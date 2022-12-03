@@ -1,0 +1,99 @@
+{
+  "definitions": {
+    "QuestConditionData": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "The type of element to check for. E.g. 'step' will check for the completion state of the step with the given name.",
+          "type": "string",
+          "enum": [
+            "none",
+            "step",
+            "fact",
+            "entry",
+            "entryRumored",
+            "frequency",
+            "signal",
+            "dialogueCondition",
+            "persistentCondition",
+            "special"
+          ]
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "QuestStepData": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "A unique identifier for this step. This must not match the ID of any other steps in this quest.",
+          "type": "string"
+        },
+        "text": {
+          "description": "The instructions that will be displayed in the UI and quest log for this step.",
+          "type": "string"
+        },
+        "revealOn": {
+          "description": "A list of conditions that will cause this step to be displayed, if any are met. If no conditions are specified, the step will be revealed as soon as the quest is started.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/QuestConditionData"
+          }
+        },
+        "completeOn": {
+          "description": "A list of conditions that will flag the step as completed, if any are met. If no conditions are specified, the step will complete immediately.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/QuestConditionData"
+          }
+        },
+        "locationEntry": {
+          "description": "The ID of an entry that will be targeted by a quest marker when this step is active. This will match the location targeted when using the \"Mark on HUD\" feature in the ship log.",
+          "type": "string"
+        },
+        "locationPath": {
+          "description": "The full path of a GameObject that will be targeted by a quest marker when this step is active. If an object has identically named siblings, you can specify the Nth child of that name with a colon, like: \"iningRig_Body/Nodes/BrokenNode:2\".",
+          "type": "string"
+        },
+        "optional": {
+          "description": "Whether the step must be completed for the quest to be completed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "completeOn"
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "A unique identifier for this quest. This must not match the ID of any other quests in this mod.",
+      "type": "string"
+    },
+    "name": {
+      "description": "The name that will be displayed in the UI and quest log for this quest.",
+      "type": "string"
+    },
+    "steps": {
+      "description": "The list of steps that must be completed for this quest to be marked as complete.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/QuestStepData"
+      }
+    },
+    "xp": {
+      "description": "The amount of XP to award to the player for completing this quest. If no value is provided, a default XP reward will be given.",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "steps"
+  ]
+}

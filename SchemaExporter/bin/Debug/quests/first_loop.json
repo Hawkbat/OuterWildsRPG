@@ -1,0 +1,99 @@
+{
+  "id": "QST_FIRST_LOOP",
+  "name": "Launch Day",
+  "steps": [
+    {
+      "id": "START",
+      "text": "Wake Up",
+      "completeOn": [
+        {
+          "type": "fact",
+          "value": "TH_VILLAGE_X1"
+        }
+      ]
+    },
+    {
+      "id": "SLATE",
+      "text": "Speak to Slate",
+      "completeOn": [
+        {
+          "type": "dialogueCondition",
+          "value": "SCIENTIST_1"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_StartingCamp/Characters_StartingCamp/Villager_HEA_Slate/Slate_FocalPoint"
+    },
+    {
+      "id": "ZERO_G_CAVE",
+      "text": "Speak to Gossan",
+      "revealOn": [
+        {
+          "type": "step",
+          "value": "SLATE"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "dialogueCondition",
+          "value": "CoachSaysHi_1"
+        },
+        {
+          "type": "dialogueCondition",
+          "value": "CoachSaysHi_2"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Gossan/Gossan_FocalPoint",
+      "optional": true
+    },
+    {
+      "id": "LAUNCH_CODES",
+      "text": "Get Launch Codes from Hornfels",
+      "revealOn": [
+        {
+          "type": "step",
+          "value": "SLATE"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "persistentCondition",
+          "value": "LAUNCH_CODES_GIVEN"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Characters_Observatory/Villager_HEA_Hornfels/Hornfels_FocalPoint"
+    },
+    {
+      "id": "STATUE",
+      "text": "Leave the Observatory",
+      "revealOn": [
+        {
+          "type": "step",
+          "value": "LAUNCH_CODES"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "fact",
+          "value": "TH_VILLAGE_X2"
+        }
+      ]
+    },
+    {
+      "id": "SHIP_LOG",
+      "text": "Check Your Ship's Quest Log",
+      "revealOn": [
+        {
+          "type": "step",
+          "value": "STATUE"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "persistentCondition",
+          "value": "HAS_USED_SHIPLOG"
+        }
+      ],
+      "locationPath": "Ship_Body/Module_Cabin/Systems_Cabin/ShipLogPivot"
+    }
+  ]
+}
