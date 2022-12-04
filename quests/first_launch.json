@@ -1,0 +1,76 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Hawkbat/OuterWildsRPG/main/schemas/quest.schema.json",
+  "id": "QST_FIRST_LAUNCH",
+  "name": "Pre-Flight Checklist",
+  "type": "main",
+  "steps": [
+    {
+      "id": "ELEVATOR",
+      "text": "Enter Launch Codes",
+      "startOn": [
+        {
+          "type": "fact",
+          "value": "TH_VILLAGE_X2"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "special",
+          "value": "launchCodesEntered"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Interactables_Village/LaunchTower/Launch_Tower/ElevatorController/Elevator/Props_HEA_ControlPanel_Anim"
+    },
+    {
+      "id": "SHIP_LOG",
+      "text": "Check Your Ship's Computer",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "ELEVATOR"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "persistentCondition",
+          "value": "HAS_USED_SHIPLOG"
+        }
+      ],
+      "locationPath": "Ship_Body/Module_Cabin/Systems_Cabin/ShipLogPivot"
+    },
+    {
+      "id": "SUIT_UP",
+      "text": "Suit Up",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "ELEVATOR"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "special",
+          "value": "suitUp"
+        }
+      ],
+      "locationPath": "Ship_Body/Module_Supplies/Systems_Supplies/ExpeditionGear/InteractVolume"
+    },
+    {
+      "id": "LIFT_OFF",
+      "text": "Lift Off!",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "SHIP_LOG"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "special",
+          "value": "completeShipIgnition"
+        }
+      ],
+      "locationPath": "Ship_Body/Module_Cockpit/Systems_Cockpit/CockpitAttachPoint"
+    }
+  ]
+}

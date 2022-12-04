@@ -1,5 +1,6 @@
 ﻿using OWML.ModHelper;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,10 +12,27 @@ namespace OuterWildsRPG.Utils
 {
     public static class UnityUtils
     {
-        public static void RunAfterSeconds(float seconds, Action action)
+        public static void RunWhen(Func<bool> criteria, Action action)
         {
-            var timeout = Time.time + seconds;
-            OuterWildsRPG.Instance.ModHelper.Events.Unity.RunWhen(() => Time.time > timeout, action);
+            OuterWildsRPG.Instance.StartCoroutine(DoRunWhen(criteria, action));
+        }
+
+        static IEnumerator DoRunWhen(Func<bool> criteria, Action action)
+        {
+            while (!criteria()) yield return null;
+            action();
+        }
+
+        public static void RunAfterSeconds(float seconds, Action action, bool realTime = true)
+        {
+            OuterWildsRPG.Instance.StartCoroutine(DoRunAfterSeconds(seconds, action, realTime));
+        }
+
+        static IEnumerator DoRunAfterSeconds(float seconds, Action action, bool realTime)
+        {
+            if (realTime) yield return new WaitForSecondsRealtime(seconds);
+            else yield return new WaitForSeconds(seconds);
+            action();
         }
 
         public static IEnumerable<Transform> GetChildren(Transform t)

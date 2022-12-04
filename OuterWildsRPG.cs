@@ -21,6 +21,8 @@ namespace OuterWildsRPG
 
         public static List<Quest> Quests = new();
 
+        public static bool Ready;
+
         public static PromptPosition QuestPromptPosition;
         public static ScreenPromptList QuestPromptList;
         public static QuestLogMode QuestLogMode;
@@ -30,6 +32,8 @@ namespace OuterWildsRPG
         public static Sprite CheckboxOnSprite;
         public static Sprite CheckboxOffSprite;
         public static Color OnColor = new Color(0.9686f, 0.498f, 0.2078f);
+
+        static bool inDialogue;
 
         private void Awake()
         {
@@ -83,46 +87,31 @@ namespace OuterWildsRPG
             QuestSaveData.OnCompleteQuest.AddListener(OnCompleteQuest);
             QuestSaveData.OnDiscoverLocation.AddListener(OnDiscoverLocation);
             QuestSaveData.OnAwardXP.AddListener(OnAwardXP);
-            QuestCondition.SetUpSpecialConditionHooks();
+
+            GlobalMessenger.AddListener("EnterConversation", () => inDialogue = true);
+            GlobalMessenger.AddListener("ExitConversation", () => inDialogue = false);
+
+            LoadManager.OnStartSceneLoad += (scene, loadScene) =>
+            {
+                CleanUp();
+            };
 
             LoadManager.OnCompleteSceneLoad += (scene, loadScene) =>
             {
                 if (loadScene != OWScene.SolarSystem) return;
-                ModHelper.Console.WriteLine("Loaded into solar system!", MessageType.Success);
-
-                // Clear out any set up prompts/markers
-                foreach (var quest in Quests) quest.CleanUp();
-
-                QuestCondition.CleanUpSpecialConditions();
-
-                ModHelper.Events.Unity.RunWhen(() => Locator.GetShipLogManager(), () =>
-                {
-                    // Set up prompts/markers
-                    foreach (var quest in Quests) quest.SetUp();
-
-                    // Register quest log ship log mode with the Custom Ship Log Modes API
-                    var questLogGO = new GameObject("QuestLogMode");
-                    questLogGO.transform.parent = UnityUtils.GetTransformAtPath("Ship_Body/Module_Cabin/Systems_Cabin/ShipLogPivot/ShipLog/ShipLogPivot/ShipLogCanvas");
-                    questLogGO.transform.localPosition = Vector3.zero;
-                    questLogGO.transform.localRotation = Quaternion.identity;
-                    questLogGO.transform.localScale = Vector3.one;
-                    QuestLogMode = questLogGO.AddComponent<QuestLogMode>();
-
-                    var customModesAPI = ModHelper.Interaction.TryGetModApi<ICustomShiplogModesAPI>("dgarro.CustomShipLogModes");
-                    customModesAPI.AddMode(QuestLogMode, () => Quests.Any(q => q.IsStarted), () => "Quest Log");
-
-                    // DEBUG; Export ship log details to reference in quest steps
-                    ModHelper.Events.Unity.FireInNUpdates(() => ShipLogExporter.Export(), 10);
-                });
+                UnityUtils.RunWhen(() =>
+                    Locator.GetPromptManager() &&
+                    Locator.GetShipLogManager() &&
+                    Locator.GetMarkerManager(),
+                    () => SetUp());
             };
 
             ModHelper.Console.WriteLine($"{nameof(OuterWildsRPG)} is initialized.", MessageType.Success);
         }
 
-        private void Update()
+        private void SetUp()
         {
-            if (!Locator.GetShipLogManager()) return;
-            
+            // Set up prompt list
             if (!QuestPromptList)
             {
                 var sourceList = Locator.GetPromptManager().GetScreenPromptList(PromptPosition.UpperLeft);
@@ -136,12 +125,44 @@ namespace OuterWildsRPG
                 foreach (var prompt in QuestPromptList._listPrompts) QuestPromptList.RemoveScreenPrompt(prompt);
             }
 
-            bool promptsVisible = !ModHelper.Menus.PauseMenu.IsOpen;
+            // Set up prompts/markers
+            foreach (var quest in Quests) quest.SetUp();
+
+            // Register quest log ship log mode with the Custom Ship Log Modes API
+            var questLogGO = new GameObject("QuestLogMode");
+            questLogGO.transform.parent = UnityUtils.GetTransformAtPath("Ship_Body/Module_Cabin/Systems_Cabin/ShipLogPivot/ShipLog/ShipLogPivot/ShipLogCanvas");
+            questLogGO.transform.localPosition = Vector3.zero;
+            questLogGO.transform.localRotation = Quaternion.identity;
+            questLogGO.transform.localScale = Vector3.one;
+            QuestLogMode = questLogGO.AddComponent<QuestLogMode>();
+
+            var customModesAPI = ModHelper.Interaction.TryGetModApi<ICustomShiplogModesAPI>("dgarro.CustomShipLogModes");
+            customModesAPI.AddMode(QuestLogMode, () => Quests.Any(q => q.IsStarted), () => "Quest Log");
+
+            // DEBUG; Export ship log details to reference in quest steps
+            //ShipLogExporter.Export();
+
+            Ready = true;
+        }
+
+        private void CleanUp()
+        {
+            Ready = false;
+
+            // Clear out any set up prompts/markers
+            foreach (var quest in Quests) quest.CleanUp();
+
+            QuestPromptList = null;
+        }
+
+        private void Update()
+        {
+            if (!Ready) return;
+
+            bool promptsVisible = !ModHelper.Menus.PauseMenu.IsOpen && !inDialogue;
 
             foreach (var quest in Quests)
-            {
                 quest.Update(promptsVisible);
-            }
 
             foreach (var entry in Locator.GetShipLogManager().GetEntryList())
             {
@@ -174,7 +195,7 @@ namespace OuterWildsRPG
 
         public void OnAwardXP(int xp, string reason)
         {
-            PromptNotify($"+{xp}XP", pos: PromptPosition.BottomCenter, time: 3f);
+            PromptNotify($"+{xp}XP", pos: PromptPosition.LowerLeft, time: 3f);
         }
 
         private void PromptNotify(string msg, PromptPosition pos = PromptPosition.Center, float time = 5f, AudioType sound = AudioType.ShipLogRevealEntry)

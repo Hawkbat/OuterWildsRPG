@@ -1,0 +1,167 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Hawkbat/OuterWildsRPG/main/schemas/quest.schema.json",
+  "id": "QST_LAUNCH_DAY",
+  "name": "Launch Day",
+  "type": "main",
+  "steps": [
+    {
+      "id": "START",
+      "text": "Wake Up",
+      "startOn": [
+        {
+          "type": "fact",
+          "value": "TH_VILLAGE_X1"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "special",
+          "value": "wakeUp"
+        }
+      ]
+    },
+    {
+      "id": "SLATE",
+      "text": "Speak to Slate",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "START"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "conversation",
+          "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_StartingCamp/Characters_StartingCamp/Villager_HEA_Slate"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_StartingCamp/Characters_StartingCamp/Villager_HEA_Slate/Slate_FocalPoint"
+    },
+    {
+      "id": "MODEL_ROCKET",
+      "text": "Speak to Mica",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "SLATE"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "conversation",
+          "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Characters_LowerVillage/Villager_HEA_Mica"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Characters_LowerVillage/Villager_HEA_Mica/Mica_FocalPoint",
+      "optional": true
+    },
+    {
+      "id": "HIDE_AND_SEEK",
+      "text": "Speak to Tephra",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "SLATE"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "dialogueCondition",
+          "value": "BeginHideAndSeek"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Characters_LowerVillage/Kids_PreGame/Villager_HEA_Tephra/Tephra_FocalPoint",
+      "optional": true
+    },
+    {
+      "id": "GHOST_MATTER",
+      "text": "Speak to Arkose",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "SLATE"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "conversation",
+          "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Arkose_GhostMatter"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Arkose_GhostMatter/Arkose_FocalPoint",
+      "optional": true
+    },
+    {
+      "id": "ZERO_G_CAVE",
+      "text": "Speak to Gossan",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "SLATE"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "dialogueCondition",
+          "value": "CoachSaysHi_1"
+        },
+        {
+          "type": "dialogueCondition",
+          "value": "CoachSaysHi_2"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Gossan/Gossan_FocalPoint",
+      "optional": true
+    },
+    {
+      "id": "MUSEUM",
+      "text": "Explore the Observatory",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "SLATE"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "persistentCondition",
+          "value": "LAUNCH_CODES_GIVEN"
+        }
+      ],
+      "optional": true
+    },
+    {
+      "id": "LAUNCH_CODES",
+      "text": "Get Launch Codes from Hornfels",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "SLATE"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "persistentCondition",
+          "value": "LAUNCH_CODES_GIVEN"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Characters_Observatory/Villager_HEA_Hornfels/Hornfels_FocalPoint"
+    },
+    {
+      "id": "STATUE",
+      "text": "Leave the Observatory",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "LAUNCH_CODES"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "fact",
+          "value": "TH_VILLAGE_X2"
+        }
+      ]
+    }
+  ]
+}

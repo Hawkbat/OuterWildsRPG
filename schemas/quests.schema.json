@@ -9,6 +9,7 @@
           "enum": [
             "none",
             "step",
+            "quest",
             "fact",
             "entry",
             "entryRumored",
@@ -16,6 +17,7 @@
             "signal",
             "dialogueCondition",
             "persistentCondition",
+            "conversation",
             "special"
           ]
         },

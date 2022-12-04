@@ -1,0 +1,122 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Hawkbat/OuterWildsRPG/main/schemas/quest.schema.json",
+  "id": "QST_TRAVELERS",
+  "name": "Travelers",
+  "type": "side",
+  "steps": [
+    {
+      "id": "ESKER",
+      "text": "Find Esker on the Attlerock",
+      "startOn": [
+        {
+          "type": "quest",
+          "value": "QST_FIRST_LAUNCH"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "conversation",
+          "value": "Moon_Body/Sector_THM/Characters_THM/Villager_HEA_Esker"
+        }
+      ]
+    },
+    {
+      "id": "RIEBECK",
+      "text": "Find Riebeck on Brittle Hollow",
+      "startOn": [
+        {
+          "type": "quest",
+          "value": "QST_FIRST_LAUNCH"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "conversation",
+          "value": "BrittleHollow_Body/Sector_BH/Sector_Crossroads/Characters_Crossroads/Traveller_HEA_Riebeck"
+        }
+      ]
+    },
+    {
+      "id": "GABBRO",
+      "text": "Find Gabbro on Giant's Deep'",
+      "startOn": [
+        {
+          "type": "quest",
+          "value": "QST_FIRST_LAUNCH"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "conversation",
+          "value": "GabbroIsland_Body/Sector_GabbroIsland/Interactables_GabbroIsland/Traveller_HEA_Gabbro"
+        }
+      ]
+    },
+    {
+      "id": "CHERT",
+      "text": "Find Chert on Ember Twin",
+      "startOn": [
+        {
+          "type": "quest",
+          "value": "QST_FIRST_LAUNCH"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "conversation",
+          "value": "CaveTwin_Body/Sector_CaveTwin/Sector_NorthHemisphere/Sector_NorthSurface/Sector_Lakebed/Interactables_Lakebed/Traveller_HEA_Chert"
+        }
+      ]
+    },
+    {
+      "id": "FELDSPAR",
+      "text": "Find Feldspar",
+      "startOn": [
+        {
+          "type": "quest",
+          "value": "QST_FIRST_LAUNCH"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "conversation",
+          "value": "DB_PioneerDimension_Body/Sector_PioneerDimension/Interactables_PioneerDimension/Pioneer_Characters/Traveller_HEA_Feldspar"
+        }
+      ]
+    },
+    {
+      "id": "SOLANUM",
+      "text": "Meet Solanum",
+      "startOn": [
+        {
+          "type": "fact",
+          "value": "QM_SIXTH_LOCATION_X1"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "fact",
+          "value": "QM_SIXTH_LOCATION_X1"
+        }
+      ],
+      "optional": true
+    },
+    {
+      "id": "PRISONER",
+      "text": "Meet the Prisoner",
+      "startOn": [
+        {
+          "type": "fact",
+          "value": "IP_SARCOPHAGUS_X2"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "fact",
+          "value": "IP_SARCOPHAGUS_X2"
+        }
+      ],
+      "optional": true
+    }
+  ]
+}

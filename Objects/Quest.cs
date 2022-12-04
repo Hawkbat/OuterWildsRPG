@@ -67,7 +67,7 @@ namespace OuterWildsRPG.Objects
             foreach (var step in Steps) step.Update(promptsVisible);
 
             if (spacerPrompt != null)
-                spacerPrompt.SetVisibility(promptsVisible && IsStarted);
+                spacerPrompt.SetVisibility(promptsVisible && IsInProgress);
         }
 
         public void CalculateStatus()
@@ -143,6 +143,8 @@ namespace OuterWildsRPG.Objects
                     OuterWildsRPG.Instance.ModHelper.Console.WriteLine(ex.Message, MessageType.Error);
                 }
             }
+            foreach (var cond in StartOn) cond.SetUp();
+            foreach (var cond in CompleteOn) cond.SetUp();
         }
 
         public void CleanUp()
@@ -158,6 +160,9 @@ namespace OuterWildsRPG.Objects
             if (Locator.GetMapController()?.GetMarkerManager() && mapMarker != null)
                 Locator.GetMapController().GetMarkerManager().UnregisterMarker(mapMarker);
             mapMarker = null;
+
+            foreach (var cond in StartOn) cond.CleanUp();
+            foreach (var cond in CompleteOn) cond.CleanUp();
         }
 
         public void Update(bool promptsVisible)
@@ -180,9 +185,9 @@ namespace OuterWildsRPG.Objects
             }
         }
 
-        public void CalculateStatus()
+        public void CalculateStatus(bool forceStart = false, bool forceComplete = false)
         {
-            bool shouldStart = (StartOn.Count == 0 && QuestSaveData.HasStartedQuest(Quest)) ||
+            bool shouldStart = forceStart || (StartOn.Count == 0 && QuestSaveData.HasStartedQuest(Quest)) ||
                 (StartOn.Count > 0 && StartOn.Any(c => c.Check())) ||
                 (CompleteOn.Count > 0 && CompleteOn.Any(c => c.Check()));
             if (shouldStart && !IsStarted)
@@ -190,7 +195,7 @@ namespace OuterWildsRPG.Objects
                 QuestSaveData.StartStep(this);
             }
 
-            bool shouldComplete = CompleteOn.Count == 0 || CompleteOn.Any(c => c.Check());
+            bool shouldComplete = forceComplete || CompleteOn.Count == 0 || CompleteOn.Any(c => c.Check());
             if (shouldComplete && !IsComplete)
             {
                 QuestSaveData.CompleteStep(this);
@@ -206,56 +211,85 @@ namespace OuterWildsRPG.Objects
         public QuestConditionType Type;
         public string Value;
 
-        static bool wakeUp;
-        static bool launchCodesEntered;
-        static bool completeShipIgnition;
-        static SatelliteNode satelliteNode1;
-        static SatelliteNode satelliteNode2;
-        static SatelliteNode satelliteNode3;
+        public QuestSpecialConditionType SpecialConditionType => (QuestSpecialConditionType)Enum.Parse(typeof(QuestSpecialConditionType), Value, true);
 
-        public static void CleanUpSpecialConditions()
-        {
-            wakeUp = false;
-            launchCodesEntered = false;
-            completeShipIgnition = false;
-            satelliteNode1 = null;
-            satelliteNode2 = null;
-            satelliteNode3 = null;
-        }
+        public bool IsStartCondition => Step.StartOn.Contains(this);
+        public bool IsCompletionCondition => Step.CompleteOn.Contains(this);
 
-        public static void SetUpSpecialConditionHooks()
+        public void SetUp()
         {
-            GlobalMessenger.AddListener("WakeUp", () => wakeUp = true);
-            GlobalMessenger.AddListener("LaunchCodesEntered", () => launchCodesEntered = true);
-            GlobalMessenger.AddListener("CompleteShipIgnition", () => completeShipIgnition = true);
-        }
-
-        public static bool CheckSpecialCondition(QuestSpecialConditionType condition)
-        {
-            switch (condition)
+            if (Type == QuestConditionType.Conversation)
             {
-                case QuestSpecialConditionType.WakeUp:
-                    return wakeUp;
-                case QuestSpecialConditionType.LaunchCodesEntered:
-                    return launchCodesEntered;
-                case QuestSpecialConditionType.CompleteShipIgnition:
-                    return completeShipIgnition;
-                case QuestSpecialConditionType.SatelliteRepair0:
-                    if (!satelliteNode1)
-                        satelliteNode1 = UnityUtils.GetTransformAtPath("MiningRig_Body/Nodes/BrokenNode:0").GetComponent<SatelliteNode>();
-                    return !satelliteNode1._damaged;
-                case QuestSpecialConditionType.SatelliteRepair1:
-                    if (!satelliteNode2)
-                        satelliteNode2 = UnityUtils.GetTransformAtPath("MiningRig_Body/Nodes/BrokenNode:1").GetComponent<SatelliteNode>();
-                    return !satelliteNode2._damaged;
-                case QuestSpecialConditionType.SatelliteRepair2:
-                    if (!satelliteNode3)
-                        satelliteNode3 = UnityUtils.GetTransformAtPath("MiningRig_Body/Nodes/BrokenNode:2").GetComponent<SatelliteNode>();
-                    return !satelliteNode3._damaged;
-                default:
-                    return false;
+                try
+                {
+                    var target = UnityUtils.GetTransformAtPath(Value).GetComponentInChildren<CharacterDialogueTree>();
+                    target.OnEndConversation += Trigger;
+                } catch (Exception ex)
+                {
+                    OuterWildsRPG.Instance.ModHelper.Console.WriteLine($"Failed to attach to conversation event for {Step.Quest.ID}:{Step.ID}", MessageType.Warning);
+                    OuterWildsRPG.Instance.ModHelper.Console.WriteLine(ex.Message, MessageType.Error);
+                }
+            } else if (Type == QuestConditionType.Special)
+            {
+                switch (SpecialConditionType)
+                {
+                    case QuestSpecialConditionType.WakeUp:
+                        GlobalMessenger.AddListener("WakeUp", Trigger);
+                        break;
+                    case QuestSpecialConditionType.LaunchCodesEntered:
+                        GlobalMessenger.AddListener("LaunchCodesEntered", Trigger);
+                        break;
+                    case QuestSpecialConditionType.CompleteShipIgnition:
+                        GlobalMessenger.AddListener("CompleteShipIgnition", Trigger);
+                        break;
+                    case QuestSpecialConditionType.EnterRemoteFlightConsole:
+                        GlobalMessenger<OWRigidbody>.AddListener("EnterRemoteFlightConsole", Trigger1);
+                        break;
+                    case QuestSpecialConditionType.SatelliteRepair0:
+                        UnityUtils.GetTransformAtPath("MiningRig_Body/Nodes/BrokenNode:0").GetComponent<SatelliteNode>().OnRepaired += (node) => Trigger();
+                        break;
+                    case QuestSpecialConditionType.SatelliteRepair1:
+                        UnityUtils.GetTransformAtPath("MiningRig_Body/Nodes/BrokenNode:1").GetComponent<SatelliteNode>().OnRepaired += (node) => Trigger();
+                        break;
+                    case QuestSpecialConditionType.SatelliteRepair2:
+                        UnityUtils.GetTransformAtPath("MiningRig_Body/Nodes/BrokenNode:2").GetComponent<SatelliteNode>().OnRepaired += (node) => Trigger();
+                        break;
+                    case QuestSpecialConditionType.SuitUp:
+                        // Not using the global SuitUp message because that also fires for the training suit
+                        UnityUtils.GetTransformAtPath("Ship_Body/Module_Supplies/Systems_Supplies/ExpeditionGear/InteractVolume").GetComponent<MultiInteractReceiver>().OnPressInteract += (cmd) => Trigger();
+                        break;
+                }
             }
         }
+
+        public void CleanUp()
+        {
+            if (Type == QuestConditionType.Special)
+            {
+                switch (SpecialConditionType)
+                {
+                    case QuestSpecialConditionType.WakeUp:
+                        GlobalMessenger.RemoveListener("WakeUp", Trigger);
+                        break;
+                    case QuestSpecialConditionType.LaunchCodesEntered:
+                        GlobalMessenger.RemoveListener("LaunchCodesEntered", Trigger);
+                        break;
+                    case QuestSpecialConditionType.CompleteShipIgnition:
+                        GlobalMessenger.RemoveListener("CompleteShipIgnition", Trigger);
+                        break;
+                    case QuestSpecialConditionType.EnterRemoteFlightConsole:
+                        GlobalMessenger<OWRigidbody>.RemoveListener("EnterRemoteFlightConsole", Trigger1);
+                        break;
+                }
+            }
+        }
+
+        public void Trigger()
+        {
+            Step.CalculateStatus(IsStartCondition, IsCompletionCondition);
+        }
+
+        private void Trigger1<T>(T _) => Trigger();
 
         public bool Check()
         {
@@ -263,6 +297,7 @@ namespace OuterWildsRPG.Objects
             {
                 QuestConditionType.None => false,
                 QuestConditionType.Step => Step.Quest.Steps.Find(s => s.ID == Value).IsComplete,
+                QuestConditionType.Quest => OuterWildsRPG.Quests.Any(q => q.ID == Value && q.IsComplete),
                 QuestConditionType.Fact => Locator.GetShipLogManager().IsFactRevealed(Value),
                 QuestConditionType.Entry => Locator.GetShipLogManager().GetEntry(Value).CalculateState() == ShipLogEntry.State.Explored,
                 QuestConditionType.EntryRumored => Locator.GetShipLogManager().GetEntry(Value).CalculateState() == ShipLogEntry.State.Rumored,
@@ -270,7 +305,8 @@ namespace OuterWildsRPG.Objects
                 QuestConditionType.Signal => PlayerData.KnowsSignal((SignalName)Enum.Parse(typeof(SignalName), Value, true)),
                 QuestConditionType.DialogueCondition => DialogueConditionManager.SharedInstance.GetConditionState(Value),
                 QuestConditionType.PersistentCondition => PlayerData.GetPersistentCondition(Value),
-                QuestConditionType.Special => CheckSpecialCondition((QuestSpecialConditionType)Enum.Parse(typeof(QuestSpecialConditionType), Value, true)),
+                QuestConditionType.Conversation => false,
+                QuestConditionType.Special => false,
                 _ => throw new ArgumentOutOfRangeException($"Unknown {nameof(QuestConditionType)}: {Type}"),
             };
         }
@@ -295,6 +331,7 @@ namespace OuterWildsRPG.Objects
     {
         None,
         Step,
+        Quest,
         Fact,
         Entry,
         EntryRumored,
@@ -302,6 +339,7 @@ namespace OuterWildsRPG.Objects
         Signal,
         DialogueCondition,
         PersistentCondition,
+        Conversation,
         Special,
     }
 
@@ -314,5 +352,7 @@ namespace OuterWildsRPG.Objects
         SatelliteRepair0,
         SatelliteRepair1,
         SatelliteRepair2,
+        EnterRemoteFlightConsole,
+        SuitUp,
     }
 }
