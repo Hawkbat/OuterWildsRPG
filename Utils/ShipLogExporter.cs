@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OuterWildsRPG
+namespace OuterWildsRPG.Utils
 {
     public static class ShipLogExporter
     {
@@ -42,7 +42,7 @@ namespace OuterWildsRPG
                 entryData.name = entry.GetName(false);
                 var location = Locator.GetEntryLocation(entry.GetID());
                 if (location != null)
-                    entryData.location = Utils.GetTransformPath(location.GetTransform());
+                    entryData.location = UnityUtils.GetTransformPath(location.GetTransform());
 
                 foreach (var fact in entry.GetExploreFacts())
                 {
@@ -68,10 +68,7 @@ namespace OuterWildsRPG
 
             foreach (var tree in UnityEngine.Object.FindObjectsOfType<CharacterDialogueTree>())
             {
-                if (!tree.LoadXml())
-                {
-                    OuterWildsRPG.Instance.ModHelper.Console.WriteLine(Utils.GetTransformPath(tree.transform));
-                }
+                tree.LoadXml();
                 if (tree._mapDialogueNodes != null)
                 {
                     foreach (var node in tree._mapDialogueNodes.Values)

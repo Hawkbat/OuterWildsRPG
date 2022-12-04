@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OuterWildsRPG
+namespace OuterWildsRPG.External
 {
     public interface ICustomShiplogModesAPI
     {

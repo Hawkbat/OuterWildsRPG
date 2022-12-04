@@ -12,8 +12,8 @@ namespace OuterWildsRPG.Patches
     [HarmonyPatch]
     public class PromptPatches
     {
-        public static PromptPosition QuestPromptPosition => OuterWildsRPG.Instance.QuestPromptPosition;
-        public static ScreenPromptList QuestPromptList => OuterWildsRPG.Instance.QuestPromptList;
+        public static PromptPosition QuestPromptPosition => OuterWildsRPG.QuestPromptPosition;
+        public static ScreenPromptList QuestPromptList => OuterWildsRPG.QuestPromptList;
 
         [HarmonyPrefix, HarmonyPatch(typeof(PromptManager), nameof(PromptManager.UpdatePromptsEnabled))]
         public static void PromptManager_UpdatePromptsEnabled(PromptManager __instance, bool promptsOptionEnabled)

@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
 using UnityEngine;
 
-namespace OuterWildsRPG
+namespace OuterWildsRPG.Utils
 {
-    public static class Utils
+    public static class UnityUtils
     {
         public static void RunAfterSeconds(float seconds, Action action)
         {
@@ -45,7 +45,8 @@ namespace OuterWildsRPG
 
                     var child = GetChildren(t).Where(c => c.name == search).ElementAt(index);
                     t = child;
-                } else
+                }
+                else
                 {
                     t = t.Find(part);
                 }

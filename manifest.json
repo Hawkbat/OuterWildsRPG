@@ -6,5 +6,5 @@
   "uniqueName": "Hawkbar.OuterWildsRPG",
   "version": "0.1.0",
   "owmlVersion": "2.8.0",
-  "dependencies": ["xen.NewHorizons"]
+  "dependencies": [ "dgarro.CustomShipLogModes" ]
 }

@@ -1,6 +1,8 @@
 ﻿using HarmonyLib;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using OuterWildsRPG.Components;
+using OuterWildsRPG.External;
+using OuterWildsRPG.Objects;
+using OuterWildsRPG.Utils;
 using OWML.Common;
 using OWML.ModHelper;
 using OWML.Utils;
@@ -10,7 +12,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace OuterWildsRPG
 {
@@ -18,20 +19,17 @@ namespace OuterWildsRPG
     {
         public static OuterWildsRPG Instance;
 
-        public List<Quest> Quests = new();
+        public static List<Quest> Quests = new();
 
-        public PromptPosition QuestPromptPosition;
-        public ScreenPromptList QuestPromptList;
-        public QuestLogMode QuestLogMode;
+        public static PromptPosition QuestPromptPosition;
+        public static ScreenPromptList QuestPromptList;
+        public static QuestLogMode QuestLogMode;
 
-        Dictionary<string, ScreenPrompt> prompts = new();
-        Dictionary<string, CanvasMarker> canvasMarkers = new();
-
-        Texture2D checkboxOnTex;
-        Texture2D checkboxOffTex;
-        Sprite checkboxOnSprite;
-        Sprite checkboxOffSprite;
-        Color onColor = new Color(0.9686f, 0.498f, 0.2078f);
+        public static Texture2D CheckboxOnTex;
+        public static Texture2D CheckboxOffTex;
+        public static Sprite CheckboxOnSprite;
+        public static Sprite CheckboxOffSprite;
+        public static Color OnColor = new Color(0.9686f, 0.498f, 0.2078f);
 
         private void Awake()
         {
@@ -44,30 +42,29 @@ namespace OuterWildsRPG
 
         private void Start()
         {
-            checkboxOnTex = ModHelper.Assets.GetTexture("assets/CheckboxOn.png");
-            checkboxOffTex = ModHelper.Assets.GetTexture("assets/CheckboxOff.png");
-            checkboxOnSprite = Sprite.Create(checkboxOnTex, new Rect(0f, 0f, checkboxOnTex.width, checkboxOnTex.height), Vector2.one * 0.5f, 256f);
-            checkboxOffSprite = Sprite.Create(checkboxOffTex, new Rect(0f, 0f, checkboxOffTex.width, checkboxOffTex.height), Vector2.one * 0.5f, 256f);
+            CheckboxOnTex = ModHelper.Assets.GetTexture("assets/CheckboxOn.png");
+            CheckboxOffTex = ModHelper.Assets.GetTexture("assets/CheckboxOff.png");
+            CheckboxOnSprite = Sprite.Create(CheckboxOnTex, new Rect(0f, 0f, CheckboxOnTex.width, CheckboxOnTex.height), Vector2.one * 0.5f, 256f);
+            CheckboxOffSprite = Sprite.Create(CheckboxOffTex, new Rect(0f, 0f, CheckboxOffTex.width, CheckboxOffTex.height), Vector2.one * 0.5f, 256f);
 
             // Load Quests
             foreach (var mod in ModHelper.Interaction.GetMods())
             {
                 var questsFound = false;
-                var modQuestData = mod.ModHelper.Storage.Load<QuestFileData>("quests.json");
+                var modQuestData = mod.ModHelper.Storage.Load<QuestListData>("quests.json", false);
                 if (modQuestData != null)
                 {
-                    var modQuests = modQuestData.Parse();
-                    foreach (var quest in modQuests.Quests)
+                    var modQuests = modQuestData.quests.Select(q => q.Parse()).ToList();
+                    foreach (var quest in modQuests)
                         Quests.Add(quest);
-                    if (modQuests.Quests.Count > 0) questsFound = true;
+                    if (modQuests.Count > 0) questsFound = true;
                 }
                 var modQuestsPath = Path.GetFullPath(Path.Combine(mod.ModHelper.Manifest.ModFolderPath, "./quests/"));
                 if (Directory.Exists(modQuestsPath))
                 {
                     foreach (var filePath in Directory.GetFiles(modQuestsPath))
                     {
-                        var fileName = Path.GetFileName(filePath);
-                        var fileQuestData = mod.ModHelper.Storage.Load<QuestData>("quests/" + fileName);
+                        var fileQuestData = JsonHelper.LoadJsonObject<QuestData>(filePath, false);
                         if (fileQuestData != null)
                         {
                             var fileQuest = fileQuestData.Parse();
@@ -81,26 +78,31 @@ namespace OuterWildsRPG
             }
 
             // Wire up quest events
+            QuestSaveData.OnStartQuest.AddListener(OnStartQuest);
+            QuestSaveData.OnCompleteStep.AddListener(OnCompleteStep);
+            QuestSaveData.OnCompleteQuest.AddListener(OnCompleteQuest);
+            QuestSaveData.OnDiscoverLocation.AddListener(OnDiscoverLocation);
             QuestSaveData.OnAwardXP.AddListener(OnAwardXP);
-
-            // Get the New Horizons API and load configs
-            var newHorizons = ModHelper.Interaction.TryGetModApi<INewHorizons>("xen.NewHorizons");
-            newHorizons.LoadConfigs(this);
+            QuestCondition.SetUpSpecialConditionHooks();
 
             LoadManager.OnCompleteSceneLoad += (scene, loadScene) =>
             {
                 if (loadScene != OWScene.SolarSystem) return;
                 ModHelper.Console.WriteLine("Loaded into solar system!", MessageType.Success);
 
-                prompts.Clear();
-                canvasMarkers.Clear();
+                // Clear out any set up prompts/markers
+                foreach (var quest in Quests) quest.CleanUp();
+
+                QuestCondition.CleanUpSpecialConditions();
 
                 ModHelper.Events.Unity.RunWhen(() => Locator.GetShipLogManager(), () =>
                 {
+                    // Set up prompts/markers
+                    foreach (var quest in Quests) quest.SetUp();
 
                     // Register quest log ship log mode with the Custom Ship Log Modes API
                     var questLogGO = new GameObject("QuestLogMode");
-                    questLogGO.transform.parent = Utils.GetTransformAtPath("Ship_Body/Module_Cabin/Systems_Cabin/ShipLogPivot/ShipLog/ShipLogPivot/ShipLogCanvas");
+                    questLogGO.transform.parent = UnityUtils.GetTransformAtPath("Ship_Body/Module_Cabin/Systems_Cabin/ShipLogPivot/ShipLog/ShipLogPivot/ShipLogCanvas");
                     questLogGO.transform.localPosition = Vector3.zero;
                     questLogGO.transform.localRotation = Quaternion.identity;
                     questLogGO.transform.localScale = Vector3.one;
@@ -138,78 +140,7 @@ namespace OuterWildsRPG
 
             foreach (var quest in Quests)
             {
-                if (!prompts.ContainsKey(quest.ID))
-                {
-                    var prompt = new ScreenPrompt($"[{quest.Name.ToUpper()}]");
-                    prompts.Add(quest.ID, prompt);
-                    Locator.GetPromptManager().AddScreenPrompt(prompt, QuestPromptPosition);
-                }
-                prompts[quest.ID].SetVisibility(promptsVisible && quest.IsInProgress);
-                prompts[quest.ID].SetTextColor(onColor);
-
-                if (quest.IsComplete && !QuestSaveData.HasCompletedQuest(quest)) {
-                    QuestSaveData.CompleteQuest(quest);
-                }
-
-                foreach (var step in quest.Steps)
-                {
-                    var key = $"{quest.ID}_{step.ID}";
-                    if (!prompts.ContainsKey(key))
-                    {
-                        var prompt = new ScreenPrompt($"{(step.Optional ? "(Optional) " : "")}{step.Text}", customSprite: step.IsComplete ? checkboxOnSprite : checkboxOffSprite);
-                        prompts.Add(key, prompt);
-                        Locator.GetPromptManager().AddScreenPrompt(prompt, QuestPromptPosition);
-
-                        try
-                        {
-                            Transform location = null;
-
-                            if (!string.IsNullOrEmpty(step.LocationEntry))
-                            {
-                                location = Locator.GetEntryLocation(step.LocationEntry).GetTransform();
-                            } else if (!string.IsNullOrEmpty(step.LocationPath))
-                            {
-                                location = Utils.GetTransformAtPath(step.LocationPath);
-                            }
-
-                            if (location != null)
-                            {
-                                var marker = Locator.GetMarkerManager().InstantiateNewMarker();
-                                Locator.GetMarkerManager().RegisterMarker(marker, location, step.Text, 0f);
-                                canvasMarkers.Add(key, marker);
-                            }
-                        } catch (Exception ex)
-                        {
-                            ModHelper.Console.WriteLine($"Failed to create quest marker for {key}");
-                            ModHelper.Console.WriteLine(ex.Message, MessageType.Error);
-                        }
-                    }
-                    prompts[key].SetVisibility(promptsVisible && quest.IsInProgress && step.IsStarted);
-                    if (step.IsComplete) prompts[key].SetTextColor(onColor);
-                    else prompts[key].SetTextColor(prompts[key].GetDefaultColor());
-                    if (canvasMarkers.ContainsKey(key))
-                        canvasMarkers[key].SetVisibility(step.IsInProgress);
-
-                    if (step.IsComplete && !QuestSaveData.HasCompletedStep(step))
-                    {
-                        QuestSaveData.CompleteStep(step);
-                        prompts[key]._customSprite = checkboxOnSprite;
-                        Locator.GetPromptManager().TriggerRebuild(prompts[key]);
-
-                        var prompt = new ScreenPrompt($"{step.Text} - Complete");
-                        Locator.GetPromptManager().AddScreenPrompt(prompt, PromptPosition.Center, true);
-                        Utils.RunAfterSeconds(3f, () => Locator.GetPromptManager().RemoveScreenPrompt(prompt, PromptPosition.Center));
-                    }
-                }
-
-                var spacerKey = $"{quest.ID}_#";
-                if (!prompts.ContainsKey(spacerKey))
-                {
-                    var prompt = new ScreenPrompt(" ");
-                    prompts.Add(spacerKey, prompt);
-                    Locator.GetPromptManager().AddScreenPrompt(prompt, QuestPromptPosition);
-                }
-                prompts[spacerKey].SetVisibility(promptsVisible && quest.IsStarted);
+                quest.Update(promptsVisible);
             }
 
             foreach (var entry in Locator.GetShipLogManager().GetEntryList())
@@ -221,11 +152,37 @@ namespace OuterWildsRPG
             }
         }
 
+        public void OnStartQuest(Quest quest)
+        {
+            PromptNotify($"Started quest {quest.Name}");
+        }
+
+        public void OnCompleteQuest(Quest quest)
+        {
+            PromptNotify($"Completed quest {quest.Name}", sound: AudioType.TH_ZeroGTrainingAllRepaired);
+        }
+
+        public void OnCompleteStep(QuestStep step)
+        {
+            PromptNotify($"{step.Text} - Complete", time: 3f);
+        }
+
+        public void OnDiscoverLocation(ShipLogEntry entry)
+        {
+            PromptNotify($"Discovered location {entry.GetName(false)}");
+        }
+
         public void OnAwardXP(int xp, string reason)
         {
-            var prompt = new ScreenPrompt($"{reason} +{xp}XP");
-            Locator.GetPromptManager().AddScreenPrompt(prompt, PromptPosition.Center, true);
-            Utils.RunAfterSeconds(5f, () => Locator.GetPromptManager().RemoveScreenPrompt(prompt, PromptPosition.Center));
+            PromptNotify($"+{xp}XP", pos: PromptPosition.BottomCenter, time: 3f);
+        }
+
+        private void PromptNotify(string msg, PromptPosition pos = PromptPosition.Center, float time = 5f, AudioType sound = AudioType.ShipLogRevealEntry)
+        {
+            var prompt = new ScreenPrompt(msg);
+            Locator.GetPromptManager().AddScreenPrompt(prompt, pos, true);
+            UnityUtils.RunAfterSeconds(time, () => Locator.GetPromptManager().RemoveScreenPrompt(prompt, pos));
+            Locator.GetPlayerAudioController().PlayOneShotInternal(sound);
         }
     }
 }

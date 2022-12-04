@@ -20,9 +20,14 @@
           ]
         },
         "value": {
+          "description": "An appropriate ID for the type specified in 'type'. E.g. a ship log entry ID for the 'entry' type or a SignalName enum value for the 'signal' type.",
           "type": "string"
         }
-      }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
     },
     "QuestStepData": {
       "type": "object",
@@ -35,7 +40,7 @@
           "description": "The instructions that will be displayed in the UI and quest log for this step.",
           "type": "string"
         },
-        "revealOn": {
+        "startOn": {
           "description": "A list of conditions that will cause this step to be displayed, if any are met. If no conditions are specified, the step will be revealed as soon as the quest is started.",
           "type": "array",
           "items": {
@@ -79,21 +84,28 @@
       "description": "The name that will be displayed in the UI and quest log for this quest.",
       "type": "string"
     },
+    "type": {
+      "description": "How significant this quest is, which determines ship log priority and XP rewards.",
+      "type": "string",
+      "enum": [
+        "none",
+        "side",
+        "main",
+        "misc"
+      ]
+    },
     "steps": {
       "description": "The list of steps that must be completed for this quest to be marked as complete.",
       "type": "array",
       "items": {
         "$ref": "#/definitions/QuestStepData"
       }
-    },
-    "xp": {
-      "description": "The amount of XP to award to the player for completing this quest. If no value is provided, a default XP reward will be given.",
-      "type": "integer"
     }
   },
   "required": [
     "id",
     "name",
+    "type",
     "steps"
   ]
 }

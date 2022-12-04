@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json.Schema.Generation;
-using OuterWildsRPG;
+using OuterWildsRPG.Objects;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +13,7 @@ namespace SchemaExporter
     {
         static void Main(string[] args)
         {
-            GenerateSchema<QuestFileData>("quests");
+            GenerateSchema<QuestListData>("quests");
             GenerateSchema<QuestData>("quest");
         }
 

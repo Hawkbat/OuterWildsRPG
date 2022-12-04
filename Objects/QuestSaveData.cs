@@ -5,11 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine.Events;
 
-namespace OuterWildsRPG
+namespace OuterWildsRPG.Objects
 {
     public class QuestSaveData
     {
         const int DEFAULT_QUEST_XP = 1000;
+        const int DEFAULT_MAIN_QUEST_XP = 5000;
+        const int DEFAULT_SIDE_QUEST_XP = 1000;
+        const int DEFAULT_MISC_QUEST_XP = 200;
         const int DEFAULT_LOCATION_XP = 100;
         const int DEFAULT_LOCATION_SUBENTRY_XP = 50;
         const int DEFAULT_LOCATION_CURIOSITY_XP = 500;
@@ -17,6 +20,7 @@ namespace OuterWildsRPG
         public static QuestSaveData Instance = new QuestSaveData();
 
         public class QuestStepEvent : UnityEvent<QuestStep> { }
+        public static QuestStepEvent OnStartStep = new QuestStepEvent();
         public static QuestStepEvent OnCompleteStep = new QuestStepEvent();
         public class QuestEvent : UnityEvent<Quest> { }
         public static QuestEvent OnStartQuest = new QuestEvent();
@@ -26,12 +30,30 @@ namespace OuterWildsRPG
         public class AwardXPEvent : UnityEvent<int, string> { }
         public static AwardXPEvent OnAwardXP = new AwardXPEvent();
 
+        public Dictionary<string, HashSet<string>> StartedSteps = new();
         public Dictionary<string, HashSet<string>> CompletedSteps = new();
         public HashSet<string> CompletedQuests = new();
         public HashSet<string> StartedQuests = new();
         public HashSet<string> TrackedQuests = new();
         public HashSet<string> DiscoveredLocations = new();
         public int XP;
+
+        public static bool HasStartedStep(QuestStep step)
+        {
+            return Instance.StartedSteps.ContainsKey(step.Quest.ID) && Instance.StartedSteps[step.Quest.ID].Contains(step.ID);
+        }
+
+        public static bool StartStep(QuestStep step)
+        {
+            if (!Instance.StartedSteps.ContainsKey(step.Quest.ID))
+                Instance.StartedSteps.Add(step.Quest.ID, new HashSet<string>());
+            if (Instance.StartedSteps[step.Quest.ID].Add(step.ID))
+            {
+                OnStartStep.Invoke(step);
+                return true;
+            }
+            return false;
+        }
 
         public static bool HasCompletedStep(QuestStep step)
         {
@@ -75,7 +97,10 @@ namespace OuterWildsRPG
             if (Instance.CompletedQuests.Add(quest.ID))
             {
                 OnCompleteQuest.Invoke(quest);
-                AwardXP(quest.XP ?? DEFAULT_QUEST_XP, $"Completed quest {quest.Name}!");
+                if (quest.Type == QuestType.Main) AwardXP(DEFAULT_MAIN_QUEST_XP, $"Completed main quest {quest.Name}!");
+                else if (quest.Type == QuestType.Side) AwardXP(DEFAULT_SIDE_QUEST_XP, $"Completed side quest {quest.Name}!");
+                else if (quest.Type == QuestType.Misc) AwardXP(DEFAULT_MISC_QUEST_XP, $"Completed miscellaneous quest {quest.Name}!");
+                else AwardXP(DEFAULT_QUEST_XP, $"Completed quest {quest.Name}!");
                 return true;
             }
             return false;

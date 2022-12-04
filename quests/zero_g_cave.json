@@ -1,11 +1,13 @@
 {
+  "$schema": "https://raw.githubusercontent.com/Hawkbat/OuterWildsRPG/main/schemas/quest.schema.json",
   "id": "QST_ZERO_G_CAVE",
-  "name": "Baby's First Spacewalk",
+  "name": "Hatchling's First Spacewalk",
+  "type": "misc",
   "steps": [
     {
       "id": "TRAVEL",
       "text": "Find Gossan's 'Satellite'",
-      "revealOn": [
+      "startOn": [
         {
           "type": "dialogueCondition",
           "value": "CoachSaysHi_1"
@@ -26,7 +28,7 @@
     {
       "id": "REPAIR_0",
       "text": "Repair First Node",
-      "revealOn": [
+      "startOn": [
         {
           "type": "step",
           "value": "TRAVEL"
@@ -43,7 +45,7 @@
     {
       "id": "REPAIR_1",
       "text": "Repair Second Node",
-      "revealOn": [
+      "startOn": [
         {
           "type": "step",
           "value": "TRAVEL"
@@ -60,7 +62,7 @@
     {
       "id": "REPAIR_2",
       "text": "Repair Third Node",
-      "revealOn": [
+      "startOn": [
         {
           "type": "step",
           "value": "TRAVEL"

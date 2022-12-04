@@ -1,14 +1,16 @@
 {
+  "$schema": "https://raw.githubusercontent.com/Hawkbat/OuterWildsRPG/main/schemas/quest.schema.json",
   "id": "QST_FIRST_LOOP",
   "name": "Launch Day",
+  "type": "main",
   "steps": [
     {
       "id": "START",
       "text": "Wake Up",
       "completeOn": [
         {
-          "type": "fact",
-          "value": "TH_VILLAGE_X1"
+          "type": "special",
+          "value": "wakeUp"
         }
       ]
     },
@@ -24,9 +26,27 @@
       "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_StartingCamp/Characters_StartingCamp/Villager_HEA_Slate/Slate_FocalPoint"
     },
     {
+      "id": "HIDE_AND_SEEK",
+      "text": "Speak to Tephra",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "SLATE"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "dialogueCondition",
+          "value": "BeginHideAndSeek"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Characters_LowerVillage/Kids_PreGame/Villager_HEA_Tephra/Tephra_FocalPoint",
+      "optional": true
+    },
+    {
       "id": "ZERO_G_CAVE",
       "text": "Speak to Gossan",
-      "revealOn": [
+      "startOn": [
         {
           "type": "step",
           "value": "SLATE"
@@ -48,7 +68,7 @@
     {
       "id": "LAUNCH_CODES",
       "text": "Get Launch Codes from Hornfels",
-      "revealOn": [
+      "startOn": [
         {
           "type": "step",
           "value": "SLATE"
@@ -65,7 +85,7 @@
     {
       "id": "STATUE",
       "text": "Leave the Observatory",
-      "revealOn": [
+      "startOn": [
         {
           "type": "step",
           "value": "LAUNCH_CODES"
@@ -79,12 +99,29 @@
       ]
     },
     {
-      "id": "SHIP_LOG",
-      "text": "Check Your Ship's Quest Log",
-      "revealOn": [
+      "id": "ELEVATOR",
+      "text": "Enter Launch Codes",
+      "startOn": [
         {
           "type": "step",
           "value": "STATUE"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "special",
+          "value": "launchCodesEntered"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Interactables_Village/LaunchTower/Launch_Tower/ElevatorController/Elevator/Props_HEA_ControlPanel_Anim"
+    },
+    {
+      "id": "SHIP_LOG",
+      "text": "Check Your Ship's Quest Log",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "ELEVATOR"
         }
       ],
       "completeOn": [
@@ -94,6 +131,22 @@
         }
       ],
       "locationPath": "Ship_Body/Module_Cabin/Systems_Cabin/ShipLogPivot"
+    },
+    {
+      "id": "LIFT_OFF",
+      "text": "Lift Off!",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "SHIP_LOG"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "special",
+          "value": "completeShipIgnition"
+        }
+      ]
     }
   ]
 }
