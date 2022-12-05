@@ -4,6 +4,7 @@ using System.Linq;
 using OuterWildsRPG.Utils;
 using UnityEngine;
 using OWML.Common;
+using OWML.Utils;
 
 namespace OuterWildsRPG.Objects
 {
@@ -211,7 +212,7 @@ namespace OuterWildsRPG.Objects
         public QuestConditionType Type;
         public string Value;
 
-        public QuestSpecialConditionType SpecialConditionType => (QuestSpecialConditionType)Enum.Parse(typeof(QuestSpecialConditionType), Value, true);
+        public QuestSpecialConditionType SpecialConditionType => EnumUtils.Parse<QuestSpecialConditionType>(Value, true);
 
         public bool IsStartCondition => Step.StartOn.Contains(this);
         public bool IsCompletionCondition => Step.CompleteOn.Contains(this);
@@ -301,8 +302,8 @@ namespace OuterWildsRPG.Objects
                 QuestConditionType.Fact => Locator.GetShipLogManager().IsFactRevealed(Value),
                 QuestConditionType.Entry => Locator.GetShipLogManager().GetEntry(Value).CalculateState() == ShipLogEntry.State.Explored,
                 QuestConditionType.EntryRumored => Locator.GetShipLogManager().GetEntry(Value).CalculateState() == ShipLogEntry.State.Rumored,
-                QuestConditionType.Frequency => PlayerData.KnowsFrequency((SignalFrequency)Enum.Parse(typeof(SignalFrequency), Value, true)),
-                QuestConditionType.Signal => PlayerData.KnowsSignal((SignalName)Enum.Parse(typeof(SignalName), Value, true)),
+                QuestConditionType.Frequency => PlayerData.KnowsFrequency(EnumUtils.Parse<SignalFrequency>(Value, true)),
+                QuestConditionType.Signal => PlayerData.KnowsSignal(EnumUtils.Parse<SignalName>(Value, true)),
                 QuestConditionType.DialogueCondition => DialogueConditionManager.SharedInstance.GetConditionState(Value),
                 QuestConditionType.PersistentCondition => PlayerData.GetPersistentCondition(Value),
                 QuestConditionType.Conversation => false,
