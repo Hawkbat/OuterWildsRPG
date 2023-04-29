@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Hawkbat/OuterWildsRPG/main/schemas/drop.schema.json",
+  "id": "BASIC_TRANSLATOR",
+  "name": "Nomai Translator",
+  "description": "A tool you and Hal developed to translate Nomai writing.",
+  "rarity": "uncommon",
+  "equipSlot": "translator",
+  "locations": [
+    {
+      "parentPath": "TimberHearth_Body/Sector_TH",
+      "position": {
+        "x": -70.33205,
+        "y": 5.372261,
+        "z": 213.8982
+      },
+      "rotation": {
+        "x": 0.4891755,
+        "y": 72.73146,
+        "z": 88.94646
+      }
+    }
+  ]
+}

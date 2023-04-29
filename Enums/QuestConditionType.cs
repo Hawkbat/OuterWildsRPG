@@ -19,6 +19,10 @@ namespace OuterWildsRPG.Enums
         DialogueCondition,
         PersistentCondition,
         Conversation,
+        EnterVolume,
+        ExitVolume,
+        HaveDrop,
+        EquipDrop,
         Special,
     }
 }

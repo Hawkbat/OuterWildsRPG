@@ -15,8 +15,8 @@
       ],
       "completeOn": [
         {
-          "type": "conversation",
-          "value": "Moon_Body/Sector_THM/Characters_THM/Villager_HEA_Esker"
+          "type": "fact",
+          "value": "TM_ESKER_X1"
         }
       ]
     },
@@ -31,14 +31,14 @@
       ],
       "completeOn": [
         {
-          "type": "conversation",
-          "value": "BrittleHollow_Body/Sector_BH/Sector_Crossroads/Characters_Crossroads/Traveller_HEA_Riebeck"
+          "type": "fact",
+          "value": "BH_RIEBECK_X1"
         }
       ]
     },
     {
       "id": "GABBRO",
-      "text": "Find Gabbro on Giant's Deep'",
+      "text": "Find Gabbro on Giant's Deep",
       "startOn": [
         {
           "type": "quest",
@@ -47,8 +47,8 @@
       ],
       "completeOn": [
         {
-          "type": "conversation",
-          "value": "GabbroIsland_Body/Sector_GabbroIsland/Interactables_GabbroIsland/Traveller_HEA_Gabbro"
+          "type": "fact",
+          "value": "GD_GABBRO_ISLAND_X0"
         }
       ]
     },
@@ -63,8 +63,8 @@
       ],
       "completeOn": [
         {
-          "type": "conversation",
-          "value": "CaveTwin_Body/Sector_CaveTwin/Sector_NorthHemisphere/Sector_NorthSurface/Sector_Lakebed/Interactables_Lakebed/Traveller_HEA_Chert"
+          "type": "fact",
+          "value": "CT_CHERT_X1"
         }
       ]
     },
@@ -79,8 +79,8 @@
       ],
       "completeOn": [
         {
-          "type": "conversation",
-          "value": "DB_PioneerDimension_Body/Sector_PioneerDimension/Interactables_PioneerDimension/Pioneer_Characters/Traveller_HEA_Feldspar"
+          "type": "fact",
+          "value": "DB_FELDSPAR_X1"
         }
       ]
     },

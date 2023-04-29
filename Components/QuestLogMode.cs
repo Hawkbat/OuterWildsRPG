@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OuterWildsRPG.Objects;
+using OuterWildsRPG.External;
+using OuterWildsRPG.Objects.Quests;
+using OuterWildsRPG.Utils;
 using UnityEngine;
 
 namespace OuterWildsRPG.Components
@@ -18,8 +20,12 @@ namespace OuterWildsRPG.Components
         ScreenPromptList centerPromptList;
         ScreenPromptList upperRightPromptList;
 
+        MonoBehaviour itemList;
+
         List<Quest> quests = new();
         Quest selected;
+
+        public ICustomShiplogModesAPI ShiplogModesAPI;
 
         public override void Initialize(ScreenPromptList centerPromptList, ScreenPromptList upperRightPromptList, OWAudioSource oneShotSource)
         {
@@ -29,6 +35,12 @@ namespace OuterWildsRPG.Components
 
             trackQuestPrompt = new ScreenPrompt(InputLibrary.markEntryOnHUD, "Track Quest");
             untrackQuestPrompt = new ScreenPrompt(InputLibrary.markEntryOnHUD, "Untrack Quest");
+
+            ShiplogModesAPI.ItemListMake(true, (itemList) =>
+            {
+                this.itemList = itemList;
+                ShiplogModesAPI.ItemListSetName(itemList, "Quest Log");
+            });
         }
 
         public override void EnterMode(string entryID = "", List<ShipLogFact> revealQueue = null)
@@ -36,16 +48,27 @@ namespace OuterWildsRPG.Components
             prevEntryID = entryID;
             oneShotSource.PlayOneShot(AudioType.ShipLogEnterDetectiveMode);
 
-            quests = OuterWildsRPG.Quests.Where(q => q.IsStarted).ToList();
+            quests = QuestManager.GetStartedQuests()
+                .OrderBy(q => q.IsComplete)
+                .ThenBy(q => q.Type)
+                .ThenBy(q => q.Name)
+                .ToList();
 
-            Locator.GetPromptManager().AddScreenPrompt(trackQuestPrompt, centerPromptList, TextAnchor.MiddleRight);
-            Locator.GetPromptManager().AddScreenPrompt(untrackQuestPrompt, centerPromptList, TextAnchor.MiddleRight);
+            Locator.GetPromptManager().AddScreenPrompt(trackQuestPrompt, upperRightPromptList, TextAnchor.MiddleRight);
+            Locator.GetPromptManager().AddScreenPrompt(untrackQuestPrompt, upperRightPromptList, TextAnchor.MiddleRight);
+
+            ShiplogModesAPI.ItemListOpen(itemList);
+
+            UpdateItems();
+            UpdateDescription();
         }
 
         public override void ExitMode()
         {
             Locator.GetPromptManager().RemoveScreenPrompt(trackQuestPrompt);
             Locator.GetPromptManager().RemoveScreenPrompt(untrackQuestPrompt);
+
+            ShiplogModesAPI.ItemListClose(itemList);
         }
 
         public override void OnEnterComputer()
@@ -60,30 +83,25 @@ namespace OuterWildsRPG.Components
 
         public override void UpdateMode()
         {
-            var index = quests.IndexOf(selected);
-            if (index < 0 && quests.Count > 0)
-            {
-                selected = quests[0];
-                index = 0;
-            }
+            int index = ShiplogModesAPI.ItemListGetSelectedIndex(itemList);
+            int delta = ShiplogModesAPI.ItemListUpdateList(itemList);
+            index = (index + delta + quests.Count) % quests.Count;
 
-            if (OWInput.IsNewlyPressed(InputLibrary.up) || OWInput.IsNewlyPressed(InputLibrary.up2))
-            {
-                selected = quests[index > 0 ? index - 1 : quests.Count - 1];
-            }
+            selected = quests[index];
 
-            if (OWInput.IsNewlyPressed(InputLibrary.down) || OWInput.IsNewlyPressed(InputLibrary.down2))
-            {
-                selected = quests[index == quests.Count - 1 ? 0 : index + 1];
-            }
+            if (delta != 0) UpdateDescription();
 
-            bool isTracked = QuestSaveData.IsTrackingQuest(selected);
-            if (OWInput.IsNewlyPressed(InputLibrary.markEntryOnHUD))
+            if (!selected.IsComplete && OWInput.IsNewlyPressed(InputLibrary.markEntryOnHUD))
             {
-                QuestSaveData.SetTrackingQuest(selected, !isTracked);
+                if (selected.IsTracked)
+                    oneShotSource.PlayOneShot(AudioType.ShipLogUnmarkLocation);
+                else
+                    oneShotSource.PlayOneShot(AudioType.ShipLogMarkLocation);
+                QuestManager.SetTrackingQuest(selected, !selected.IsTracked);
+                UpdateItems();
             }
-            trackQuestPrompt.SetVisibility(!isTracked);
-            untrackQuestPrompt.SetVisibility(isTracked);
+            trackQuestPrompt.SetVisibility(!selected.IsTracked);
+            untrackQuestPrompt.SetVisibility(selected.IsTracked);
         }
 
         public override bool AllowModeSwap()
@@ -99,6 +117,35 @@ namespace OuterWildsRPG.Components
         public override string GetFocusedEntryID()
         {
             return prevEntryID;
+        }
+
+        private void UpdateItems()
+        {
+            var items = quests.Select(q => {
+                var name = q.Name;
+                if (q.IsComplete) name = UnityUtils.RichTextColor(name, Assets.HUDActiveColor);
+                var isMarked = q.IsTracked;
+                var isUnread = false;
+                var moreToExplore = !q.IsComplete;
+                return new Tuple<string, bool, bool, bool>(name, isMarked, isUnread, moreToExplore);
+            }).ToList();
+            ShiplogModesAPI.ItemListSetItems(itemList, items);
+        }
+
+        private void UpdateDescription()
+        {
+            ShiplogModesAPI.ItemListDescriptionFieldClear(itemList);
+            if (selected != null)
+            {
+                foreach (var step in selected.Steps.Where(s => s.IsStarted).Reverse())
+                {
+                    var item = ShiplogModesAPI.ItemListDescriptionFieldGetNextItem(itemList);
+                    var text = step.Text;
+                    if (step.Optional) text = $"{text} (Optional)";
+                    if (step.IsComplete) text = UnityUtils.RichTextColor(text, Assets.HUDActiveColor);
+                    item.DisplayText(text);
+                }
+            }
         }
     }
 }

@@ -5,12 +5,24 @@
   "type": "misc",
   "steps": [
     {
+      "id": "START",
+      "text": "Speak to Mica",
+      "startOn": [],
+      "completeOn": [
+        {
+          "type": "conversation",
+          "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Characters_LowerVillage/Villager_HEA_Mica"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Characters_LowerVillage/Villager_HEA_Mica/Mica_FocalPoint"
+    },
+    {
       "id": "USE_ROCKET",
       "text": "Control the Model Rocket",
       "startOn": [
         {
-          "type": "conversation",
-          "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Characters_LowerVillage/Villager_HEA_Mica"
+          "type": "step",
+          "value": "START"
         }
       ],
       "completeOn": [

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Hawkbat/OuterWildsRPG/main/schemas/drop.schema.json",
+  "id": "BASIC_SIGNALSCOPE",
+  "name": "Signalscope",
+  "description": "A tool for picking up audible signals from distant locations.",
+  "rarity": "uncommon",
+  "equipSlot": "signalscope",
+  "locations": [
+    {
+      "parentPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Props_LowerVillage/OtherComponentsGroup/Architecture_LowerVillage/OtherComponentsGroup/Village_UnderLaunchTowerProps/LaunchTowerSequoiaProps/WorkBench2/Props_HEA_Signalscope (2)",
+      "rotation": {
+        "x": 285,
+        "y": 270,
+        "z": 0
+      },
+      "visuals": [
+        "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Props_LowerVillage/OtherComponentsGroup/Architecture_LowerVillage/BatchedGroup/BatchedMeshRenderers_11"
+      ]
+    }
+  ]
+}

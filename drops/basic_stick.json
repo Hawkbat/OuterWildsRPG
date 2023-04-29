@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Hawkbat/OuterWildsRPG/main/schemas/drop.schema.json",
+  "id": "BASIC_STICK",
+  "name": "Roasting Stick",
+  "description": "A basic stick, for roasting marshmellows on.",
+  "rarity": "common",
+  "equipSlot": "stick",
+  "locations": [
+    {
+      "parentPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_StartingCamp/Props_StartingCamp/OtherComponentsGroup/Props_HEA_CampsiteLogAssets",
+      "position": {
+        "x": 0.8133,
+        "y": -0.0007,
+        "z": 1.6912
+      },
+      "visuals": [
+        "TimberHearth_Body/Sector_TH/Sector_Village/Sector_StartingCamp/Props_StartingCamp/OtherComponentsGroup/Props_HEA_CampsiteLogAssets/Props_HEA_MarshmallowStick",
+        "TimberHearth_Body/Sector_TH/Sector_Village/Sector_StartingCamp/Props_StartingCamp/OtherComponentsGroup/Props_HEA_CampsiteLogAssets/Props_HEA_MarshmallowUncoocked1",
+        "TimberHearth_Body/Sector_TH/Sector_Village/Sector_StartingCamp/Props_StartingCamp/OtherComponentsGroup/Props_HEA_CampsiteLogAssets/Props_HEA_MarshmallowCanOpened"
+      ]
+    }
+  ]
+}

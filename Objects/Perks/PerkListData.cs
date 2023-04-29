@@ -1,0 +1,20 @@
+﻿using OuterWildsRPG.Utils;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OuterWildsRPG.Objects.Perks
+{
+    public class PerkListData : MultipleEntityData<PerkData>
+    {
+        [Required]
+        [Description("A list of perks included in this mod.")]
+        public List<PerkData> perks = new();
+
+        public override IEnumerable<PerkData> GetEntities() => perks;
+    }
+}

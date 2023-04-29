@@ -1,0 +1,212 @@
+{
+  "definitions": {
+    "BuffData": {
+      "type": "object",
+      "properties": {
+        "hazardDamage": {
+          "$ref": "#/definitions/HazardDamageEffectData"
+        },
+        "translationSpeed": {
+          "$ref": "#/definitions/TranslationSpeedEffectData"
+        },
+        "travelMusic": {
+          "$ref": "#/definitions/TravelMusicEffectData"
+        },
+        "custom": {
+          "$ref": "#/definitions/CustomEffectData"
+        },
+        "id": {
+          "description": "A unique internal identifier for this entity. This must not be the same as any other entity of the same type in your mod.",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name to display in-game for this entity.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "CustomEffectData": {
+      "description": "Defines a custom effect that can be interacted with via the mod API.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "A custom value that uniquely identifies this effect, for use with the mod API.",
+          "type": "string"
+        },
+        "description": {
+          "description": "The text to display in the UI for this effect.",
+          "type": "string"
+        }
+      }
+    },
+    "DropLocationData": {
+      "type": "object",
+      "properties": {
+        "parentPath": {
+          "description": "The full path to a GameObject in the solar system that the drop should be attached to.",
+          "type": "string"
+        },
+        "position": {
+          "$ref": "#/definitions/Vector3Data"
+        },
+        "rotation": {
+          "$ref": "#/definitions/Vector3Data-1"
+        },
+        "visuals": {
+          "description": "Full paths to GameObjects to disable when picking up this drop.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "parentPath"
+      ]
+    },
+    "HazardDamageEffectData": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "The type of hazard to modify damage for.",
+          "type": "string",
+          "enum": [
+            "all",
+            "general",
+            "ghostMatter",
+            "heat",
+            "fire",
+            "sandfall",
+            "electricity"
+          ]
+        },
+        "add": {
+          "description": "The percentage of the initial damage to add/reduce. E.g. a value of -0.1 means subtract 10% of the base damage from the total.",
+          "type": "number"
+        },
+        "multiply": {
+          "description": "The percentage to multiply the total damage by. E.g. a value of 0.25 will result in 25% damage, or a 75% reduction.",
+          "type": "number"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "TranslationSpeedEffectData": {
+      "type": "object",
+      "properties": {
+        "multiply": {
+          "description": "The percentage to multiply the total translation time by. E.g. a value of 0.25 will result in translating taking 25% of the usual time, or a 75% reduction.",
+          "type": "number"
+        }
+      }
+    },
+    "TravelMusicEffectData": {
+      "type": "object",
+      "properties": {
+        "audioType": {
+          "description": "An Outer Wilds AudioType value that will be used as the travel music will this buff is active. See https://nh.outerwildsmods.com/reference/audio_enum.html",
+          "type": "string"
+        }
+      },
+      "required": [
+        "audioType"
+      ]
+    },
+    "Vector3Data": {
+      "description": "The position to place the drop at, relative to the parent.",
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      }
+    },
+    "Vector3Data-1": {
+      "description": "The rotation of the drop, relative to the parent.",
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "description": {
+      "description": "A short description to display in the inventory for this drop.",
+      "type": "string"
+    },
+    "rarity": {
+      "description": "The 'quality' rating of this drop, which generally reflects its value.",
+      "type": "string",
+      "enum": [
+        "common",
+        "uncommon",
+        "rare",
+        "epic",
+        "legendary"
+      ]
+    },
+    "equipSlot": {
+      "description": "Which equipment slot this drop can be equipped to, if any.",
+      "type": "string",
+      "enum": [
+        "none",
+        "helmet",
+        "suit",
+        "jetpack",
+        "probe",
+        "signalscope",
+        "flashlight",
+        "translator",
+        "radio",
+        "stick"
+      ]
+    },
+    "buffs": {
+      "description": "Effects that will apply while this drop is equipped.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/BuffData"
+      }
+    },
+    "locations": {
+      "description": "Locations in the solar system to place pickups for this drop.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/DropLocationData"
+      }
+    },
+    "id": {
+      "description": "A unique internal identifier for this entity. This must not be the same as any other entity of the same type in your mod.",
+      "type": "string"
+    },
+    "name": {
+      "description": "The name to display in-game for this entity.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "name"
+  ]
+}

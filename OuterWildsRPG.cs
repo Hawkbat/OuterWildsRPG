@@ -1,7 +1,11 @@
 ﻿using HarmonyLib;
 using OuterWildsRPG.Components;
+using OuterWildsRPG.Enums;
 using OuterWildsRPG.External;
-using OuterWildsRPG.Objects;
+using OuterWildsRPG.Objects.Common;
+using OuterWildsRPG.Objects.Drops;
+using OuterWildsRPG.Objects.Perks;
+using OuterWildsRPG.Objects.Quests;
 using OuterWildsRPG.Utils;
 using OWML.Common;
 using OWML.ModHelper;
@@ -12,6 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace OuterWildsRPG
 {
@@ -19,77 +24,112 @@ namespace OuterWildsRPG
     {
         public static OuterWildsRPG Instance;
 
-        public static List<Quest> Quests = new();
-
         public static bool Ready;
 
-        public static PromptPosition QuestPromptPosition;
-        public static ScreenPromptList QuestPromptList;
+        public static QuestHUD QuestHUD;
         public static QuestLogMode QuestLogMode;
 
-        public static Texture2D CheckboxOnTex;
-        public static Texture2D CheckboxOffTex;
-        public static Sprite CheckboxOnSprite;
-        public static Sprite CheckboxOffSprite;
-        public static Color OnColor = new Color(0.9686f, 0.498f, 0.2078f);
+        public static NotificationQueue MajorQueue = new();
+        public static NotificationQueue MinorQueue = new() { ConcurrentLimit = 4 };
+        public static NotificationQueue ExpQueue = new() { ConcurrentLimit = 3 };
+
+        public static string ModID => Instance.ModHelper.Manifest.UniqueName;
 
         static bool inDialogue;
+        static bool inComputer;
 
         private void Awake()
         {
             Instance = this;
 
-            QuestPromptPosition = EnumUtils.Create<PromptPosition>("QuestList");
-
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
+        }
+
+        void LoadEntities<TEntity, TSingle, TMultiple>(Dictionary<string, TEntity> entities, string type) where TEntity : Entity<TEntity, TSingle>, new() where TSingle : EntityData, new() where TMultiple : MultipleEntityData<TSingle>, new()
+        {
+            Dictionary<string, TSingle> rawData = new();
+
+            foreach (var mod in ModHelper.Interaction.GetMods())
+            {
+                var modID = mod.ModHelper.Manifest.UniqueName;
+
+                List<TEntity> modEntities = new List<TEntity>();
+
+                var dataPath = Path.GetFullPath(Path.Combine(mod.ModHelper.Manifest.ModFolderPath, $"./{type}.json"));
+                if (File.Exists(dataPath))
+                {
+                    var multipleData = mod.ModHelper.Storage.Load<TMultiple>($"{type}.json", false);
+                    if (multipleData != null)
+                    {
+                        foreach (var singleData in multipleData.GetEntities())
+                        {
+                            var entity = new TEntity();
+                            entity.Load(singleData, modID);
+                            rawData.Add(entity.FullID, singleData);
+                            entities.Add(entity.FullID, entity);
+                            modEntities.Add(entity);
+                        }
+                    } else
+                    {
+                        ModHelper.Console.WriteLine($"Failed to load {type}.json for {modID}.", MessageType.Error);
+                    }
+                }
+                var dataDirectory = Path.GetFullPath(Path.Combine(mod.ModHelper.Manifest.ModFolderPath, $"./{type}/"));
+                if (Directory.Exists(dataDirectory))
+                {
+                    foreach (var filePath in Directory.GetFiles(dataDirectory))
+                    {
+                        var fileName = Path.GetFileName(filePath);
+                        var singleData = JsonHelper.LoadJsonObject<TSingle>(filePath, false);
+                        if (singleData != null)
+                        {
+                            var entity = new TEntity();
+                            entity.Load(singleData, modID);
+                            rawData.Add(entity.FullID, singleData);
+                            entities.Add(entity.FullID, entity);
+                            modEntities.Add(entity);
+                        } else
+                        {
+                            ModHelper.Console.WriteLine($"Failed to load {type}/{fileName} for {modID}.", MessageType.Error);
+                        }
+                    }
+                }
+                if (modEntities.Any())
+                    ModHelper.Console.WriteLine($"Loaded {modEntities.Count} {type} from {modID}.", MessageType.Success);
+            }
+
+            foreach (var (fullID, entity) in entities) {
+                var raw = rawData[fullID];
+                entity.Resolve(raw, entities);
+            }
+
+            ModHelper.Console.WriteLine($"Loaded {entities.Count} total {type}.", MessageType.Success);
         }
 
         private void Start()
         {
-            CheckboxOnTex = ModHelper.Assets.GetTexture("assets/CheckboxOn.png");
-            CheckboxOffTex = ModHelper.Assets.GetTexture("assets/CheckboxOff.png");
-            CheckboxOnSprite = Sprite.Create(CheckboxOnTex, new Rect(0f, 0f, CheckboxOnTex.width, CheckboxOnTex.height), Vector2.one * 0.5f, 256f);
-            CheckboxOffSprite = Sprite.Create(CheckboxOffTex, new Rect(0f, 0f, CheckboxOffTex.width, CheckboxOffTex.height), Vector2.one * 0.5f, 256f);
+            Assets.LoadAll();
 
-            // Load Quests
-            foreach (var mod in ModHelper.Interaction.GetMods())
-            {
-                var questsFound = false;
-                var modQuestData = mod.ModHelper.Storage.Load<QuestListData>("quests.json", false);
-                if (modQuestData != null)
-                {
-                    var modQuests = modQuestData.quests.Select(q => q.Parse()).ToList();
-                    foreach (var quest in modQuests)
-                        Quests.Add(quest);
-                    if (modQuests.Count > 0) questsFound = true;
-                }
-                var modQuestsPath = Path.GetFullPath(Path.Combine(mod.ModHelper.Manifest.ModFolderPath, "./quests/"));
-                if (Directory.Exists(modQuestsPath))
-                {
-                    foreach (var filePath in Directory.GetFiles(modQuestsPath))
-                    {
-                        var fileQuestData = JsonHelper.LoadJsonObject<QuestData>(filePath, false);
-                        if (fileQuestData != null)
-                        {
-                            var fileQuest = fileQuestData.Parse();
-                            Quests.Add(fileQuest);
-                            questsFound = true;
-                        }
-                    }
-                }
-                if (questsFound)
-                    ModHelper.Console.WriteLine($"Loaded quests from {mod.ModHelper.Manifest.UniqueName}.", MessageType.Success);
-            }
+            LoadEntities<Quest, QuestData, QuestListData>(QuestManager.Dictionary, "quests");
+            LoadEntities<Perk, PerkData, PerkListData>(PerkManager.Dictionary, "perks");
+            LoadEntities<Drop, DropData, DropListData>(DropManager.Dictionary, "drops");
 
-            // Wire up quest events
-            QuestSaveData.OnStartQuest.AddListener(OnStartQuest);
-            QuestSaveData.OnCompleteStep.AddListener(OnCompleteStep);
-            QuestSaveData.OnCompleteQuest.AddListener(OnCompleteQuest);
-            QuestSaveData.OnDiscoverLocation.AddListener(OnDiscoverLocation);
-            QuestSaveData.OnAwardXP.AddListener(OnAwardXP);
+            QuestManager.OnStartQuest.AddListener(OnStartQuest);
+            QuestManager.OnCompleteStep.AddListener(OnCompleteStep);
+            QuestManager.OnCompleteQuest.AddListener(OnCompleteQuest);
+            CharacterManager.OnAwardXP.AddListener(OnAwardXP);
+            CharacterManager.OnLevelUp.AddListener(OnLevelUp);
+            CharacterManager.OnDiscoverLocation.AddListener(OnDiscoverLocation);
+            CharacterManager.OnExploreLocation.AddListener(OnExploreLocation);
+            PerkManager.OnUnlockPerk.AddListener(OnUnlockPerk);
+            DropManager.OnPickUpDrop.AddListener(OnPickUp);
+            DropManager.OnEquipDrop.AddListener(OnEquipDrop);
+            DropManager.OnUnequipDrop.AddListener(OnUnequipDrop);
 
             GlobalMessenger.AddListener("EnterConversation", () => inDialogue = true);
             GlobalMessenger.AddListener("ExitConversation", () => inDialogue = false);
+            GlobalMessenger.AddListener("EnterShipComputer", () => inComputer = true);
+            GlobalMessenger.AddListener("ExitShipComputer", () => inComputer = false);
 
             LoadManager.OnStartSceneLoad += (scene, loadScene) =>
             {
@@ -111,24 +151,20 @@ namespace OuterWildsRPG
 
         private void SetUp()
         {
-            // Set up prompt list
-            if (!QuestPromptList)
+            if (!QuestHUD)
             {
-                var sourceList = Locator.GetPromptManager().GetScreenPromptList(PromptPosition.UpperLeft);
-                var clone = Instantiate(sourceList.gameObject);
-                clone.transform.parent = sourceList.transform.parent;
-                clone.transform.localPosition = new Vector3(-400f, 120f, 0f);
-                clone.transform.localScale = Vector3.one;
-                clone.name = "ScreenPromptListQuestList";
-                QuestPromptList = clone.GetComponent<ScreenPromptList>();
-                QuestPromptList.SetMinElementHeightAndWidth(Locator.GetPromptManager()._promptElementMinHeight, Locator.GetPromptManager()._promptElementMinWidth);
-                foreach (var prompt in QuestPromptList._listPrompts) QuestPromptList.RemoveScreenPrompt(prompt);
+                var questHudRect = UnityUtils.MakeRectChild(null, "QuestHUD");
+                QuestHUD = questHudRect.gameObject.AddComponent<QuestHUD>();
             }
 
-            // Set up prompts/markers
-            foreach (var quest in Quests) quest.SetUp();
+            foreach (var drop in DropManager.GetAllDrops())
+                foreach (var location in drop.Locations)
+                    DropManager.SpawnDropPickup(location);
 
-            // Register quest log ship log mode with the Custom Ship Log Modes API
+            foreach (var quest in QuestManager.GetAllQuests()) quest.SetUp();
+
+            BuffManager.UpdateTravelMusic();
+
             var questLogGO = new GameObject("QuestLogMode");
             questLogGO.transform.parent = UnityUtils.GetTransformAtPath("Ship_Body/Module_Cabin/Systems_Cabin/ShipLogPivot/ShipLog/ShipLogPivot/ShipLogCanvas");
             questLogGO.transform.localPosition = Vector3.zero;
@@ -137,7 +173,11 @@ namespace OuterWildsRPG
             QuestLogMode = questLogGO.AddComponent<QuestLogMode>();
 
             var customModesAPI = ModHelper.Interaction.TryGetModApi<ICustomShiplogModesAPI>("dgarro.CustomShipLogModes");
-            customModesAPI.AddMode(QuestLogMode, () => Quests.Any(q => q.IsStarted), () => "Quest Log");
+            customModesAPI.AddMode(QuestLogMode, () => true, () => "Quest Log");
+            QuestLogMode.ShiplogModesAPI = customModesAPI;
+
+            var perkTreeMode = GraphMode.Create<PerkTreeMode>();
+            customModesAPI.AddMode(perkTreeMode, () => true, () => "Perk Tree");
 
             // DEBUG; Export ship log details to reference in quest steps
             //ShipLogExporter.Export();
@@ -149,61 +189,111 @@ namespace OuterWildsRPG
         {
             Ready = false;
 
-            // Clear out any set up prompts/markers
-            foreach (var quest in Quests) quest.CleanUp();
-
-            QuestPromptList = null;
+            foreach (var quest in QuestManager.GetAllQuests()) quest.CleanUp();
         }
 
         private void Update()
         {
             if (!Ready) return;
 
-            bool promptsVisible = !ModHelper.Menus.PauseMenu.IsOpen && !inDialogue;
+            bool markersVisible = !GUIMode.IsHiddenMode() && !ModHelper.Menus.PauseMenu.IsOpen && !inDialogue && !inComputer;
 
-            foreach (var quest in Quests)
-                quest.Update(promptsVisible);
+            foreach (var quest in QuestManager.GetAllQuests())
+                quest.Update(markersVisible);
 
             foreach (var entry in Locator.GetShipLogManager().GetEntryList())
             {
-                if (!QuestSaveData.HasDiscoveredLocation(entry) && entry.CalculateState() == ShipLogEntry.State.Explored)
+                if (!CharacterManager.HasDiscoveredLocation(entry) && entry.CalculateState() == ShipLogEntry.State.Explored)
                 {
-                    QuestSaveData.DiscoverLocation(entry);
+                    CharacterManager.DiscoverLocation(entry);
                 }
+                if (!CharacterManager.HasExploredLocation(entry) && entry.GetExploreFacts().All(f => f.IsRevealed()))
+                {
+                    CharacterManager.ExploreLocation(entry);
+                }
+            }
+
+            if (Keyboard.current[Key.Numpad1].wasPressedThisFrame)
+            {
+                WarpToSpawnPoint("Spawn_TH");
+            }
+            if (Keyboard.current[Key.Numpad2].wasPressedThisFrame)
+            {
+                WarpToSpawnPoint("Spawn_TH_Observatory");
+            }
+
+            if (markersVisible)
+            {
+                NotificationQueue.UpdateAll();
             }
         }
 
         public void OnStartQuest(Quest quest)
         {
-            PromptNotify($"Started quest {quest.Name}");
+            MajorQueue.Enqueue($"Started quest {quest.Name}", sound: AudioType.ShipLogRevealEntry);
         }
 
         public void OnCompleteQuest(Quest quest)
         {
-            PromptNotify($"Completed quest {quest.Name}", sound: AudioType.TH_ZeroGTrainingAllRepaired);
+            MajorQueue.Enqueue($"Completed quest {quest.Name}", sound: AudioType.TH_ZeroGTrainingAllRepaired);
         }
 
         public void OnCompleteStep(QuestStep step)
         {
-            PromptNotify($"{step.Text} - Complete", time: 3f);
+            MinorQueue.Enqueue($"{step.Text} - Complete", time: 3f, sound: AudioType.ShipLogRevealEntry);
         }
 
         public void OnDiscoverLocation(ShipLogEntry entry)
         {
-            PromptNotify($"Discovered location {entry.GetName(false)}");
+            MajorQueue.Enqueue($"Discovered location {entry.GetName(false)}", sound: AudioType.ShipLogRevealEntry);
+        }
+
+        public void OnExploreLocation(ShipLogEntry entry)
+        {
+            MajorQueue.Enqueue($"Fully explored location {entry.GetName(false)}", sound: AudioType.TH_ZeroGTrainingAllRepaired);
         }
 
         public void OnAwardXP(int xp, string reason)
         {
-            PromptNotify($"+{xp}XP", pos: PromptPosition.LowerLeft, time: 3f);
+            ExpQueue.Enqueue($"+{xp}XP", pos: PromptPosition.LowerLeft, time: 3f);
         }
 
-        private void PromptNotify(string msg, PromptPosition pos = PromptPosition.Center, float time = 5f, AudioType sound = AudioType.ShipLogRevealEntry)
+        public void OnLevelUp(int level)
         {
-            var prompt = new ScreenPrompt(msg);
-            Locator.GetPromptManager().AddScreenPrompt(prompt, pos, true);
-            UnityUtils.RunAfterSeconds(time, () => Locator.GetPromptManager().RemoveScreenPrompt(prompt, pos));
-            Locator.GetPlayerAudioController().PlayOneShotInternal(sound);
+            MajorQueue.Enqueue($"Reached Level {level}!", clip: Assets.QuestJingleAudioClip);
+            if (PerkManager.GetUnspentPerkPoints() > 0)
+                ExpQueue.Enqueue($"You have {PerkManager.GetUnspentPerkPoints()} unspent perk points.", PromptPosition.LowerLeft, time: 10f);
+        }
+
+        public void OnUnlockPerk(Perk perk)
+        {
+
+        }
+
+        public void OnPickUp(Drop drop)
+        {
+            MinorQueue.Enqueue($"Picked up {drop.Name}");
+        }
+
+        public void OnEquipDrop(Drop drop, EquipSlot slot)
+        {
+            MinorQueue.Enqueue($"Equipped {drop.Name}");
+        }
+
+        public void OnUnequipDrop(Drop drop, EquipSlot slot)
+        {
+            MinorQueue.Enqueue($"Unequipped {drop.Name}");
+        }
+
+        private void WarpToSpawnPoint(string spawnPointName)
+        {
+            var spawner = Locator.GetPlayerBody().GetComponent<PlayerSpawner>();
+            var spawnPoint = spawner._spawnList.FirstOrDefault(s => s.name == spawnPointName);
+            if (spawnPoint is EyeSpawnPoint eyeSpawn)
+            {
+                Locator.GetEyeStateManager().SetState(eyeSpawn.GetEyeState());
+            }
+            spawner.DebugWarp(spawnPoint);
         }
     }
 }

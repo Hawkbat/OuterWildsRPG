@@ -1,0 +1,113 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using UnityEngine.Events;
+
+namespace OuterWildsRPG.Objects.Common
+{
+    public class CharacterManager
+    {
+        const int LEVEL_CAP = 255;
+
+        const int DEFAULT_LOCATION_DISCOVER_XP = 200;
+        const int DEFAULT_LOCATION_SUBENTRY_DISCOVER_XP = 100;
+        const int DEFAULT_LOCATION_CURIOSITY_DISCOVER_XP = 1000;
+
+        const int DEFAULT_LOCATION_EXPLORE_XP = 400;
+        const int DEFAULT_LOCATION_SUBENTRY_EXPLORE_XP = 200;
+        const int DEFAULT_LOCATION_CURIOSITY_EXPLORE_XP = 2000;
+
+        public class AwardXPEvent : UnityEvent<int, string> { }
+        public static AwardXPEvent OnAwardXP = new AwardXPEvent();
+
+        public class LevelUpEvent : UnityEvent<int> { }
+        public static LevelUpEvent OnLevelUp = new LevelUpEvent();
+        public class LocationEvent : UnityEvent<ShipLogEntry> { }
+        public static LocationEvent OnDiscoverLocation = new LocationEvent();
+        public static LocationEvent OnExploreLocation = new LocationEvent();
+
+        public static int GetTotalNeededXP(int level)
+        {
+            if (level <= 0) return 0;
+            return 2000 * level + 100 * (level - 1) * (level - 1);
+        }
+
+        public static int GetNeededXP(int level)
+        {
+            return GetTotalNeededXP(level) - GetTotalNeededXP(level - 1);
+        }
+
+        public static int GetCurrentXP()
+        {
+            return CharacterSaveData.Instance.TotalXP - GetTotalNeededXP(GetCharacterLevel());
+        }
+
+        public static int GetCharacterLevel()
+        {
+            for (int level = 1; level <= LEVEL_CAP; level++)
+            {
+                if (GetTotalNeededXP(level) > CharacterSaveData.Instance.TotalXP)
+                {
+                    return level - 1;
+                }
+            }
+            return LEVEL_CAP;
+        }
+
+        public static bool HasDiscoveredLocation(ShipLogEntry entry)
+        {
+            return CharacterSaveData.Instance.DiscoveredLocations.Contains(entry.GetID());
+        }
+
+        public static bool DiscoverLocation(ShipLogEntry entry)
+        {
+            if (CharacterSaveData.Instance.DiscoveredLocations.Add(entry.GetID()))
+            {
+                OnDiscoverLocation.Invoke(entry);
+                if (entry.IsCuriosity())
+                    AwardXP(DEFAULT_LOCATION_CURIOSITY_DISCOVER_XP, $"Discovered major location {entry.GetName(false)}!");
+                else if (entry.HasParent())
+                    AwardXP(DEFAULT_LOCATION_SUBENTRY_DISCOVER_XP, $"Discovered minor location {entry.GetName(false)}!");
+                else
+                    AwardXP(DEFAULT_LOCATION_DISCOVER_XP, $"Discovered location {entry.GetName(false)}!");
+                return true;
+            }
+            return false;
+        }
+
+        public static bool HasExploredLocation(ShipLogEntry entry)
+        {
+            return CharacterSaveData.Instance.ExploredLocations.Contains(entry.GetID());
+        }
+
+        public static bool ExploreLocation(ShipLogEntry entry)
+        {
+            if (CharacterSaveData.Instance.ExploredLocations.Add(entry.GetID()))
+            {
+                OnExploreLocation.Invoke(entry);
+                if (entry.IsCuriosity())
+                    AwardXP(DEFAULT_LOCATION_CURIOSITY_EXPLORE_XP, $"Fully explored major location {entry.GetName(false)}!");
+                else if (entry.HasParent())
+                    AwardXP(DEFAULT_LOCATION_SUBENTRY_EXPLORE_XP, $"Fully explored minor location {entry.GetName(false)}!");
+                else
+                    AwardXP(DEFAULT_LOCATION_EXPLORE_XP, $"Fully explored location {entry.GetName(false)}!");
+                return true;
+            }
+            return false;
+        }
+
+        public static void AwardXP(int amount, string reason)
+        {
+            var beforeLevel = GetCharacterLevel();
+            CharacterSaveData.Instance.TotalXP += amount;
+            OnAwardXP.Invoke(amount, reason);
+            var afterLevel = GetCharacterLevel();
+            for (var level = beforeLevel + 1; level <= afterLevel; level++)
+            {
+                OnLevelUp.Invoke(level);
+            }
+        }
+    }
+}

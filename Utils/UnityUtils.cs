@@ -72,5 +72,23 @@ namespace OuterWildsRPG.Utils
             }
             return t;
         }
+
+        public static string RichTextColor(string s, Color32 color)
+        {
+            return $"<color=#{color.r:x2}{color.g:x2}{color.b:x2}{color.a:x2}>{s}</color>";
+        }
+
+        public static RectTransform MakeRectChild(Transform parent, string name)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            var rt = go.GetComponent<RectTransform>();
+            rt.parent = parent;
+            rt.localPosition = Vector3.zero;
+            rt.localRotation = Quaternion.identity;
+            rt.localScale = Vector3.one;
+            return rt;
+        }
+
+        public static Vector3 ToVector3(this Vector3Data v) => v != null ? new Vector3(v.x, v.y, v.z) : Vector3.zero;
     }
 }

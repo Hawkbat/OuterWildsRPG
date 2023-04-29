@@ -38,8 +38,8 @@
       "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_StartingCamp/Characters_StartingCamp/Villager_HEA_Slate/Slate_FocalPoint"
     },
     {
-      "id": "MODEL_ROCKET",
-      "text": "Speak to Mica",
+      "id": "VILLAGE_HINT",
+      "text": "Explore the Village",
       "startOn": [
         {
           "type": "step",
@@ -48,16 +48,33 @@
       ],
       "completeOn": [
         {
-          "type": "conversation",
-          "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Characters_LowerVillage/Villager_HEA_Mica"
+          "type": "step",
+          "value": "MUSEUM"
         }
       ],
-      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Characters_LowerVillage/Villager_HEA_Mica/Mica_FocalPoint",
+      "optional": true,
+      "isHint": true
+    },
+    {
+      "id": "GET_STICK",
+      "text": "Retrieve a Marshmellow Roasting Stick",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "SLATE"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "haveDrop",
+          "value": "BASIC_STICK"
+        }
+      ],
       "optional": true
     },
     {
-      "id": "HIDE_AND_SEEK",
-      "text": "Speak to Tephra",
+      "id": "GET_SIGNALSCOPE",
+      "text": "Retrieve a Signalscope",
       "startOn": [
         {
           "type": "step",
@@ -66,60 +83,35 @@
       ],
       "completeOn": [
         {
-          "type": "dialogueCondition",
-          "value": "BeginHideAndSeek"
+          "type": "haveDrop",
+          "value": "BASIC_SIGNALSCOPE"
         }
-      ],
-      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Characters_LowerVillage/Kids_PreGame/Villager_HEA_Tephra/Tephra_FocalPoint",
-      "optional": true
-    },
-    {
-      "id": "GHOST_MATTER",
-      "text": "Speak to Arkose",
-      "startOn": [
-        {
-          "type": "step",
-          "value": "SLATE"
-        }
-      ],
-      "completeOn": [
-        {
-          "type": "conversation",
-          "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Arkose_GhostMatter"
-        }
-      ],
-      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Arkose_GhostMatter/Arkose_FocalPoint",
-      "optional": true
-    },
-    {
-      "id": "ZERO_G_CAVE",
-      "text": "Speak to Gossan",
-      "startOn": [
-        {
-          "type": "step",
-          "value": "SLATE"
-        }
-      ],
-      "completeOn": [
-        {
-          "type": "dialogueCondition",
-          "value": "CoachSaysHi_1"
-        },
-        {
-          "type": "dialogueCondition",
-          "value": "CoachSaysHi_2"
-        }
-      ],
-      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Gossan/Gossan_FocalPoint",
-      "optional": true
+      ]
     },
     {
       "id": "MUSEUM",
+      "text": "Enter the Observatory",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "SLATE"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "enterVolume",
+          "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Volumes_Observatory/ObservatoryInteriorVolume"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Volumes_Observatory/ObservatoryInteriorVolume/MuseumEntryway"
+    },
+    {
+      "id": "MUSEUM_HINT",
       "text": "Explore the Observatory",
       "startOn": [
         {
           "type": "step",
-          "value": "SLATE"
+          "value": "MUSEUM"
         }
       ],
       "completeOn": [
@@ -128,6 +120,59 @@
           "value": "LAUNCH_CODES_GIVEN"
         }
       ],
+      "optional": true,
+      "isHint": true
+    },
+    {
+      "id": "GET_TRANSLATOR",
+      "text": "Retrieve the Nomai Translator",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "MUSEUM"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "haveDrop",
+          "value": "BASIC_TRANSLATOR"
+        }
+      ]
+    },
+    {
+      "id": "HAL",
+      "text": "Speak to Hal",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "MUSEUM"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "conversation",
+          "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Characters_Observatory/Character_HEA_Hal_Museum"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Characters_Observatory/Character_HEA_Hal_Museum/Hal_FocalPoint",
+      "optional": true
+    },
+    {
+      "id": "EYE_WALL",
+      "text": "Try Out the Translator",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "HAL"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "fact",
+          "value": "TM_EYE_LOCATOR_R2"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Interactables_Observatory/NomaiEyeExhibit/AttentionPoint",
       "optional": true
     },
     {
@@ -136,7 +181,7 @@
       "startOn": [
         {
           "type": "step",
-          "value": "SLATE"
+          "value": "MUSEUM"
         }
       ],
       "completeOn": [

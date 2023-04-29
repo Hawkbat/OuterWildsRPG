@@ -5,6 +5,24 @@
   "type": "main",
   "steps": [
     {
+      "id": "HAL",
+      "text": "Speak to Hal",
+      "startOn": [
+        {
+          "type": "fact",
+          "value": "TH_VILLAGE_X2"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "conversation",
+          "value": "TimberHearth_Body/Sector_TH/Sector_Village/Characters_Village/Villager_HEA_Hal_Outside"
+        }
+      ],
+      "optional": true,
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Characters_Village/Villager_HEA_Hal_Outside/Hal_FocalPoint"
+    },
+    {
       "id": "ELEVATOR",
       "text": "Enter Launch Codes",
       "startOn": [

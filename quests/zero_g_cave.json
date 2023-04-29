@@ -5,9 +5,10 @@
   "type": "misc",
   "steps": [
     {
-      "id": "TRAVEL",
-      "text": "Find Gossan's 'Satellite'",
-      "startOn": [
+      "id": "START",
+      "text": "Speak to Gossan",
+      "startOn": [],
+      "completeOn": [
         {
           "type": "dialogueCondition",
           "value": "CoachSaysHi_1"
@@ -15,6 +16,17 @@
         {
           "type": "dialogueCondition",
           "value": "CoachSaysHi_2"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Gossan/Gossan_FocalPoint"
+    },
+    {
+      "id": "TRAVEL",
+      "text": "Find Gossan's 'Satellite'",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "START"
         }
       ],
       "completeOn": [
@@ -75,6 +87,33 @@
         }
       ],
       "locationPath": "MiningRig_Body/Nodes/BrokenNode:2"
+    },
+    {
+      "id": "FINISH",
+      "text": "Speak to Gossan",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "REPAIR_0"
+        },
+        {
+          "type": "step",
+          "value": "REPAIR_1"
+        },
+        {
+          "type": "step",
+          "value": "REPAIR_2"
+        }
+      ],
+      "startMode": "all",
+      "completeOn": [
+        {
+          "type": "conversation",
+          "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Gossan"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Gossan/Gossan_FocalPoint",
+      "preventEarlyComplete": true
     }
   ]
 }

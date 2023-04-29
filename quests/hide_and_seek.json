@@ -5,6 +5,31 @@
   "type": "misc",
   "steps": [
     {
+      "id": "START",
+      "text": "Speak to Tephra",
+      "startOn": [],
+      "completeOn": [
+        {
+          "type": "dialogueCondition",
+          "value": "BeginHideAndSeek"
+        }
+      ],
+      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Characters_LowerVillage/Kids_PreGame/Villager_HEA_Tephra/Tephra_FocalPoint"
+    },
+    {
+      "id": "HINT",
+      "text": "Use your Signalscope",
+      "startOn": [
+        {
+          "type": "dialogueCondition",
+          "value": "BeginHideAndSeek"
+        }
+      ],
+      "completeOn": [],
+      "optional": true,
+      "isHint": true
+    },
+    {
       "id": "KID_1",
       "text": "Find Tephra",
       "startOn": [

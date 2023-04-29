@@ -9,8 +9,8 @@ namespace OuterWildsRPG.Enums
     public enum QuestType
     {
         None,
-        Side,
         Main,
+        Side,
         Misc,
     }
 }
