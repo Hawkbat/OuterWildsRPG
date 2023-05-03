@@ -1,126 +1,198 @@
 {
-  "definitions": {
-    "BuffData": {
-      "type": "object",
-      "properties": {
-        "hazardDamage": {
-          "$ref": "#/definitions/HazardDamageEffectData"
-        },
-        "translationSpeed": {
-          "$ref": "#/definitions/TranslationSpeedEffectData"
-        },
-        "travelMusic": {
-          "$ref": "#/definitions/TravelMusicEffectData"
-        },
-        "custom": {
-          "$ref": "#/definitions/CustomEffectData"
-        },
-        "id": {
-          "description": "A unique internal identifier for this entity. This must not be the same as any other entity of the same type in your mod.",
-          "type": "string"
-        },
-        "name": {
-          "description": "The name to display in-game for this entity.",
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "name"
-      ]
-    },
-    "CustomEffectData": {
-      "description": "Defines a custom effect that can be interacted with via the mod API.",
-      "type": "object",
-      "properties": {
-        "id": {
-          "description": "A custom value that uniquely identifies this effect, for use with the mod API.",
-          "type": "string"
-        },
-        "description": {
-          "description": "The text to display in the UI for this effect.",
-          "type": "string"
-        }
-      }
-    },
-    "HazardDamageEffectData": {
-      "type": "object",
-      "properties": {
-        "type": {
-          "description": "The type of hazard to modify damage for.",
-          "type": "string",
-          "enum": [
-            "all",
-            "general",
-            "ghostMatter",
-            "heat",
-            "fire",
-            "sandfall",
-            "electricity"
-          ]
-        },
-        "add": {
-          "description": "The percentage of the initial damage to add/reduce. E.g. a value of -0.1 means subtract 10% of the base damage from the total.",
-          "type": "number"
-        },
-        "multiply": {
-          "description": "The percentage to multiply the total damage by. E.g. a value of 0.25 will result in 25% damage, or a 75% reduction.",
-          "type": "number"
-        }
-      },
-      "required": [
-        "type"
-      ]
-    },
-    "TranslationSpeedEffectData": {
-      "type": "object",
-      "properties": {
-        "multiply": {
-          "description": "The percentage to multiply the total translation time by. E.g. a value of 0.25 will result in translating taking 25% of the usual time, or a 75% reduction.",
-          "type": "number"
-        }
-      }
-    },
-    "TravelMusicEffectData": {
-      "type": "object",
-      "properties": {
-        "audioType": {
-          "description": "An Outer Wilds AudioType value that will be used as the travel music will this buff is active. See https://nh.outerwildsmods.com/reference/audio_enum.html",
-          "type": "string"
-        }
-      },
-      "required": [
-        "audioType"
-      ]
-    }
-  },
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "PerkData",
   "type": "object",
+  "description": "A perk that can be unlocked by the player using perk points to grant certain passive effects.",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name"
+  ],
   "properties": {
+    "id": {
+      "type": "string",
+      "description": "A unique internal identifier for this entity. This must not be the same as any other entity of the same type in your mod.",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "description": "The name to display in-game for this entity.",
+      "minLength": 1
+    },
     "level": {
+      "type": "integer",
       "description": "The minimum level requirement to unlock this perk.",
-      "type": "integer"
+      "format": "int32"
+    },
+    "iconPath": {
+      "type": "string",
+      "description": "A file path (relative to your mod's folder) to an image file to use for this perk's icon. Can be shared with other perks."
     },
     "prereq": {
-      "description": "The ID of a perk that must be unlocked before this perk becomes available.",
-      "type": "string"
+      "type": "string",
+      "description": "The ID of a perk that must be unlocked before this perk becomes available."
     },
     "buffs": {
       "type": "array",
       "items": {
         "$ref": "#/definitions/BuffData"
       }
-    },
-    "id": {
-      "description": "A unique internal identifier for this entity. This must not be the same as any other entity of the same type in your mod.",
-      "type": "string"
-    },
-    "name": {
-      "description": "The name to display in-game for this entity.",
-      "type": "string"
     }
   },
-  "required": [
-    "id",
-    "name"
-  ]
+  "definitions": {
+    "BuffData": {
+      "type": "object",
+      "description": "Various possible effects that will apply when the buff is active.",
+      "additionalProperties": false,
+      "properties": {
+        "hazardDamage": {
+          "description": "Modifies the damage the player takes from various types of hazards.",
+          "$ref": "#/definitions/HazardDamageEffectData"
+        },
+        "translationSpeed": {
+          "description": "Modifies the speed at which the player can translate Nomai text.",
+          "$ref": "#/definitions/TranslationSpeedEffectData"
+        },
+        "travelMusic": {
+          "description": "Changes the travel music played when flying the ship between planets.",
+          "$ref": "#/definitions/TravelMusicEffectData"
+        },
+        "heal": {
+          "description": "Restores a percentage of the player's health.",
+          "$ref": "#/definitions/HealEffectData"
+        },
+        "giveDrop": {
+          "description": "Adds a drop directly to the player's inventory.",
+          "$ref": "#/definitions/GiveDropEffectData"
+        },
+        "custom": {
+          "description": "Defines a custom effect that can be interacted with via the mod API.",
+          "$ref": "#/definitions/CustomEffectData"
+        }
+      }
+    },
+    "HazardDamageEffectData": {
+      "type": "object",
+      "description": "Modifies the damage the player takes from various types of hazards.",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "description": "The type of hazard to modify damage for.",
+          "$ref": "#/definitions/HazardType"
+        },
+        "add": {
+          "type": "number",
+          "description": "The percentage of the initial damage to add/reduce. E.g. a value of -0.1 means subtract 10% of the base damage from the total.",
+          "format": "float"
+        },
+        "multiply": {
+          "type": "number",
+          "description": "The percentage to multiply the total damage by. E.g. a value of 0.25 will result in 25% damage, or a 75% reduction.",
+          "format": "float"
+        }
+      }
+    },
+    "HazardType": {
+      "type": "string",
+      "description": "",
+      "x-enumNames": [
+        "All",
+        "General",
+        "GhostMatter",
+        "Heat",
+        "Fire",
+        "Sandfall",
+        "Electricity"
+      ],
+      "enum": [
+        "all",
+        "general",
+        "ghostMatter",
+        "heat",
+        "fire",
+        "sandfall",
+        "electricity"
+      ]
+    },
+    "TranslationSpeedEffectData": {
+      "type": "object",
+      "description": "Modifies the speed at which the player can translate Nomai text.",
+      "additionalProperties": false,
+      "properties": {
+        "multiply": {
+          "type": "number",
+          "description": "The percentage to multiply the total translation time by. E.g. a value of 0.25 will result in translating taking 25% of the usual time, or a 75% reduction.",
+          "format": "float"
+        }
+      }
+    },
+    "TravelMusicEffectData": {
+      "type": "object",
+      "description": "Changes the travel music played when flying the ship between planets.",
+      "additionalProperties": false,
+      "required": [
+        "audioType"
+      ],
+      "properties": {
+        "audioType": {
+          "type": "string",
+          "description": "An Outer Wilds AudioType value that will be used as the travel music will this buff is active. See https://nh.outerwildsmods.com/reference/audio_enum.html",
+          "minLength": 1
+        }
+      }
+    },
+    "HealEffectData": {
+      "type": "object",
+      "description": "Restores a percentage of the player's health.",
+      "additionalProperties": false,
+      "required": [
+        "amount"
+      ],
+      "properties": {
+        "amount": {
+          "type": "number",
+          "description": "The percentage of total health to restore. E.g. 0.2 will restore 20% of maximum health.",
+          "format": "float"
+        }
+      }
+    },
+    "GiveDropEffectData": {
+      "type": "object",
+      "description": "Adds a drop directly to the player's inventory.",
+      "additionalProperties": false,
+      "required": [
+        "drop"
+      ],
+      "properties": {
+        "drop": {
+          "type": "string",
+          "description": "The unique ID of the drop to give.",
+          "minLength": 1
+        },
+        "amount": {
+          "type": "integer",
+          "description": "The text to display in the UI for this effect.",
+          "format": "int32"
+        }
+      }
+    },
+    "CustomEffectData": {
+      "type": "object",
+      "description": "Defines a custom effect that can be interacted with via the mod API.",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "A custom value that uniquely identifies this effect, for use with the mod API."
+        },
+        "description": {
+          "type": "string",
+          "description": "The text to display in the UI for this effect."
+        }
+      }
+    }
+  }
 }

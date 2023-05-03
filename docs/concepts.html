@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Concepts - Outer Wilds RPG</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" href="/logo.png" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato">
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js?skin=sunburst"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/nomai-json-schema@1/index.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/nomai-json-schema@1/index.css">
+    <script>fetch('/hotreload').then((r) => r.ok && window.location.reload())</script>
+</head>
+<body>
+    <header>
+        <nav><ul><li><a href="/index.html"><img src="/logo.png" />Outer Wilds RPG</a></li><li><a href="/concepts.html">Concepts</a></li><li><a href="/guides/">Guides</a><ul><li><a href="/guides/using.html">Adding RPG Content to Your Mod</a></li></ul></li><li><a href="/schemas/">Schemas</a><ul><li><a href="/schemas/drop.html">Drop Schema</a></li><li><a href="/schemas/drops.html">Drops Schema</a></li><li><a href="/schemas/perk.html">Perk Schema</a></li><li><a href="/schemas/perks.html">Perks Schema</a></li><li><a href="/schemas/quest.html">Quest Schema</a></li><li><a href="/schemas/quests.html">Quests Schema</a></li></ul></li></ul>
+            <div class="spacer"></div>
+            <a href="https://discord.gg/9vE5aHxcF9" target="_blank">
+                <img src="https://unpkg.com/simple-icons@v4/icons/discord.svg" />
+            </a>
+            <a href="https://github.com/Hawkbat/OuterWildsRPG" target="_blank">
+                <img src="https://unpkg.com/simple-icons@v4/icons/github.svg" />
+            </a>
+        </nav>
+    </header>
+    <main><h1 id="concepts"><a href="#concepts">Concepts</a></h1>
+<h2 id="quests"><a href="#quests">Quests</a></h2>
+<p>Quests are just like quests in any other game.
+You have a series of steps that must be completed in order,
+and then when all steps are complete, the quest is completed, and the player is rewarded.
+What separates Outer Wilds RPG's quests from other games is the extremely non-linear nature of Outer Wilds,
+which means players may end up experiencing the different parts of a quest in unexpected or unintended orders.</p>
+<p>Quests give a certain amount of XP points when completed.
+After the player reaches the amount of XP needed to level up, they gain a perk point,
+which can then be used to unlock perks.</p>
+<h3 id="quest-steps"><a href="#quest-steps">Quest Steps</a></h3>
+<p>Quests are divided up into individual steps.
+Each step represents a single &lsquo;task&rsquo; in the quest, and will show as a checklist item in the game interface.
+Steps have a set of &lsquo;start&rsquo; conditions, which is when they will start being shown to the player,
+and &lsquo;completion&rsquo; conditions, which is when they will be marked as completed.
+When all non-optional steps are completed, the quest as a whole will be marked as complete.</p>
+<h3 id="quest-conditions"><a href="#quest-conditions">Quest Conditions</a></h3>
+<p>Both &lsquo;start&rsquo; and &lsquo;complete&rsquo; criteria are considered to be quest conditions.
+Quest conditions are what describe the actual actions that the player needs to perform in-game
+for the quest step to progress. This includes things like discovering a location, learning a ship log fact,
+speaking to a character, completing a different quest step, and many more.</p>
+<p>Conditions determine where quest markers will be placed while the quest step is in progress.
+The location of the quest markers will be inferred based on the type of the condition.
+For example, a condition to speak with a character will place the marker on the character's focal point,
+or a condition to discover a location will use the same place as marking that entry in Rumor Mode.
+These auto-placed quest markers can be disabled, or a user-specified point can be provided.</p>
+<p>A step can be configured to require either any condition or all conditions to be met before progressing.
+If all conditions must be met, the number of conditions remaining will be displayed in the interface.</p>
+<h2 id="drops"><a href="#drops">Drops</a></h2>
+<p>Drops are items that can be picked up and stored in the player's inventory, and also function as
+equipment or consumable items. They are called &ldquo;drops&rdquo; by this mod to distinguish them
+from the objects that you can pick up in the vanilla game, such as the Nomai scrolls or projection stones.</p>
+<p>Consumable drops have an instantaneous effect on the player when used from the inventory menu, and can
+also provide passive buffs for a certain duration of time afterwards.</p>
+<p>All of the tools in the vanilla game have been converted into equipment drops, meaning the player must have
+a drop of the appropriate type equipped in your inventory in order to use the tool. You can create
+additional drops that occupy the same equipment slot but provide different benefits, such as a spacesuit
+that provides additional protection against certain types of hazards, or a Nomai translator that can
+translate text faster than the base one. Equipment drops apply certain buffs while they are equipped.</p>
+<h2 id="perks"><a href="#perks">Perks</a></h2>
+<p>Perks are unlocked by the player as they level up, and permanently provide certain buffs to the player.
+Perks can require a previous perk to be unlocked before they become available, forming a standard RPG
+perk tree.</p>
+<h2 id="buffs"><a href="#buffs">Buffs</a></h2>
+<p>Buffs are positive or detrimental effects applied to the player while they have an equippable drop equipped,
+have consumed a consumable drop, or have a perk unlocked. These effects can cover a wide range of functionality,
+such as modifying the amount of damage taken from different sources, healing or damaging the player,
+giving the player additional drops, and many more features.</p>
+</main>
+    <footer>© 2023 Hawkbar</footer>
+</body>
+</html>

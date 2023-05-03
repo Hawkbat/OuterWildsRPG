@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json.Schema.Generation;
+﻿using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
+using NJsonSchema;
+using NJsonSchema.Generation;
 using OuterWildsRPG.Objects.Drops;
 using OuterWildsRPG.Objects.Perks;
 using OuterWildsRPG.Objects.Quests;
@@ -25,17 +28,27 @@ namespace SchemaExporter
 
         static void GenerateSchema<T>(string name)
         {
-            var generator = new JSchemaGenerator();
-            generator.GenerationProviders.Add(new StringEnumGenerationProvider()
+            var settings = new JsonSchemaGeneratorSettings()
             {
-                CamelCaseText = true,
-            });
-            generator.DefaultRequired = Newtonsoft.Json.Required.DisallowNull;
-            var schema = generator.Generate(typeof(T));
+                FlattenInheritanceHierarchy = true,
+                AllowReferencesWithProperties = true,
+                DefaultReferenceTypeNullHandling = ReferenceTypeNullHandling.NotNull,
+                SerializerSettings = new Newtonsoft.Json.JsonSerializerSettings()
+                {
+                    Converters = {
+                        new StringEnumConverter() {
+                            NamingStrategy = new CamelCaseNamingStrategy()
+                        }
+                    }
+                }
+            };
+            var schema = JsonSchema.FromType<T>(settings);
+            var schemaJson = schema.ToJson();
+
             var filePath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), $"../../../schemas/{name}.schema.json"));
             using (StreamWriter w = new StreamWriter(filePath))
             {
-                w.WriteLine(schema.ToString());
+                w.WriteLine(schemaJson);
             }
         }
     }

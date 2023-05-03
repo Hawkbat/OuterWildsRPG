@@ -29,6 +29,11 @@
     <Content Include="OuterWildsRPG.csproj.user" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="DocGenerator\**" />
+    <EmbeddedResource Remove="DocGenerator\**" />
+    <None Remove="DocGenerator\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Remove="SchemaExporter\**" />
     <EmbeddedResource Remove="SchemaExporter\**" />
     <None Remove="SchemaExporter\**" />
@@ -46,6 +51,9 @@
     <None Update="assets\Particle.xcf">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
+	<None Update="icons\**\*.*">
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</None>
     <None Update="perks.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

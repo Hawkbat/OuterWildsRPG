@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OuterWildsRPG", "OuterWildsRPG.csproj", "{00586C05-2E8B-4CE6-9673-104A15463172}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OuterWildsRPG", "OuterWildsRPG.csproj", "{00586C05-2E8B-4CE6-9673-104A15463172}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchemaExporter", "SchemaExporter\SchemaExporter.csproj", "{B1AC0F52-29BA-4A00-9AED-668111673C11}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocGenerator", "DocGenerator\DocGenerator.csproj", "{55CFAA4A-BBC1-418B-8460-BD14F5A9026D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{B1AC0F52-29BA-4A00-9AED-668111673C11}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1AC0F52-29BA-4A00-9AED-668111673C11}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1AC0F52-29BA-4A00-9AED-668111673C11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55CFAA4A-BBC1-418B-8460-BD14F5A9026D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55CFAA4A-BBC1-418B-8460-BD14F5A9026D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55CFAA4A-BBC1-418B-8460-BD14F5A9026D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55CFAA4A-BBC1-418B-8460-BD14F5A9026D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

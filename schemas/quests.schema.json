@@ -1,159 +1,214 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "QuestListData",
+  "type": "object",
+  "description": "A file named 'quests.json' in the root of a mod folder that contains a list of quests to load.",
+  "additionalProperties": false,
+  "required": [
+    "quests"
+  ],
+  "properties": {
+    "quests": {
+      "type": "array",
+      "description": "A list of quests included in this mod.",
+      "items": {
+        "$ref": "#/definitions/QuestData"
+      }
+    }
+  },
   "definitions": {
-    "QuestConditionData": {
-      "type": "object",
-      "properties": {
-        "type": {
-          "description": "The type of element to check for. E.g. 'step' will check for the completion state of the step with the given name.",
-          "type": "string",
-          "enum": [
-            "none",
-            "step",
-            "quest",
-            "fact",
-            "entry",
-            "entryRumored",
-            "frequency",
-            "signal",
-            "dialogueCondition",
-            "persistentCondition",
-            "conversation",
-            "enterVolume",
-            "exitVolume",
-            "haveDrop",
-            "equipDrop",
-            "special"
-          ]
-        },
-        "value": {
-          "description": "An appropriate ID for the type specified in 'type'. E.g. a ship log entry ID for the 'entry' type or a SignalName enum value for the 'signal' type.",
-          "type": "string"
-        }
-      },
-      "required": [
-        "type",
-        "value"
-      ]
-    },
     "QuestData": {
       "type": "object",
+      "description": "A quest that can be completed by the player for various rewards.",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "type",
+        "steps"
+      ],
       "properties": {
+        "id": {
+          "type": "string",
+          "description": "A unique internal identifier for this entity. This must not be the same as any other entity of the same type in your mod.",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "description": "The name to display in-game for this entity.",
+          "minLength": 1
+        },
         "type": {
           "description": "How significant this quest is, which determines ship log priority and XP rewards.",
-          "type": "string",
-          "enum": [
-            "none",
-            "main",
-            "side",
-            "misc"
-          ]
+          "$ref": "#/definitions/QuestType"
         },
         "steps": {
-          "description": "The list of steps that must be completed for this quest to be marked as complete.",
           "type": "array",
+          "description": "The list of steps that must be completed for this quest to be marked as complete.",
           "items": {
             "$ref": "#/definitions/QuestStepData"
           }
-        },
-        "id": {
-          "description": "A unique internal identifier for this entity. This must not be the same as any other entity of the same type in your mod.",
-          "type": "string"
-        },
-        "name": {
-          "description": "The name to display in-game for this entity.",
-          "type": "string"
         }
-      },
-      "required": [
-        "type",
-        "steps",
-        "id",
-        "name"
+      }
+    },
+    "QuestType": {
+      "type": "string",
+      "description": "",
+      "x-enumNames": [
+        "None",
+        "Main",
+        "Side",
+        "Misc"
+      ],
+      "enum": [
+        "none",
+        "main",
+        "side",
+        "misc"
       ]
     },
     "QuestStepData": {
       "type": "object",
+      "description": "A step in a quest that can be started or completed as its conditions are met.",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "text",
+        "completeOn"
+      ],
       "properties": {
         "id": {
+          "type": "string",
           "description": "A unique identifier for this step. This must not match the ID of any other steps in this quest.",
-          "type": "string"
+          "minLength": 1
         },
         "text": {
+          "type": "string",
           "description": "The instructions that will be displayed in the UI and quest log for this step.",
-          "type": "string"
+          "minLength": 1
         },
         "startOn": {
-          "description": "A list of conditions that will cause this step to be displayed if they are met. If no conditions are specified, the step will be revealed as soon as the quest is started.",
           "type": "array",
+          "description": "A list of conditions that will cause this step to be displayed if they are met. If no conditions are specified, the step will be revealed as soon as the quest is started.",
           "items": {
             "$ref": "#/definitions/QuestConditionData"
           }
         },
         "startMode": {
           "description": "Whether the step will be displayed if any conditions are met, or if all are met.",
-          "type": "string",
-          "default": "any",
-          "enum": [
-            "any",
-            "all"
-          ]
+          "default": "Any",
+          "$ref": "#/definitions/QuestConditionMode"
         },
         "completeOn": {
-          "description": "A list of conditions that will flag the step as completed if they are met. If no conditions are specified, the step will complete immediately.",
           "type": "array",
+          "description": "A list of conditions that will flag the step as completed if they are met. If no conditions are specified, the step will complete immediately.",
           "items": {
             "$ref": "#/definitions/QuestConditionData"
           }
         },
         "completeMode": {
           "description": "Whether the step will be completed if any conditions are met, or if all are met.",
-          "type": "string",
-          "default": "any",
-          "enum": [
-            "any",
-            "all"
-          ]
-        },
-        "locationEntry": {
-          "description": "The ID of an entry that will be targeted by a quest marker when this step is active. This will match the location targeted when using the \"Mark on HUD\" feature in the ship log.",
-          "type": "string"
-        },
-        "locationPath": {
-          "description": "The full path of a GameObject that will be targeted by a quest marker when this step is active. If an object has identically named siblings, you can specify the Nth child of that name with a colon, like: \"MiningRig_Body/Nodes/BrokenNode:2\".",
-          "type": "string"
+          "default": "Any",
+          "$ref": "#/definitions/QuestConditionMode"
         },
         "optional": {
-          "description": "Whether the step must be completed for the quest to be completed.",
           "type": "boolean",
+          "description": "Whether the step must be completed for the quest to be completed.",
           "default": false
         },
         "isHint": {
-          "description": "Whether this step is a hint, which will be displayed differently from checklist steps.",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Whether this step is a hint, which will be displayed differently from checklist steps."
         },
         "preventEarlyComplete": {
-          "description": "Whether to prevent the step from being completed early if its completion conditions are met but not its start conditions.",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Whether to prevent the step from being completed early if its completion conditions are met but not its start conditions."
         }
-      },
+      }
+    },
+    "QuestConditionData": {
+      "type": "object",
+      "description": "A condition that must be met for the quest step to be started/completed.",
+      "additionalProperties": false,
       "required": [
-        "id",
-        "text",
-        "completeOn"
+        "type",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "description": "The type of element to check for. E.g. 'step' will check for the completion state of the step with the given ID.",
+          "$ref": "#/definitions/QuestConditionType"
+        },
+        "value": {
+          "type": "string",
+          "description": "An appropriate ID for the type specified in 'type'. E.g. a ship log entry ID for the 'entry' type or a SignalName enum value for the 'signal' type.",
+          "minLength": 1
+        },
+        "markerEntry": {
+          "type": "string",
+          "description": "The ID of an entry that will be targeted by a quest marker when this condition's step is active. This will match the location targeted when using the \"Mark on HUD\" feature in the ship log."
+        },
+        "markerPath": {
+          "type": "string",
+          "description": "The full path of a GameObject that will be targeted by a quest marker when this condition's step is active. If an object has identically named siblings, you can specify the Nth child of that name with a colon, like: \"MiningRig_Body/Nodes/BrokenNode:2\"."
+        },
+        "disableAutoMarkers": {
+          "type": "boolean",
+          "description": "Conditions automatically place quest markers based on the condition type. Set this property to true to disable these auto-placed markers."
+        }
+      }
+    },
+    "QuestConditionType": {
+      "type": "string",
+      "description": "",
+      "x-enumNames": [
+        "None",
+        "Step",
+        "Quest",
+        "Fact",
+        "Entry",
+        "EntryRumored",
+        "Frequency",
+        "Signal",
+        "DialogueCondition",
+        "PersistentCondition",
+        "Conversation",
+        "EnterVolume",
+        "ExitVolume",
+        "HaveDrop",
+        "EquipDrop",
+        "Special"
+      ],
+      "enum": [
+        "none",
+        "step",
+        "quest",
+        "fact",
+        "entry",
+        "entryRumored",
+        "frequency",
+        "signal",
+        "dialogueCondition",
+        "persistentCondition",
+        "conversation",
+        "enterVolume",
+        "exitVolume",
+        "haveDrop",
+        "equipDrop",
+        "special"
+      ]
+    },
+    "QuestConditionMode": {
+      "type": "string",
+      "description": "",
+      "x-enumNames": [
+        "Any",
+        "All"
+      ],
+      "enum": [
+        "any",
+        "all"
       ]
     }
-  },
-  "type": "object",
-  "properties": {
-    "quests": {
-      "description": "A list of quests included in this mod.",
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/QuestData"
-      }
-    }
-  },
-  "required": [
-    "quests"
-  ]
+  }
 }

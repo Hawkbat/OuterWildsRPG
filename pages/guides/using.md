@@ -1,0 +1,71 @@
+﻿# Adding RPG Content to Your Mod
+
+You can add quests, drops, and perks in either of two ways: top-level JSON files, or per-item JSON files.
+## Top-Level JSON Files
+If you have a small number of items, you can use a json file at the root of your project for each type of item (`quests.json`, `drops.json`, or `perks.json`):
+
+
+![The contents of a mod folder containing 'quests.json', 'drops.json', and 'perks.json'](screenshot-top-level-json.png)
+### quests.json
+<?prettify?>
+```js
+{
+	"$schema": "https://raw.githubusercontent.com/Hawkbat/OuterWildsRPG/main/schemas/quests.schema.json",
+	"quests": [
+		{
+			"id": "MY_FIRST_QUEST",
+			"name": "My Cool Quest",
+			// etc.
+		},
+		{
+			"id": "MY_SECOND_QUEST",
+			"name": "My Other Cool Quest",
+			// etc.
+		}
+	]
+}
+```
+### drops.json
+<?prettify?>
+```js
+{
+	"$schema": "https://raw.githubusercontent.com/Hawkbat/OuterWildsRPG/main/schemas/drops.schema.json",
+	"drops": [
+		{
+			"id": "MY_FIRST_DROP",
+			"name": "A Very Rare Item",
+			// etc.
+		},
+		{
+			"id": "MY_SECOND_DROP",
+			"name": "A Less Cool Item",
+			// etc.
+		}
+	]
+}
+```
+### perks.json
+<?prettify?>
+```js
+{
+	"$schema": "https://raw.githubusercontent.com/Hawkbat/OuterWildsRPG/main/schemas/perks.schema.json",
+	"perks": [
+		{
+			"id": "MY_FIRST_PERK",
+			"name": "Do Cool Stuff",
+			// etc.
+		},
+		{
+			"id": "MY_SECOND_PERK",
+			"name": "Do Cool Stuff Better",
+			// etc.
+		}
+	]
+}
+```
+## Per-Item JSON Files
+If you have many items, or wish to organize them independently, you can create individual .json files for each one, within the appropriate subfolder (`quests`, `drops`, or `perks`). The individual file names do not matter, but you should ensure the `id` property of each item is unique:
+
+
+![The contents of a mod folder containing various quest .json files](screenshot-individual-jsons.png)
+
