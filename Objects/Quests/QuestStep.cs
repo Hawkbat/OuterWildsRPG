@@ -1,5 +1,6 @@
 ﻿using Epic.OnlineServices.Platform;
 using OuterWildsRPG.Enums;
+using OuterWildsRPG.Objects.Common;
 using OuterWildsRPG.Objects.Drops;
 using OuterWildsRPG.Utils;
 using OWML.Common;
@@ -12,7 +13,7 @@ using UnityEngine;
 
 namespace OuterWildsRPG.Objects.Quests
 {
-    public class QuestStep : EntityLike<QuestStep, QuestStepData>
+    public class QuestStep : EntityLike<QuestStep, QuestStepData>, IDisplayable
     {
         public Quest Quest;
 
@@ -22,11 +23,11 @@ namespace OuterWildsRPG.Objects.Quests
         public QuestConditionMode StartMode;
         public List<QuestCondition> CompleteOn = new();
         public QuestConditionMode CompleteMode;
-        public string LocationEntry;
-        public string LocationPath;
         public bool Optional;
         public bool IsHint;
         public bool PreventEarlyComplete;
+
+        public string FullID => $"{Quest.FullID}:{ID}";
 
         public bool IsStarted => QuestManager.HasStartedStep(this);
         public bool IsInProgress => IsStarted && !IsComplete;
@@ -35,22 +36,29 @@ namespace OuterWildsRPG.Objects.Quests
         public float StartedTime => startedTime;
         public float CompletedTime => completedTime;
 
-        private CanvasMarker canvasMarker;
-        private CanvasMapMarker mapMarker;
-        private Transform markerTarget;
+        public int GetStartConditionProgress() => StartOn.Where(c => c.Check()).Count();
+        public int GetCompletionConditionProgress() => CompleteOn.Where(c => c.Check()).Count();
 
+        public IEnumerable<QuestCondition> GetConditions()
+        {
+            foreach (var c in StartOn) yield return c;
+            foreach (var c in CompleteOn) yield return c;
+        }
+
+        private int startProgress;
         private float startedTime;
+        private int completionProgress;
         private float completedTime;
 
         public override void Load(QuestStepData data, string modID)
         {
+            base.Load(data, modID);
+            ID = data.id;
             Text = data.text;
             StartOn = data.startOn.Select(c => QuestCondition.LoadNew(c, modID)).ToList();
             StartMode = data.startMode;
             CompleteOn = data.completeOn.Select(c => QuestCondition.LoadNew(c, modID)).ToList();
             CompleteMode = data.completeMode;
-            LocationEntry = data.locationEntry;
-            LocationPath = data.locationPath;
             Optional = data.optional;
             IsHint = data.isHint;
             PreventEarlyComplete = data.preventEarlyComplete;
@@ -58,100 +66,60 @@ namespace OuterWildsRPG.Objects.Quests
             foreach (var c in CompleteOn) c.Step = this;
         }
 
+        public override void Resolve()
+        {
+            base.Resolve();
+            foreach (var c in GetConditions()) c.Resolve();
+            TranslationUtils.RegisterGeneral(FullID, Text);
+        }
+
         public void SetUp()
         {
-            if (canvasMarker == null && mapMarker == null)
-            {
-                try
-                {
-                    markerTarget = null;
-
-                    if (!string.IsNullOrEmpty(LocationEntry))
-                    {
-                        markerTarget = Locator.GetEntryLocation(LocationEntry).GetTransform();
-                    }
-                    else if (!string.IsNullOrEmpty(LocationPath))
-                    {
-                        markerTarget = UnityUtils.GetTransformAtPath(LocationPath);
-                    } else if (StartOn.Any(c => c.Type == QuestConditionType.HaveDrop) || CompleteOn.Any(c => c.Type == QuestConditionType.HaveDrop))
-                    {
-                        try
-                        {
-                            var condition = StartOn.Find(c => c.Type == QuestConditionType.HaveDrop) ?? CompleteOn.Find(c => c.Type == QuestConditionType.HaveDrop);
-                            var drop = DropManager.GetDrop(condition.Value, OuterWildsRPG.ModID);
-                            var pickup = DropManager.FindDropPickup(drop);
-                            markerTarget = pickup.transform;
-                        } catch (Exception ex)
-                        {
-                            OuterWildsRPG.Instance.ModHelper.Console.WriteLine($"Failed to locate applicable item drop for {Quest.ID}:{ID}", MessageType.Warning);
-                            OuterWildsRPG.Instance.ModHelper.Console.WriteLine(ex.Message, MessageType.Error);
-                        }
-                    }
-
-                    if (markerTarget != null)
-                    {
-                        canvasMarker = Locator.GetMarkerManager().InstantiateNewMarker();
-                        Locator.GetMarkerManager().RegisterMarker(canvasMarker, markerTarget, Text, 0f);
-                        mapMarker = Locator.GetMapController().GetMarkerManager().InstantiateNewMarker(true);
-                        mapMarker.SetLabel(Text);
-                        Locator.GetMapController().GetMarkerManager().RegisterMarker(mapMarker, markerTarget);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    OuterWildsRPG.Instance.ModHelper.Console.WriteLine($"Failed to create quest marker for {Quest.ID}:{ID}", MessageType.Warning);
-                    OuterWildsRPG.Instance.ModHelper.Console.WriteLine(ex.Message, MessageType.Error);
-                }
-            }
-            foreach (var cond in StartOn) cond.SetUp();
-            foreach (var cond in CompleteOn) cond.SetUp();
+            foreach (var c in GetConditions()) c.SetUp();
         }
 
         public void CleanUp()
         {
-            if (Locator.GetMarkerManager() && canvasMarker != null)
-                Locator.GetMarkerManager().UnregisterMarker(canvasMarker);
-            canvasMarker = null;
-
-            if (Locator.GetMapController()?.GetMarkerManager() && mapMarker != null)
-                Locator.GetMapController().GetMarkerManager().UnregisterMarker(mapMarker);
-            mapMarker = null;
-
-            foreach (var cond in StartOn) cond.CleanUp();
-            foreach (var cond in CompleteOn) cond.CleanUp();
+            foreach (var c in GetConditions()) c.CleanUp();
         }
 
         public void Update(bool markersVisible)
         {
+            var ownMarkersVisible = markersVisible && IsInProgress;
+
+            foreach (var c in GetConditions()) c.Update(ownMarkersVisible);
+
             CalculateStatus(null);
-
-            var ownMarkersVisible = markersVisible && IsInProgress && markerTarget && markerTarget.gameObject.activeSelf;
-
-            if (canvasMarker)
-            {
-                canvasMarker.SetVisibility(ownMarkersVisible);
-            }
-            if (mapMarker)
-            {
-                mapMarker.SetVisibility(ownMarkersVisible);
-            }
         }
 
         public void CalculateStatus(QuestCondition triggeringCondition)
         {
-            bool shouldStart = AreStartConditionsMet(triggeringCondition) || AreCompletionConditionsMet(triggeringCondition);
+            bool shouldComplete = (!PreventEarlyComplete || AreStartConditionsMet(triggeringCondition)) && AreCompletionConditionsMet(triggeringCondition);
+            bool shouldStart = AreStartConditionsMet(triggeringCondition) || shouldComplete;
+
+            var newStartProgress = GetStartConditionProgress();
+            var newCompletionProgress = GetCompletionConditionProgress();
+
+            if (newStartProgress != startProgress)
+            {
+                startProgress = newStartProgress;
+                QuestManager.ProgressStep(this);
+            }
+            if (newCompletionProgress != completionProgress)
+            {
+                completionProgress = newCompletionProgress;
+                QuestManager.ProgressStep(this);
+            }
+            
             if (shouldStart && !IsStarted)
             {
-                startedTime = Time.time;
+                startedTime = Time.unscaledTime;
                 QuestManager.StartStep(this);
             }
-
-            bool shouldComplete = (!PreventEarlyComplete || AreStartConditionsMet(triggeringCondition)) && AreCompletionConditionsMet(triggeringCondition);
             if (shouldComplete && !IsComplete)
             {
-                completedTime = Time.time;
+                completedTime = Time.unscaledTime;
                 QuestManager.CompleteStep(this);
-
             }
         }
 
@@ -176,5 +144,9 @@ namespace OuterWildsRPG.Objects.Quests
                 return CompleteOn.All(c => c.Check() || c == triggeringCondition);
             return false;
         }
+
+        public string ToDisplayString(bool richText = true) => TranslationUtils.GetGeneral(FullID);
+
+        public override string ToString() => FullID;
     }
 }

@@ -1,0 +1,22 @@
+{
+  "$schema": "../schemas/drop.schema.json",
+  "id": "RADIO_TIMBERHEARTH",
+  "name": "Timber Hearth Cassette",
+  "description": "A cassette tape for your ship's radio that plays a nostalgic melody.",
+  "rarity": "uncommon",
+  "equipSlot": "radio",
+  "iconPath": "RECORDER.png",
+  "locations": [
+    {
+      "parentPath": "TimberHearth_Body/Sector_TH",
+      "position": {
+        "x": -49.51757,
+        "y": -31.45731,
+        "z": 218.7875
+      }
+    }
+  ],
+  "buffs": [
+    { "travelMusic": { "audioType": "TH_Village" } }
+  ]
+}

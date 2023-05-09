@@ -1,0 +1,45 @@
+
+Riebeck
+Solanum
+Prisoner
+
+Chert's Scout + Launcher
+Feldspar's Jetpack (increased thrust)
+Gossan's Helmet
+Gabbro's Spacesuit (insulation)
+???'s Flashlight (brighter/longer distance)
+Esker's Signalscope (increased signal angle? idk)
+Hal's Translator (Can translate Stranger text)
+
+Make more perks
+Add clearer indicator of perk points remaining
+Add perks for increasing inventory space
+
+Weird bug with some icons not showing in the inventory after consuming a marshmallow can
+Trigger reveals and reload card lists when refreshing graph mode
+
+Truly misc quests should probably get their own psuedo-quest bucket in the UI (like Skyrim/Fallout)
+
+LOADING SAVES IS BROKEN, MAYBE? IT ISN'T MARKING COMPLETED STEPS/QUESTS AS COMPLETE ON LOAD
+
+Reduce save data space some
+Maybe clear out started and completed steps and started quests lists once quest is completed
+
+See about running in the Eye scene, for an ending quest
+
+Hide dialogue icons when in dialogue, viewing slide reels, etc.
+
+Add a dialogue-style icon for Nomai recorders, cairns, and text
+
+Fix shop dialogue translations
+
+Auto-generate shop dialogue nodes for buying and selling
+
+Add inventory size limits and reject pickups if they would exceed size limits
+Add indicator somewhere of remaining golden marshmallows (use the fancy icons!)
+
+
+The dialogue tree code is fairly vestigial
+_mapDialogueNodes is only used for resolving option targets when selecting them
+_listOptionNodes is initialized but never used
+With some minimal patches we could probably make a dynamic dialogue provider fairly easily

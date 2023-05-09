@@ -1,0 +1,25 @@
+{
+  "$schema": "../schemas/drop.schema.json",
+  "id": "SAPWINE",
+  "name": "Porphy's Sap Wine",
+  "description": "A serving of Porphy's infamous sap wine. This batch was brewed to commemorate your first launch!",
+  "rarity": "common",
+  "consumable": true,
+  "iconPath": "SOUP.png",
+  "locations": [
+    {
+      "parentPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Characters_LowerVillage/Villager_HEA_Porphy/Props_HEA_SapwinePot",
+      "position": {
+        "x": 7.100058,
+        "y": -15.95331,
+        "z": 187.5071
+      },
+      "visuals": []
+    }
+  ],
+  "buffs": [
+    {
+      "heal": { "amount": 0.5 }
+    }
+  ]
+}

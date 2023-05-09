@@ -1,0 +1,10 @@
+{
+  "$schema": "../schemas/drop.schema.json",
+  "id": "BASIC_LAUNCHER",
+  "name": "Hatchling's Scout Launcher",
+  "description": "Launches scouts over long distances. It feels like a weapon, but Slate insists it's safe-ish.",
+  "rarity": "uncommon",
+  "equipSlot": "launcher",
+  "iconPath": "SCOUT_LAUNCHER_EMPTY.png",
+  "locations": []
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "../schemas/drop.schema.json",
+  "id": "RADIO_ATP",
+  "name": "Ash Twin Project Cassette",
+  "description": "A cassette tape for your ship's radio that reminds you of a significant discovery.",
+  "rarity": "rare",
+  "equipSlot": "radio",
+  "iconPath": "RECORDER.png",
+  "locations": [
+    {
+      "parentPath": "TimeLoopRing_Body",
+      "position": {
+        "x": -25.42101,
+        "y": 11.22423,
+        "z": 0.09000435
+      },
+      "rotation": {
+        "x": 293.9102,
+        "y": 110.8885,
+        "z": 160.767
+      }
+    }
+  ],
+  "buffs": [
+    { "travelMusic": { "audioType": "TimeLoopDevice_Ambient" } }
+  ]
+}

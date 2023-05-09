@@ -1,0 +1,10 @@
+{
+  "$schema": "../schemas/drop.schema.json",
+  "id": "BASIC_SCOUT",
+  "name": "Hatchling's Scout",
+  "description": "The Surveyer Probe Mk. IV, or 'Little Scout.' These devices incorporate borrowed Nomai technology for their recall capability.",
+  "rarity": "uncommon",
+  "equipSlot": "scout",
+  "iconPath": "SCOUT.png",
+  "locations": []
+}

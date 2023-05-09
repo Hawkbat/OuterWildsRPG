@@ -1,0 +1,132 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "ShopData",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "characterPath",
+    "dialogueXmlPath",
+    "items"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "A unique internal identifier for this entity. This must not be the same as any other entity of the same type in your mod.",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "description": "The name to display in-game for this entity.",
+      "minLength": 1
+    },
+    "characterPath": {
+      "type": "string",
+      "description": "The full path to the character to use as a shopkeeper for this shop.",
+      "minLength": 1
+    },
+    "characterClone": {
+      "description": "If present, clones the character and repositions them instead of using the original as-is.",
+      "$ref": "#/definitions/ShopkeeperData"
+    },
+    "dialogueXmlPath": {
+      "type": "string",
+      "description": "A mod-relative file path to an .xml file containing the dialogue tree to use when speaking to the shopkeeper.",
+      "minLength": 1
+    },
+    "mergeDialogue": {
+      "type": "boolean",
+      "description": "Whether the shopkeeper's dialogue tree should be merged with the existing character's dialogue. Otherwise, it replaces it entirely."
+    },
+    "items": {
+      "type": "array",
+      "description": "The drops to sell in this shop.",
+      "items": {
+        "$ref": "#/definitions/ShopItemData"
+      }
+    },
+    "$schema": {
+      "type": "string",
+      "description": "The schema to validate with"
+    }
+  },
+  "definitions": {
+    "ShopkeeperData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "parentPath"
+      ],
+      "properties": {
+        "parentPath": {
+          "type": "string",
+          "description": "The full path to a GameObject in the solar system that the prop should be attached to.",
+          "minLength": 1
+        },
+        "position": {
+          "description": "The position to place the prop at.",
+          "$ref": "#/definitions/Vector3Data"
+        },
+        "rotation": {
+          "description": "The rotation of the prop.",
+          "$ref": "#/definitions/Vector3Data"
+        },
+        "isRelativeToParent": {
+          "type": "boolean",
+          "description": "Whether the position and rotation are relative to the parent, instead of the whole planet."
+        },
+        "alignRadial": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether to orient the prop to point 'up' away from the center of the planet, or use the provided rotation value. Defaults to true if `rotation` is omitted and false otherwise."
+        }
+      }
+    },
+    "Vector3Data": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "type": "number",
+          "format": "float"
+        },
+        "y": {
+          "type": "number",
+          "format": "float"
+        },
+        "z": {
+          "type": "number",
+          "format": "float"
+        }
+      }
+    },
+    "ShopItemData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "drop"
+      ],
+      "properties": {
+        "drop": {
+          "type": "string",
+          "description": "The unique ID of the drop to sell.",
+          "minLength": 1
+        },
+        "stock": {
+          "type": "integer",
+          "description": "The number of times the drop can be bought.",
+          "format": "int32",
+          "default": 1
+        },
+        "restocks": {
+          "type": "boolean",
+          "description": "Whether this drop is restocked at the start of each loop or keeps the current stock between loops.",
+          "default": false
+        }
+      }
+    }
+  }
+}

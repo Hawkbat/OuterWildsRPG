@@ -1,0 +1,19 @@
+﻿{
+  "$schema": "../schemas/shop.schema.json",
+  "id": "SCORIA",
+  "name": "Scoria's Shop",
+  "characterPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Tektite",
+  "characterClone": {
+    "parentPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_VillageCemetery",
+    "position": {
+      "x": -30.35662,
+      "y": -75.82315,
+      "z": 183.5499
+    },
+    "alignRadial": true
+  },
+  "dialogueXmlPath": "scoria.xml",
+  "items": [
+    { "drop": "RADIO_TIMBERHEARTH" }
+  ]
+}

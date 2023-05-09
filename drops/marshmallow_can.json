@@ -1,0 +1,32 @@
+{
+  "$schema": "../schemas/drop.schema.json",
+  "id": "MARSHMALLOW_CAN",
+  "name": "Marshmallow Can",
+  "description": "A full can of marshmallows! Who makes these, anyway?",
+  "rarity": "uncommon",
+  "consumable": true,
+  "iconPath": "MARSHMALLOW_CAN_OPEN.png",
+  "locations": [
+    {
+      "parentPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_StartingCamp/Props_StartingCamp/OtherComponentsGroup/Props_HEA_CampsiteLogAssets",
+      "position": {
+        "x": -0.158,
+        "y": 0.068,
+        "z": -1.628
+      },
+      "isRelativeToParent": true,
+      "respawns": true,
+      "visuals": [
+        "TimberHearth_Body/Sector_TH/Sector_Village/Sector_StartingCamp/Props_StartingCamp/OtherComponentsGroup/Props_HEA_CampsiteLogAssets/Props_HEA_MarshmallowCanOpened"
+      ]
+    }
+  ],
+  "buffs": [
+    {
+      "giveDrop": {
+        "drop": "MARSHMALLOW",
+        "amount": 5
+      }
+    }
+  ]
+}

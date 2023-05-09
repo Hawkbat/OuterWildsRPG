@@ -13,5 +13,9 @@ namespace OuterWildsRPG.Objects.Drops
 
         public Dictionary<EquipSlot, string> Equipment = new();
         public List<string> Inventory = new();
+        public Dictionary<string, float> Consumables = new();
+        public HashSet<string> HasPickedUp = new();
+        public HashSet<string> HasSeen = new();
+        public HashSet<string> HasRead = new();
     }
 }

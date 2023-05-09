@@ -1,6 +1,6 @@
 ﻿
 :root {
-    background: #222;
+    background: #111;
     height: 100%;
 }
 
@@ -17,11 +17,15 @@ body {
     flex-direction: column;
     font-size: 16px;
     min-height: 100%;
+    width: 100%;
 }
 
 header {
     display: flex;
     background: #333;
+    width: 100%;
+    position: sticky;
+    top: 0;
 }
 
 nav {
@@ -111,6 +115,7 @@ nav {
 main {
     padding: 10px;
     flex: 1 0 auto;
+    background: #222;
 }
 
     main a {
@@ -127,9 +132,9 @@ main {
         border-bottom: 1px solid #777;
     }
 
-    main h1 > a, main h2 > a, main h3 > a, main h4 > a, main h5 > a, main h6 > a {
-        text-decoration: none;
-    }
+        main h1 > a, main h2 > a, main h3 > a, main h4 > a, main h5 > a, main h6 > a {
+            text-decoration: none;
+        }
 
     main p {
         line-height: 1.4em;
@@ -139,6 +144,11 @@ main {
         background: #111;
         overflow-x: auto;
         tab-size: 2;
+    }
+
+    main .banner {
+        display: block;
+        width: 100%;
     }
 
 footer {
@@ -152,4 +162,19 @@ footer {
         width: 900px;
         margin: auto;
     }
+}
+
+@media only screen and (max-width: 900px) {
+
+    header {
+        position: static;
+    }
+
+    nav, nav > ul {
+        flex-wrap: wrap;
+    }
+
+        nav > ul > li:first-child > a > span {
+            display: none;
+        }
 }

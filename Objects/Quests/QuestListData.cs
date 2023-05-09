@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace OuterWildsRPG.Objects.Quests
 {
+    [Description("A file named 'quests.json' in the root of a mod folder that contains a list of quests to load.")]
     public class QuestListData : MultipleEntityData<QuestData>
     {
         [Required]

@@ -1,0 +1,14 @@
+{
+  "$schema": "../schemas/perk.schema.json",
+  "id": "INVENTORY_SPACE_5",
+  "name": "Inventory Up V",
+  "level": 1,
+  "prereq": "INVENTORY_SPACE_4",
+  "iconPath": "INVENTORY_SPACE.png",
+  "color": { "r": 1, "g": 0.75, "b": 0 },
+  "buffs": [
+    {
+      "inventorySpace": { "amount": 10 }
+    }
+  ]
+}

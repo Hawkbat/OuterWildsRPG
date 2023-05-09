@@ -1,0 +1,15 @@
+{
+  "$schema": "../schemas/drop.schema.json",
+  "id": "MARSHMALLOW",
+  "name": "Marshmallow",
+  "description": "Can be eaten raw, but much better roasted!",
+  "rarity": "common",
+  "consumable": true,
+  "iconPath": "MARSHMALLOW.png",
+  "locations": [],
+  "buffs": [
+    {
+      "heal": { "amount": 0.05 }
+    }
+  ]
+}

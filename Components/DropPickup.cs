@@ -1,4 +1,5 @@
-﻿using OuterWildsRPG.Objects.Drops;
+﻿using OuterWildsRPG.Enums;
+using OuterWildsRPG.Objects.Drops;
 using OuterWildsRPG.Utils;
 using OWML.Common;
 using System;
@@ -28,9 +29,14 @@ namespace OuterWildsRPG.Components
         ParticleSystem sparkles;
         InteractReceiver interactReceiver;
         Light light;
+        OWItem owItem;
+        Sector sector;
+        int sectorOccupantCount = 0;
 
         bool animatePickUp;
         float pickUpTime;
+        Vector3 pickUpPosition;
+        bool isHeld;
 
         public DropLocation GetLocation() => location;
 
@@ -43,8 +49,7 @@ namespace OuterWildsRPG.Components
         {
             this.location = location;
 
-            var drop = location.Drop;
-            var color = Assets.GetRarityColor(drop.Rarity);
+            var color = Assets.GetRarityColor(location.Drop.Rarity);
 
             if (fadeOutGradient == null)
             {
@@ -92,6 +97,8 @@ namespace OuterWildsRPG.Components
             sparksMain.startSpeed = new(0.25f, 0.5f);
             sparksMain.startSize = 0.02f;
             sparksMain.startColor = color;
+            sparksMain.startLifetime = 1f;
+            sparksMain.scalingMode = ParticleSystemScalingMode.Hierarchy;
             var sparksShape = sparks.shape;
             sparksShape.shapeType = ParticleSystemShapeType.Cone;
             sparksShape.angle = 10f;
@@ -113,6 +120,8 @@ namespace OuterWildsRPG.Components
             shaftsMain.startSpeed = 0.01f;
             shaftsMain.startSize = new(0.01f, 0.05f);
             shaftsMain.startColor = color;
+            shaftsMain.startLifetime = 1f;
+            shaftsMain.scalingMode = ParticleSystemScalingMode.Hierarchy;
             var shaftsShape = shafts.shape;
             shaftsShape.shapeType = ParticleSystemShapeType.Cone;
             shaftsShape.angle = 5f;
@@ -134,6 +143,8 @@ namespace OuterWildsRPG.Components
             shineMain.startSpeed = new(0f, 0.05f);
             shineMain.startSize = 0.25f;
             shineMain.startColor = color;
+            shineMain.startLifetime = 1f;
+            shineMain.scalingMode = ParticleSystemScalingMode.Hierarchy;
             var shineShape = shine.shape;
             shineShape.shapeType = ParticleSystemShapeType.Sphere;
             shineShape.radius = 0.0001f;
@@ -153,6 +164,8 @@ namespace OuterWildsRPG.Components
             sparklesMain.startSpeed = new(0f, 0.01f);
             sparklesMain.startSize = new(0.02f, 0.05f);
             sparklesMain.startColor = color;
+            sparklesMain.startLifetime = 1f;
+            sparklesMain.scalingMode = ParticleSystemScalingMode.Hierarchy;
             var sparklesShape = sparkles.shape;
             sparklesShape.shapeType = ParticleSystemShapeType.Sphere;
             sparklesShape.radius = 0.125f;
@@ -168,110 +181,166 @@ namespace OuterWildsRPG.Components
             light.intensity = 1f;
             light.color = color;
 
+            owItem = GetComponentInParent<OWItem>();
+
             var collider = gameObject.AddComponent<SphereCollider>();
-            collider.radius = 1f;
+            collider.radius = owItem != null ? 0f : 1f;
+            collider.isTrigger = true;
             var owCollider = gameObject.AddComponent<OWCollider>();
 
             interactReceiver = gameObject.AddComponent<InteractReceiver>();
-            interactReceiver.SetInteractionEnabled(true);
+            interactReceiver.SetInteractionEnabled(owItem == null);
             interactReceiver.SetInteractRange(2f);
-            interactReceiver.SetPromptText(UITextType.ItemPickUpPrompt);
+            interactReceiver.ChangePrompt(Translations.PromptDropPickup(location.Drop));
             interactReceiver.OnPressInteract += OnPressInteract;
 
-            var sector = gameObject.GetComponentInParent<Sector>();
-            if (sector != null)
-            {
-                sector.OnOccupantEnterSector.AddListener(OnOccupantEnterSector);
-                sector.OnOccupantExitSector.AddListener(OnOccupantExitSector);
-
-                foreach (var occupant in sector.GetOccupants())
-                    OnOccupantEnterSector(occupant);
-            }
+            AttachToSector(gameObject.GetComponentInParent<Sector>());
 
             All.Add(this);
         }
 
         void OnDestroy()
         {
-            var sector = gameObject.GetComponentInParent<Sector>();
+            DetachFromSector();
+            All.Remove(this);
+        }
+
+        void AttachToSector(Sector sector)
+        {
+            if (this.sector != null)
+                DetachFromSector();
+            this.sector = sector;
+            if (sector != null)
+            {
+                sectorOccupantCount = 0;
+                sector.OnOccupantEnterSector.AddListener(OnOccupantEnterSector);
+                sector.OnOccupantExitSector.AddListener(OnOccupantExitSector);
+
+                foreach (var occupant in sector.GetOccupants())
+                    OnOccupantEnterSector(occupant);
+            }
+        }
+
+        void DetachFromSector()
+        {
             if (sector != null)
             {
                 sector.OnOccupantEnterSector.RemoveListener(OnOccupantEnterSector);
                 sector.OnOccupantExitSector.RemoveListener(OnOccupantExitSector);
+                sector = null;
             }
-
-            All.Remove(this);
         }
-
-        int occupantCount = 0;
 
         void OnOccupantEnterSector(SectorDetector detector)
         {
-            occupantCount++;
-            if (occupantCount > 0 && !light.enabled)
+            sectorOccupantCount++;
+            if (sectorOccupantCount > 0 && !light.enabled)
                 light.enabled = true;
+            if (sectorOccupantCount > 0)
+                ToggleVisuals(true);
         }
 
         void OnOccupantExitSector(SectorDetector detector)
         {
-            occupantCount--;
-            if (occupantCount <= 0 && light.enabled)
+            sectorOccupantCount--;
+            if (sectorOccupantCount <= 0 && light.enabled)
                 light.enabled = false;
+            if (sectorOccupantCount <= 0f)
+                ToggleVisuals(false);
         }
 
         void OnPressInteract()
         {
-            var drop = location.Drop;
-            if (!DropManager.PickUpDrop(drop))
+            if (owItem != null)
+            {
+                return;
+            }
+
+            if (!DropManager.PickUpDropLocation(GetLocation()))
             {
                 Locator.GetPlayerAudioController().PlayNegativeUISound();
                 interactReceiver.ResetInteraction();
+                OuterWildsRPG.DropQueue.Enqueue(Translations.NotificationPickUpDropFailed(location.Drop));
                 return;
             }
 
             animatePickUp = true;
             pickUpTime = Time.time;
+            pickUpPosition = transform.position;
             enabled = true;
 
             interactReceiver.DisableInteraction();
 
-            var sparksEmission = sparks.emission;
-            sparksEmission.enabled = false;
-            var shaftsEmission = shafts.emission;
-            shaftsEmission.enabled = false;
-            var shineEmission = shine.emission;
-            shineEmission.enabled = false;
-            var sparklesEmission = sparkles.emission;
-            sparklesEmission.enabled = false;
-
             foreach (var visualPath in location.Visuals)
             {
-                try
-                {
-                    var visual = UnityUtils.GetTransformAtPath(visualPath);
-                    visual.gameObject.SetActive(false);
-                } catch (Exception ex)
-                {
-                    OuterWildsRPG.Instance.ModHelper.Console.WriteLine($"Failed to remove visual for {drop.Name} drop location", MessageType.Warning);
-                    OuterWildsRPG.Instance.ModHelper.Console.WriteLine(ex.Message, MessageType.Error);
-                }
+                var visual = UnityUtils.GetTransformAtPath(visualPath, $"Failed to remove visual for {location.GetUniqueKey()} drop location");
+                if (visual != null) visual.gameObject.SetActive(false);
             }
 
-            Locator.GetPlayerAudioController().PlayPickUpItem(ItemType.WarpCore);
+            Locator.GetPlayerAudioController().PlayOneShotInternal(location.Drop.PickUpAudioType);
+        }
+
+        public void OnPickedUp(OWItem item)
+        {
+            DropManager.EquipDrop(location.Drop, EquipSlot.Item);
+            interactReceiver.DisableInteraction();
+            isHeld = true;
+            enabled = true;
+            DetachFromSector();
+            ToggleVisuals(false);
+        }
+
+        public void OnDropped(OWItem item)
+        {
+            DropManager.UnequipDrop(location.Drop, EquipSlot.Item);
+            interactReceiver.EnableInteraction();
+            interactReceiver.ResetInteraction();
+            isHeld = false;
+            AttachToSector(gameObject.GetComponentInParent<Sector>());
+            ToggleVisuals(true);
+        }
+
+        void ToggleVisuals(bool enable)
+        {
+            var sparksEmission = sparks.emission;
+            sparksEmission.enabled = enable;
+            var shaftsEmission = shafts.emission;
+            shaftsEmission.enabled = enable;
+            var shineEmission = shine.emission;
+            shineEmission.enabled = enable;
+            var sparklesEmission = sparkles.emission;
+            sparklesEmission.enabled = enable;
+            light.enabled = enable;
         }
 
         void Update()
         {
+            if (isHeld)
+            {
+                var heldItem = Locator.GetToolModeSwapper().GetItemCarryTool().GetHeldItem();
+                if (heldItem != owItem)
+                {
+                    OnDropped(owItem);
+                }
+            }
             if (animatePickUp)
             {
                 var t = Mathf.InverseLerp(pickUpTime, pickUpTime + 0.2f, Time.time);
+
+                var cam = Locator.GetPlayerCamera().transform;
+                var targetPos = cam.position + cam.up * -0.25f + cam.right * 0.25f;
+                transform.position = Vector3.Lerp(pickUpPosition, targetPos, t);
+                
                 transform.localScale = Vector3.one * (1f - t);
+                
                 if (t >= 1f)
                 {
+                    animatePickUp = false;
                     gameObject.SetActive(false);
-                    enabled = false;
                 }
             }
+            if (!animatePickUp && !isHeld)
+                enabled = false;
         }
     }
 }

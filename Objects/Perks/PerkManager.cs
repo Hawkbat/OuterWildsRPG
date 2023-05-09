@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OuterWildsRPG.Objects.Common;
+using OuterWildsRPG.Objects.Drops;
+using OuterWildsRPG.Utils;
 using UnityEngine.Events;
 
 namespace OuterWildsRPG.Objects.Perks
@@ -12,15 +14,13 @@ namespace OuterWildsRPG.Objects.Perks
     {
         public class PerkEvent : UnityEvent<Perk> { }
         public static PerkEvent OnUnlockPerk = new();
+        public static PerkEvent OnRefundPerk = new();
 
-        static Dictionary<string, Perk> perks = new();
+        static readonly Dictionary<string, Perk> perks = new();
 
-        public static Dictionary<string, Perk> Dictionary => perks;
-
-        public static Perk GetPerk(string id, string modID)
+        public static Perk GetPerk(string id, string modID = null)
         {
-            if (!id.Contains("/")) id = $"{modID}/{id}";
-            if (perks.TryGetValue(id, out var perk))
+            if (perks.TryGetValue(Entity.GetID(id, modID), out var perk))
             {
                 return perk;
             }
@@ -41,7 +41,7 @@ namespace OuterWildsRPG.Objects.Perks
             => perks.Values;
 
         public static IEnumerable<Perk> GetUnlockedPerks()
-            => PerkSaveData.Instance.UnlockedPerks.Select(s => GetPerk(s, OuterWildsRPG.ModID));
+            => PerkSaveData.Instance.UnlockedPerks.Select(s => GetPerk(s));
 
         public static int GetTotalPerkPoints()
             => CharacterManager.GetCharacterLevel();
@@ -67,7 +67,53 @@ namespace OuterWildsRPG.Objects.Perks
         {
             if (PerkSaveData.Instance.UnlockedPerks.Add(perk.FullID))
             {
+                SaveDataManager.Save();
                 OnUnlockPerk.Invoke(perk);
+                return true;
+            }
+            return false;
+        }
+
+        public static bool CanRefundPerk(Perk perk)
+        {
+            if (!HasUnlockedPerk(perk)) return false;
+            return true;
+        }
+
+        public static bool RefundPerk(Perk perk)
+        {
+            if (PerkSaveData.Instance.UnlockedPerks.Remove(perk.FullID))
+            {
+                foreach (var dependent in perk.Dependents)
+                    RefundPerk(dependent);
+                SaveDataManager.Save();
+                OnRefundPerk.Invoke(perk);
+                return true;
+            }
+            return false;
+        }
+
+        public static bool HasSeenPerk(Perk perk)
+            => PerkSaveData.Instance.HasSeen.Contains(perk.FullID);
+
+        public static bool SeePerk(Perk perk)
+        {
+            if (PerkSaveData.Instance.HasSeen.Add(perk.FullID))
+            {
+                SaveDataManager.Save();
+                return true;
+            }
+            return false;
+        }
+
+        public static bool HasReadPerk(Perk perk)
+            => PerkSaveData.Instance.HasRead.Contains(perk.FullID);
+
+        public static bool ReadPerk(Perk perk)
+        {
+            if (PerkSaveData.Instance.HasRead.Add(perk.FullID))
+            {
+                SaveDataManager.Save();
                 return true;
             }
             return false;

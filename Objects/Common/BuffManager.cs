@@ -1,5 +1,7 @@
 ﻿using OuterWildsRPG.Enums;
+using OuterWildsRPG.Objects.Common.Effects;
 using OuterWildsRPG.Objects.Drops;
+using OuterWildsRPG.Objects.Perks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +15,32 @@ namespace OuterWildsRPG.Objects.Common
     {
         public static IEnumerable<Buff> GetAllActiveBuffs()
         {
+            foreach (var perk in PerkManager.GetUnlockedPerks())
+                foreach (var buff in perk.Buffs)
+                    yield return buff;
             foreach (var drop in DropManager.GetEquippedDrops())
                 foreach (var buff in drop.Buffs)
                     yield return buff;
+            foreach (var drop in DropManager.GetConsumedDrops())
+                foreach (var buff in drop.Buffs)
+                    yield return buff;
+        }
 
+        public static void ApplyInstantEffects(Buff buff)
+        {
+            foreach (var effect in buff.GetEffects().Where(e => e.IsInstant()))
+            {
+                if (effect is HealEffect heal)
+                {
+                    var playerResources = Locator.GetPlayerBody().GetComponentInChildren<PlayerResources>();
+                    playerResources._currentHealth = Mathf.Min(100f, playerResources._currentHealth + 100f * heal.Amount);
+                }
+                if (effect is GiveDropEffect giveDrop)
+                {
+                    for (int i = 0; i < giveDrop.Amount; i++)
+                        DropManager.ReceiveDrop(giveDrop.Drop);
+                }
+            }
         }
 
         public static float ModifyHazardDamage(HazardVolume.HazardType type, float damage)
@@ -27,12 +51,12 @@ namespace OuterWildsRPG.Objects.Common
                 .Where(e => e.Type == HazardVolume.HazardType.NONE || e.Type == type);
 
             var addition = 0f;
-            foreach (var buff in activeEffects)
-                addition += buff.Add;
+            foreach (var effect in activeEffects)
+                addition += effect.Add;
 
             var multiplier = 1f;
-            foreach (var buff in activeEffects)
-                multiplier *= buff.Multiply;
+            foreach (var effect in activeEffects)
+                multiplier *= effect.Multiply;
 
             return (damage + addition) * multiplier;
         }
@@ -40,27 +64,82 @@ namespace OuterWildsRPG.Objects.Common
         public static float GetTranslationSpeedMultiplier()
         {
             var multiplier = 1f;
-            var activeEffects = GetAllActiveBuffs().Select(b => b.TranslationSpeed).Where(e => e != null);
-            foreach (var buff in activeEffects)
-                multiplier *= buff.Multiply;
+            var activeEffects = GetAllActiveBuffs()
+                .Select(b => b.TranslationSpeed)
+                .Where(e => e != null);
+            foreach (var effect in activeEffects)
+                multiplier *= effect.Multiply;
             return multiplier;
         }
 
-        public static void UpdateTravelMusic()
+        public static int GetInventoryCapacity()
         {
+            var capacity = 10;
+            var activeEffects = GetAllActiveBuffs()
+                .Select(b => b.InventorySpace)
+                .Where(e => e != null);
+            foreach (var effect in activeEffects)
+                capacity += effect.Amount;
+            return capacity;
+        }
+
+        static void UpdateMovementSpeed()
+        {
+            var multiplier = 1f;
+
+            var activeEffects = GetAllActiveBuffs()
+                .Select(b => b.MoveSpeed)
+                .Where(e => e != null);
+            foreach (var effect in activeEffects)
+                multiplier *= effect.Multiply;
+
+            var player = Locator.GetPlayerController();
+            player._runSpeed = 6f * multiplier;
+            player._walkSpeed = 3f * multiplier;
+            player._strafeSpeed = 4f * multiplier;
+            player._acceleration = 0.5f * multiplier;
+            player._airSpeed = 3f * multiplier;
+            player._airAcceleration = 0.2f * multiplier;
+        }
+
+        static void UpdateJumpSpeed()
+        {
+            var multiplier = 1f;
+
+            var activeEffects = GetAllActiveBuffs()
+                .Select(b => b.JumpSpeed)
+                .Where(e => e != null);
+            foreach (var effect in activeEffects)
+                multiplier *= effect.Multiply;
+
+            var player = Locator.GetPlayerController();
+            player._minJumpSpeed = 3f * multiplier;
+            player._maxJumpSpeed = 6f * multiplier;
+        }
+
+        static void UpdateTravelMusic()
+        {
+            var currentTravelMusic = Locator.GetGlobalMusicController()._travelSource.audioLibraryClip;
             var travelMusic = AudioType.Travel_Theme;
 
-            var equippedRadio = DropManager.GetEquippedDrop(EquipSlot.Radio);
-            if (equippedRadio != null)
-            {
-                var activeEffects = equippedRadio.Buffs.Select(b => b.TravelMusic).Where(b => b != null);
-                if (activeEffects.Any())
-                {
-                    travelMusic = activeEffects.First().AudioType;
-                }
-            }
+            var activeEffects = GetAllActiveBuffs()
+                .Select(b => b.TravelMusic)
+                .Where(e => e != null);
+            foreach (var effect in activeEffects)
+                travelMusic = effect.AudioType;
 
-            Locator.GetGlobalMusicController()._travelSource.AssignAudioLibraryClip(travelMusic);
+            if (travelMusic != currentTravelMusic)
+            {
+                Locator.GetGlobalMusicController()._travelSource.AssignAudioLibraryClip(travelMusic);
+            }
+        }
+
+        public static void Update()
+        {
+            UpdateMovementSpeed();
+            UpdateJumpSpeed();
+            UpdateJumpSpeed();
+            UpdateTravelMusic();
         }
     }
 }

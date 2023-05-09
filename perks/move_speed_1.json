@@ -1,0 +1,13 @@
+{
+  "$schema": "../schemas/perk.schema.json",
+  "id": "MOVE_SPEED_1",
+  "name": "Speed Up I",
+  "level": 1,
+  "iconPath": "MOVE_SPEED.png",
+  "color": { "r": 0, "g": 0.5, "b": 1 },
+  "buffs": [
+    {
+      "moveSpeed": { "multiply": 1.1 }
+    }
+  ]
+}

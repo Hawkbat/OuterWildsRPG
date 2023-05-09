@@ -1,0 +1,22 @@
+{
+  "$schema": "../schemas/drop.schema.json",
+  "id": "RADIO_OBSERVATORY",
+  "name": "Observatory Cassette",
+  "description": "A cassette tape for your ship's radio that plays an enriching ambiance.",
+  "rarity": "uncommon",
+  "equipSlot": "radio",
+  "iconPath": "RECORDER.png",
+  "locations": [
+    {
+      "parentPath": "TimberHearth_Body/Sector_TH",
+      "position": {
+        "x": -53.54003,
+        "y": -6.385822,
+        "z": 231.0816
+      }
+    }
+  ],
+  "buffs": [
+    { "travelMusic": { "audioType": "TH_Observatory" } }
+  ]
+}

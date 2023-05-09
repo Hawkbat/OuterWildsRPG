@@ -1,8 +1,8 @@
 {
-  "$schema": "https://raw.githubusercontent.com/Hawkbat/OuterWildsRPG/main/schemas/quest.schema.json",
-  "id": "QST_ZERO_G_CAVE",
+  "$schema": "../schemas/quest.schema.json",
+  "id": "ZERO_G_CAVE",
   "name": "Hatchling's First Spacewalk",
-  "type": "misc",
+  "type": "side",
   "steps": [
     {
       "id": "START",
@@ -11,14 +11,14 @@
       "completeOn": [
         {
           "type": "dialogueCondition",
-          "value": "CoachSaysHi_1"
+          "value": "CoachSaysHi_1",
+          "markerPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Gossan/Gossan_FocalPoint"
         },
         {
           "type": "dialogueCondition",
           "value": "CoachSaysHi_2"
         }
-      ],
-      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Gossan/Gossan_FocalPoint"
+      ]
     },
     {
       "id": "TRAVEL",
@@ -34,8 +34,7 @@
           "type": "fact",
           "value": "TH_ZERO_G_CAVE_X1"
         }
-      ],
-      "locationEntry": "TH_ZERO_G_CAVE"
+      ]
     },
     {
       "id": "REPAIR_0",
@@ -51,8 +50,7 @@
           "type": "special",
           "value": "SatelliteRepair0"
         }
-      ],
-      "locationPath": "MiningRig_Body/Nodes/BrokenNode:0"
+      ]
     },
     {
       "id": "REPAIR_1",
@@ -68,8 +66,7 @@
           "type": "special",
           "value": "SatelliteRepair1"
         }
-      ],
-      "locationPath": "MiningRig_Body/Nodes/BrokenNode:1"
+      ]
     },
     {
       "id": "REPAIR_2",
@@ -85,8 +82,7 @@
           "type": "special",
           "value": "SatelliteRepair2"
         }
-      ],
-      "locationPath": "MiningRig_Body/Nodes/BrokenNode:2"
+      ]
     },
     {
       "id": "FINISH",
@@ -112,7 +108,6 @@
           "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Gossan"
         }
       ],
-      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Gossan/Gossan_FocalPoint",
       "preventEarlyComplete": true
     }
   ]

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace OuterWildsRPG.Objects.Common.Effects
 {
+    [Description("Modifies the speed at which the player can translate Nomai text.")]
     public class TranslationSpeedEffectData : EntityLikeData
     {
         [Description("The percentage to multiply the total translation time by. E.g. a value of 0.25 will result in translating taking 25% of the usual time, or a 75% reduction.")]

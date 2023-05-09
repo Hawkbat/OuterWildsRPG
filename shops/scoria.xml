@@ -1,0 +1,50 @@
+﻿<DialogueTree xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/xen-42/outer-wilds-new-horizons/main/NewHorizons/Schemas/dialogue_schema.xsd">
+	<NameField>Scoria</NameField>
+	<DialogueNode>
+		<Name>INTRO</Name>
+		<EntryCondition>DEFAULT</EntryCondition>
+		<Dialogue>
+			<Page>Howdy there, hatchling! You remember me, right? Tektite's twin, Scoria? Used to work in the mines, before my back gave out.</Page>
+			<Page>Anyways, I've been trying to find a purpose for all of these soft, worthless metals that Tuff and I dug up over the years.</Page>
+			<Page>I figured it'd be nice to turn it into something useful, y'know, so... drum roll, please!...</Page>
+			<Page>Presenting Scoria's golden marshmallows! Shiny metals molded into an easy, convenient to carry shape! Not that tasty though.</Page>
+			<Page>You might be wondering, "How's inedible confectionary useful, Scoria?" Well, I reckon we could use 'em as a representation of value for tradin' stuff.</Page>
+			<Page>So instead of saying "I'll give ya three fish for your axe," you could exchange each fish for two marshmallows, and then six marshmallows for an axe. You followin', hatchling?</Page>
+			<Page>Well, since you generously listened to my whole pitch, how about I give ya some to start? Maybe if an up-and-comer like yourself starts trading them, it'll finally catch on!</Page>
+			<Page>I'll also exchange any odds and ends you find for marshmallows, and marshmallows for whatever I've got on hand. Come see me any time!</Page>
+		</Dialogue>
+		<SetPersistentCondition>ScoriaIntro</SetPersistentCondition>
+		<DialogueTarget>MAIN</DialogueTarget>
+	</DialogueNode>
+	<DialogueNode>
+		<Name>MAIN</Name>
+		<EntryCondition>ScoriaIntro</EntryCondition>
+		<Dialogue>
+			<Page>Howdy there, hatchling! Got something to trade?</Page>
+		</Dialogue>
+		<DialogueOptionsList>
+			<DialogueOption>
+				<Text>What've you got?</Text>
+				<DialogueTarget>SHOP_BUY</DialogueTarget>
+			</DialogueOption>
+			<DialogueOption>
+				<Text>I have some items to exchange.</Text>
+				<DialogueTarget>SHOP_SELL</DialogueTarget>
+			</DialogueOption>
+			<DialogueOption>
+				<Text>I'd like to trade you back for an item I gave you.</Text>
+				<DialogueTarget>SHOP_BUYBACK</DialogueTarget>
+			</DialogueOption>
+			<DialogueOption>
+				<Text>Nothing today.</Text>
+				<DialogueTarget>END</DialogueTarget>
+			</DialogueOption>
+		</DialogueOptionsList>
+	</DialogueNode>
+	<DialogueNode>
+		<Name>END</Name>
+		<Dialogue>
+			<Page>Any time!</Page>
+		</Dialogue>
+	</DialogueNode>
+</DialogueTree>

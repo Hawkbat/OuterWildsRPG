@@ -5,20 +5,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
+using HazardType = HazardVolume.HazardType;
 
 namespace OuterWildsRPG.Objects.Common.Effects
 {
-    public class HazardDamageEffect : EntityLike<HazardDamageEffect, HazardDamageEffectData>
+    public class HazardDamageEffect : BuffEffect<HazardDamageEffect, HazardDamageEffectData>
     {
-        public HazardVolume.HazardType Type;
+        public HazardType Type;
         public float Add;
         public float Multiply;
 
         public override void Load(HazardDamageEffectData data, string modID)
         {
-            Type = (HazardVolume.HazardType)data.type;
+            base.Load(data, modID);
+            Type = (HazardType)data.type;
             Add = data.add;
             Multiply = data.multiply;
         }
+
+        public override bool IsInstant() => false;
+
+        public override string GetDescription() => Translations.EffectDescriptionHazardDamage(Add, Multiply, Type);
     }
 }

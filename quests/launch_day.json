@@ -1,6 +1,6 @@
 {
-  "$schema": "https://raw.githubusercontent.com/Hawkbat/OuterWildsRPG/main/schemas/quest.schema.json",
-  "id": "QST_LAUNCH_DAY",
+  "$schema": "../schemas/quest.schema.json",
+  "id": "LAUNCH_DAY",
   "name": "Launch Day",
   "type": "main",
   "steps": [
@@ -34,8 +34,7 @@
           "type": "conversation",
           "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_StartingCamp/Characters_StartingCamp/Villager_HEA_Slate"
         }
-      ],
-      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_StartingCamp/Characters_StartingCamp/Villager_HEA_Slate/Slate_FocalPoint"
+      ]
     },
     {
       "id": "VILLAGE_HINT",
@@ -73,6 +72,23 @@
       "optional": true
     },
     {
+      "id": "GET_FLASHLIGHT",
+      "text": "Retrieve a Flashlight",
+      "startOn": [
+        {
+          "type": "step",
+          "value": "SLATE"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "haveDrop",
+          "value": "BASIC_FLASHLIGHT"
+        }
+      ],
+      "optional": true
+    },
+    {
       "id": "GET_SIGNALSCOPE",
       "text": "Retrieve a Signalscope",
       "startOn": [
@@ -100,10 +116,10 @@
       "completeOn": [
         {
           "type": "enterVolume",
-          "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Volumes_Observatory/ObservatoryInteriorVolume"
+          "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Volumes_Observatory/ObservatoryInteriorVolume",
+          "markerPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Volumes_Observatory/ObservatoryInteriorVolume/MuseumEntryway"
         }
-      ],
-      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Volumes_Observatory/ObservatoryInteriorVolume/MuseumEntryway"
+      ]
     },
     {
       "id": "MUSEUM_HINT",
@@ -154,7 +170,6 @@
           "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Characters_Observatory/Character_HEA_Hal_Museum"
         }
       ],
-      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Characters_Observatory/Character_HEA_Hal_Museum/Hal_FocalPoint",
       "optional": true
     },
     {
@@ -163,16 +178,16 @@
       "startOn": [
         {
           "type": "step",
-          "value": "HAL"
+          "value": "GET_TRANSLATOR"
         }
       ],
       "completeOn": [
         {
           "type": "fact",
-          "value": "TM_EYE_LOCATOR_R2"
+          "value": "TM_EYE_LOCATOR_R2",
+          "markerPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Interactables_Observatory/NomaiEyeExhibit/AttentionPoint"
         }
       ],
-      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Interactables_Observatory/NomaiEyeExhibit/AttentionPoint",
       "optional": true
     },
     {
@@ -187,10 +202,10 @@
       "completeOn": [
         {
           "type": "persistentCondition",
-          "value": "LAUNCH_CODES_GIVEN"
+          "value": "LAUNCH_CODES_GIVEN",
+          "markerPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Characters_Observatory/Villager_HEA_Hornfels/Hornfels_FocalPoint"
         }
-      ],
-      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_Observatory/Characters_Observatory/Villager_HEA_Hornfels/Hornfels_FocalPoint"
+      ]
     },
     {
       "id": "STATUE",

@@ -32,7 +32,7 @@ namespace OuterWildsRPG.Patches
         {
             var multiplier = BuffManager.GetTranslationSpeedMultiplier();
             // Vanilla is a flat 0.2f
-            __instance._totalTranslateTime = 2f * multiplier;
+            __instance._totalTranslateTime = 1f * multiplier;
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(Campfire), nameof(Campfire.StartRoasting))]
@@ -41,8 +41,7 @@ namespace OuterWildsRPG.Patches
             var stick = DropManager.GetEquippedDrop(EquipSlot.Stick);
             if (stick == null)
             {
-                OuterWildsRPG.MinorQueue.Enqueue("You need a roasting stick to roast marshmellows!");
-                Locator.GetPlayerAudioController().PlayNegativeUISound();
+                OuterWildsRPG.MinorQueue.Enqueue("You need a roasting stick to roast marshmellows...");
                 return false;
             }
             return true;
@@ -53,11 +52,72 @@ namespace OuterWildsRPG.Patches
         {
             return mode switch
             {
-                ToolMode.Probe => DropManager.GetEquippedDrop(EquipSlot.Probe) != null,
+                ToolMode.Probe => DropManager.GetEquippedDrop(EquipSlot.Scout) != null && DropManager.GetEquippedDrop(EquipSlot.Launcher) != null,
                 ToolMode.SignalScope => DropManager.GetEquippedDrop(EquipSlot.Signalscope) != null,
                 ToolMode.Translator => DropManager.GetEquippedDrop(EquipSlot.Translator) != null,
+                ToolMode.Item => DropManager.GetEquippedDrop(EquipSlot.Item) != null,
                 _ => true,
             };
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(Flashlight), nameof(Flashlight.TurnOn))]
+        public static bool Flashlight_TurnOn(Flashlight __instance)
+        {
+            var flashlight = DropManager.GetEquippedDrop(EquipSlot.Flashlight);
+            if (flashlight == null)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(Marshmallow), nameof(Marshmallow.SpawnMallow))]
+        public static bool Marshmallow_SpawnMallow(Marshmallow __instance, bool playSFX)
+        {
+            if (!DropManager.RemoveDrop(DropManager.GetDrop("MARSHMALLOW")))
+            {
+                __instance.RemoveMallow();
+                OuterWildsRPG.MinorQueue.Enqueue("You are out of marshmallows...");
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(Marshmallow), nameof(Marshmallow.Remove))]
+        public static bool Marshmallow_Remove(Marshmallow __instance)
+        {
+            DropManager.ReceiveDrop(DropManager.GetDrop("MARSHMALLOW"));
+            return true;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(PlayerSpacesuit), nameof(PlayerSpacesuit.SuitUp))]
+        public static bool PlayerSpacesuit_SuitUp(PlayerSpacesuit __instance, bool isTrainingSuit, bool instantSuitUp, ref bool putOnHelmet)
+        {
+            if (isTrainingSuit) return true;
+
+            if (!DropManager.HasDrop(DropManager.GetDrop("BASIC_SUIT"))) {
+                DropManager.ReceiveDrop(DropManager.GetDrop("BASIC_SUIT"));
+                DropManager.ReceiveDrop(DropManager.GetDrop("BASIC_HELMET"));
+                DropManager.ReceiveDrop(DropManager.GetDrop("BASIC_JETPACK"));
+                DropManager.ReceiveDrop(DropManager.GetDrop("BASIC_SCOUT"));
+                DropManager.ReceiveDrop(DropManager.GetDrop("BASIC_LAUNCHER"));
+            }
+
+            var suit = DropManager.GetEquippedDrop(EquipSlot.Suit);
+            if (suit == null) return false;
+            var helmet = DropManager.GetEquippedDrop(EquipSlot.Helmet);
+            if (helmet == null) putOnHelmet = false;
+
+            return true;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(PlayerSpacesuit), nameof(PlayerSpacesuit.PutOnHelmet))]
+        public static bool PlayerSpacesuit_PutOnHelmet(PlayerSpacesuit __instance)
+        {
+            if (__instance.IsWearingSuit() && __instance.IsTrainingSuit()) return true;
+            var helmet = DropManager.GetEquippedDrop(EquipSlot.Helmet);
+            if (helmet == null) return false;
+            return true;
         }
     }
 }

@@ -1,11 +1,14 @@
 ﻿using HarmonyLib;
-using OuterWildsRPG.Components;
+using OuterWildsRPG.Components.Graph;
+using OuterWildsRPG.Components.ShipLogModes;
+using OuterWildsRPG.Components.UI;
 using OuterWildsRPG.Enums;
 using OuterWildsRPG.External;
 using OuterWildsRPG.Objects.Common;
 using OuterWildsRPG.Objects.Drops;
 using OuterWildsRPG.Objects.Perks;
 using OuterWildsRPG.Objects.Quests;
+using OuterWildsRPG.Objects.Shops;
 using OuterWildsRPG.Utils;
 using OWML.Common;
 using OWML.ModHelper;
@@ -23,20 +26,20 @@ namespace OuterWildsRPG
     public class OuterWildsRPG : ModBehaviour
     {
         public static OuterWildsRPG Instance;
+        public static ICustomShiplogModesAPI CustomShiplogModesAPI;
+        public static ModSaveUtility ModSaveUtility;
 
+        public static bool DebugMode;
         public static bool Ready;
 
-        public static QuestHUD QuestHUD;
-        public static QuestLogMode QuestLogMode;
+        public static ModUI ModUI;
 
-        public static NotificationQueue MajorQueue = new();
+        public static NotificationQueue MajorQueue = new() { Time = 5f };
         public static NotificationQueue MinorQueue = new() { ConcurrentLimit = 4 };
-        public static NotificationQueue ExpQueue = new() { ConcurrentLimit = 3 };
+        public static NotificationQueue ExpQueue = new() { ConcurrentLimit = 3, Position = PromptPosition.LowerLeft };
+        public static NotificationQueue DropQueue = new() { ConcurrentLimit = 3, Position = PromptPosition.BottomCenter };
 
         public static string ModID => Instance.ModHelper.Manifest.UniqueName;
-
-        static bool inDialogue;
-        static bool inComputer;
 
         private void Awake()
         {
@@ -45,15 +48,14 @@ namespace OuterWildsRPG
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
         }
 
-        void LoadEntities<TEntity, TSingle, TMultiple>(Dictionary<string, TEntity> entities, string type) where TEntity : Entity<TEntity, TSingle>, new() where TSingle : EntityData, new() where TMultiple : MultipleEntityData<TSingle>, new()
+        void LoadEntities<TEntity, TSingle, TMultiple>(Func<TEntity, bool> register, string type) where TEntity : Entity<TEntity, TSingle>, new() where TSingle : EntityData, new() where TMultiple : MultipleEntityData<TSingle>, new()
         {
-            Dictionary<string, TSingle> rawData = new();
-
+            var total = 0;
             foreach (var mod in ModHelper.Interaction.GetMods())
             {
                 var modID = mod.ModHelper.Manifest.UniqueName;
 
-                List<TEntity> modEntities = new List<TEntity>();
+                List<TEntity> modEntities = new();
 
                 var dataPath = Path.GetFullPath(Path.Combine(mod.ModHelper.Manifest.ModFolderPath, $"./{type}.json"));
                 if (File.Exists(dataPath))
@@ -65,8 +67,7 @@ namespace OuterWildsRPG
                         {
                             var entity = new TEntity();
                             entity.Load(singleData, modID);
-                            rawData.Add(entity.FullID, singleData);
-                            entities.Add(entity.FullID, entity);
+                            register(entity);
                             modEntities.Add(entity);
                         }
                     } else
@@ -79,57 +80,72 @@ namespace OuterWildsRPG
                 {
                     foreach (var filePath in Directory.GetFiles(dataDirectory))
                     {
+                        if (!filePath.ToLower().EndsWith(".json")) continue;
                         var fileName = Path.GetFileName(filePath);
                         var singleData = JsonHelper.LoadJsonObject<TSingle>(filePath, false);
                         if (singleData != null)
                         {
                             var entity = new TEntity();
                             entity.Load(singleData, modID);
-                            rawData.Add(entity.FullID, singleData);
-                            entities.Add(entity.FullID, entity);
+                            register(entity);
                             modEntities.Add(entity);
                         } else
                         {
-                            ModHelper.Console.WriteLine($"Failed to load {type}/{fileName} for {modID}.", MessageType.Error);
+                            ModHelper.Console.WriteLine($"Failed to load {type} {fileName} for {modID}.", MessageType.Error);
                         }
                     }
                 }
+                total += modEntities.Count;
                 if (modEntities.Any())
                     ModHelper.Console.WriteLine($"Loaded {modEntities.Count} {type} from {modID}.", MessageType.Success);
             }
 
-            foreach (var (fullID, entity) in entities) {
-                var raw = rawData[fullID];
-                entity.Resolve(raw, entities);
-            }
+            ModHelper.Console.WriteLine($"Loaded {total} total {type}.", MessageType.Success);
+        }
 
-            ModHelper.Console.WriteLine($"Loaded {entities.Count} total {type}.", MessageType.Success);
+        void ResolveEntities<T>(IEnumerable<T> entities) where T : IEntity
+        {
+            foreach (var entity in entities) entity.Resolve();
+        }
+
+        public override void Configure(IModConfig config)
+        {
+            DebugMode = ModHelper.Config.GetSettingsValue<bool>("Debug Mode");
         }
 
         private void Start()
         {
-            Assets.LoadAll();
+            Configure(ModHelper.Config);
 
-            LoadEntities<Quest, QuestData, QuestListData>(QuestManager.Dictionary, "quests");
-            LoadEntities<Perk, PerkData, PerkListData>(PerkManager.Dictionary, "perks");
-            LoadEntities<Drop, DropData, DropListData>(DropManager.Dictionary, "drops");
+            Assets.Init();
+
+            CustomShiplogModesAPI = ModHelper.Interaction.TryGetModApi<ICustomShiplogModesAPI>("dgarro.CustomShipLogModes");
+            ModSaveUtility = new ModSaveUtility(this);
+
+            SaveDataManager.Init();
+
+            TranslationUtils.RegisterAllTranslations();
+
+            LoadEntities<Quest, QuestData, QuestListData>(QuestManager.RegisterQuest, "quests");
+            LoadEntities<Perk, PerkData, PerkListData>(PerkManager.RegisterPerk, "perks");
+            LoadEntities<Drop, DropData, DropListData>(DropManager.RegisterDrop, "drops");
+            LoadEntities<Shop, ShopData, ShopListData>(ShopManager.RegisterShop, "shops");
+            ResolveEntities(QuestManager.GetAllQuests());
+            ResolveEntities(PerkManager.GetAllPerks());
+            ResolveEntities(DropManager.GetAllDrops());
+            ResolveEntities(ShopManager.GetAllShops());
 
             QuestManager.OnStartQuest.AddListener(OnStartQuest);
+            QuestManager.OnStepProgressed.AddListener(OnStepProgressed);
             QuestManager.OnCompleteStep.AddListener(OnCompleteStep);
             QuestManager.OnCompleteQuest.AddListener(OnCompleteQuest);
             CharacterManager.OnAwardXP.AddListener(OnAwardXP);
             CharacterManager.OnLevelUp.AddListener(OnLevelUp);
-            CharacterManager.OnDiscoverLocation.AddListener(OnDiscoverLocation);
-            CharacterManager.OnExploreLocation.AddListener(OnExploreLocation);
             PerkManager.OnUnlockPerk.AddListener(OnUnlockPerk);
-            DropManager.OnPickUpDrop.AddListener(OnPickUp);
+            DropManager.OnReceiveDrop.AddListener(OnPickUpDrop);
+            DropManager.OnRemoveDrop.AddListener(OnRemoveDrop);
             DropManager.OnEquipDrop.AddListener(OnEquipDrop);
             DropManager.OnUnequipDrop.AddListener(OnUnequipDrop);
-
-            GlobalMessenger.AddListener("EnterConversation", () => inDialogue = true);
-            GlobalMessenger.AddListener("ExitConversation", () => inDialogue = false);
-            GlobalMessenger.AddListener("EnterShipComputer", () => inComputer = true);
-            GlobalMessenger.AddListener("ExitShipComputer", () => inComputer = false);
 
             LoadManager.OnStartSceneLoad += (scene, loadScene) =>
             {
@@ -146,38 +162,39 @@ namespace OuterWildsRPG
                     () => SetUp());
             };
 
-            ModHelper.Console.WriteLine($"{nameof(OuterWildsRPG)} is initialized.", MessageType.Success);
+            LogSuccess($"{nameof(OuterWildsRPG)} is initialized.", true);
         }
 
         private void SetUp()
         {
-            if (!QuestHUD)
+            SaveDataManager.SetUp();
+            DropManager.SetUp();
+            ShopManager.SetUp();
+            QuestManager.SetUp();
+
+            PlayerStateUtils.SetUp();
+
+            if (!ModUI)
             {
                 var questHudRect = UnityUtils.MakeRectChild(null, "QuestHUD");
-                QuestHUD = questHudRect.gameObject.AddComponent<QuestHUD>();
+                ModUI = questHudRect.gameObject.AddComponent<ModUI>();
             }
 
-            foreach (var drop in DropManager.GetAllDrops())
-                foreach (var location in drop.Locations)
-                    DropManager.SpawnDropPickup(location);
-
-            foreach (var quest in QuestManager.GetAllQuests()) quest.SetUp();
-
-            BuffManager.UpdateTravelMusic();
-
             var questLogGO = new GameObject("QuestLogMode");
-            questLogGO.transform.parent = UnityUtils.GetTransformAtPath("Ship_Body/Module_Cabin/Systems_Cabin/ShipLogPivot/ShipLog/ShipLogPivot/ShipLogCanvas");
+            questLogGO.transform.parent = UnityUtils.GetTransformAtPathUnsafe("Ship_Body/Module_Cabin/Systems_Cabin/ShipLogPivot/ShipLog/ShipLogPivot/ShipLogCanvas");
             questLogGO.transform.localPosition = Vector3.zero;
             questLogGO.transform.localRotation = Quaternion.identity;
             questLogGO.transform.localScale = Vector3.one;
-            QuestLogMode = questLogGO.AddComponent<QuestLogMode>();
+            var questLogMode = questLogGO.AddComponent<QuestLogMode>();
 
-            var customModesAPI = ModHelper.Interaction.TryGetModApi<ICustomShiplogModesAPI>("dgarro.CustomShipLogModes");
-            customModesAPI.AddMode(QuestLogMode, () => true, () => "Quest Log");
-            QuestLogMode.ShiplogModesAPI = customModesAPI;
+            CustomShiplogModesAPI.AddMode(questLogMode, () => true, () => "Quest Log");
+            questLogMode.ShiplogModesAPI = CustomShiplogModesAPI;
 
             var perkTreeMode = GraphMode.Create<PerkTreeMode>();
-            customModesAPI.AddMode(perkTreeMode, () => true, () => "Perk Tree");
+            CustomShiplogModesAPI.AddMode(perkTreeMode, () => true, () => "Perk Tree");
+
+            var inventoryMode = GraphMode.Create<InventoryMode>();
+            CustomShiplogModesAPI.AddMode(inventoryMode, () => true, () => "Inventory");
 
             // DEBUG; Export ship log details to reference in quest steps
             //ShipLogExporter.Export();
@@ -189,29 +206,15 @@ namespace OuterWildsRPG
         {
             Ready = false;
 
-            foreach (var quest in QuestManager.GetAllQuests()) quest.CleanUp();
+            ShopManager.CleanUp();
+            DropManager.CleanUp();
+            QuestManager.CleanUp();
+            PlayerStateUtils.CleanUp();
         }
 
         private void Update()
         {
             if (!Ready) return;
-
-            bool markersVisible = !GUIMode.IsHiddenMode() && !ModHelper.Menus.PauseMenu.IsOpen && !inDialogue && !inComputer;
-
-            foreach (var quest in QuestManager.GetAllQuests())
-                quest.Update(markersVisible);
-
-            foreach (var entry in Locator.GetShipLogManager().GetEntryList())
-            {
-                if (!CharacterManager.HasDiscoveredLocation(entry) && entry.CalculateState() == ShipLogEntry.State.Explored)
-                {
-                    CharacterManager.DiscoverLocation(entry);
-                }
-                if (!CharacterManager.HasExploredLocation(entry) && entry.GetExploreFacts().All(f => f.IsRevealed()))
-                {
-                    CharacterManager.ExploreLocation(entry);
-                }
-            }
 
             if (Keyboard.current[Key.Numpad1].wasPressedThisFrame)
             {
@@ -222,7 +225,12 @@ namespace OuterWildsRPG
                 WarpToSpawnPoint("Spawn_TH_Observatory");
             }
 
-            if (markersVisible)
+            BuffManager.Update();
+            CharacterManager.Update();
+            DropManager.Update();
+            QuestManager.Update();
+
+            if (PlayerStateUtils.IsPlayable)
             {
                 NotificationQueue.UpdateAll();
             }
@@ -230,39 +238,49 @@ namespace OuterWildsRPG
 
         public void OnStartQuest(Quest quest)
         {
-            MajorQueue.Enqueue($"Started quest {quest.Name}", sound: AudioType.ShipLogRevealEntry);
+            var themeJingle = quest.Theme switch
+            {
+                QuestTheme.Hearthian => Assets.HearthianJingleAudioClip,
+                QuestTheme.Nomai => Assets.NomaiJingleAudioClip,
+                QuestTheme.Stranger => Assets.StrangerJingleAudioClip,
+                _ => Assets.HearthianJingleAudioClip,
+            };
+            if (quest.Type == QuestType.Misc)
+                themeJingle = null;
+            MajorQueue.Enqueue(Translations.NotificationQuestStart(quest), clip: themeJingle);
+        }
+
+        public void OnStepProgressed(QuestStep step)
+        {
+            if (step.IsComplete) return;
+            string text;
+            if (step.CompleteMode == QuestConditionMode.All)
+                text = Translations.NotificationQuestStepProgress(step, step.GetCompletionConditionProgress(), step.CompleteOn.Count);
+            else
+                text = step.ToDisplayString();
+            MinorQueue.Enqueue(text);
         }
 
         public void OnCompleteQuest(Quest quest)
         {
-            MajorQueue.Enqueue($"Completed quest {quest.Name}", sound: AudioType.TH_ZeroGTrainingAllRepaired);
+            MajorQueue.Enqueue(Translations.NotificationQuestComplete(quest), sound: AudioType.TH_ZeroGTrainingAllRepaired);
         }
 
         public void OnCompleteStep(QuestStep step)
         {
-            MinorQueue.Enqueue($"{step.Text} - Complete", time: 3f, sound: AudioType.ShipLogRevealEntry);
-        }
-
-        public void OnDiscoverLocation(ShipLogEntry entry)
-        {
-            MajorQueue.Enqueue($"Discovered location {entry.GetName(false)}", sound: AudioType.ShipLogRevealEntry);
-        }
-
-        public void OnExploreLocation(ShipLogEntry entry)
-        {
-            MajorQueue.Enqueue($"Fully explored location {entry.GetName(false)}", sound: AudioType.TH_ZeroGTrainingAllRepaired);
+            MinorQueue.Enqueue(Translations.NotificationQuestStepComplete(step), sound: AudioType.ShipLogRevealEntry);
         }
 
         public void OnAwardXP(int xp, string reason)
         {
-            ExpQueue.Enqueue($"+{xp}XP", pos: PromptPosition.LowerLeft, time: 3f);
+            ExpQueue.Enqueue(Translations.NotificationXPGain(xp, reason));
         }
 
         public void OnLevelUp(int level)
         {
-            MajorQueue.Enqueue($"Reached Level {level}!", clip: Assets.QuestJingleAudioClip);
+            MajorQueue.Enqueue(Translations.NotificationLevelUp(level), clip: Assets.LevelUpJingleAudioClip);
             if (PerkManager.GetUnspentPerkPoints() > 0)
-                ExpQueue.Enqueue($"You have {PerkManager.GetUnspentPerkPoints()} unspent perk points.", PromptPosition.LowerLeft, time: 10f);
+                ExpQueue.Enqueue(Translations.NotificationUnspentPerkPoints(PerkManager.GetUnspentPerkPoints()), time: 10f);
         }
 
         public void OnUnlockPerk(Perk perk)
@@ -270,19 +288,24 @@ namespace OuterWildsRPG
 
         }
 
-        public void OnPickUp(Drop drop)
+        public void OnPickUpDrop(Drop drop)
         {
-            MinorQueue.Enqueue($"Picked up {drop.Name}");
+            DropQueue.Enqueue(Translations.NotificationPickUpDrop(drop));
+        }
+
+        public void OnRemoveDrop(Drop drop)
+        {
+            DropQueue.Enqueue(Translations.NotificationRemoveDrop(drop));
         }
 
         public void OnEquipDrop(Drop drop, EquipSlot slot)
         {
-            MinorQueue.Enqueue($"Equipped {drop.Name}");
+            DropQueue.Enqueue(Translations.NotificationEquipDrop(drop));
         }
 
         public void OnUnequipDrop(Drop drop, EquipSlot slot)
         {
-            MinorQueue.Enqueue($"Unequipped {drop.Name}");
+            DropQueue.Enqueue(Translations.NotificationUnequipDrop(drop));
         }
 
         private void WarpToSpawnPoint(string spawnPointName)
@@ -294,6 +317,37 @@ namespace OuterWildsRPG
                 Locator.GetEyeStateManager().SetState(eyeSpawn.GetEyeState());
             }
             spawner.DebugWarp(spawnPoint);
+        }
+
+        public static void Log(string message, bool debug = false)
+        {
+            if (debug && !DebugMode) return;
+            Instance.ModHelper.Console.WriteLine(message, MessageType.Info);
+        }
+
+        public static void LogWarning(string message, bool debug = false)
+        {
+            if (debug && !DebugMode) return;
+            Instance.ModHelper.Console.WriteLine(message, MessageType.Warning);
+        }
+
+        public static void LogError(string message, bool debug = false)
+        {
+            if (debug && !DebugMode) return;
+            Instance.ModHelper.Console.WriteLine(message, MessageType.Error);
+        }
+
+        public static void LogSuccess(string message, bool debug = false)
+        {
+            if (debug && !DebugMode) return;
+            Instance.ModHelper.Console.WriteLine(message, MessageType.Success);
+        }
+
+        public static void LogException(Exception ex, string message, bool debug = false)
+        {
+            if (debug && !DebugMode) return;
+            LogWarning(message);
+            LogError(ex.ToString());
         }
     }
 }

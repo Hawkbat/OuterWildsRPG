@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace OuterWildsRPG.Objects.Common.Effects
 {
+    [Description("Changes the travel music played when flying the ship between planets.")]
     public class TravelMusicEffectData : EntityLikeData
     {
         [Required]

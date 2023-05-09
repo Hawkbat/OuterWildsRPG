@@ -65,6 +65,10 @@
       "items": {
         "$ref": "#/definitions/DropLocationData"
       }
+    },
+    "$schema": {
+      "type": "string",
+      "description": "The schema to validate with"
     }
   },
   "definitions": {
@@ -100,7 +104,8 @@
         "Flashlight",
         "Translator",
         "Radio",
-        "Stick"
+        "Stick",
+        "Item"
       ],
       "enum": [
         "none",
@@ -113,7 +118,8 @@
         "flashlight",
         "translator",
         "radio",
-        "stick"
+        "stick",
+        "item"
       ]
     },
     "BuffData": {
@@ -121,6 +127,14 @@
       "description": "Various possible effects that will apply when the buff is active.",
       "additionalProperties": false,
       "properties": {
+        "moveSpeed": {
+          "description": "Modifies the player's movement speed.",
+          "$ref": "#/definitions/MoveSpeedEffectData"
+        },
+        "jumpSpeed": {
+          "description": "Modifies the player's jump speed.",
+          "$ref": "#/definitions/JumpSpeedEffectData"
+        },
         "hazardDamage": {
           "description": "Modifies the damage the player takes from various types of hazards.",
           "$ref": "#/definitions/HazardDamageEffectData"
@@ -133,6 +147,10 @@
           "description": "Changes the travel music played when flying the ship between planets.",
           "$ref": "#/definitions/TravelMusicEffectData"
         },
+        "inventorySpace": {
+          "description": "Increases the capacity of the player's inventory.",
+          "$ref": "#/definitions/InventorySpaceEffectData"
+        },
         "heal": {
           "description": "Restores a percentage of the player's health.",
           "$ref": "#/definitions/HealEffectData"
@@ -144,6 +162,38 @@
         "custom": {
           "description": "Defines a custom effect that can be interacted with via the mod API.",
           "$ref": "#/definitions/CustomEffectData"
+        }
+      }
+    },
+    "MoveSpeedEffectData": {
+      "type": "object",
+      "description": "Modifies the player's movement speed.",
+      "additionalProperties": false,
+      "required": [
+        "multiply"
+      ],
+      "properties": {
+        "multiply": {
+          "type": "number",
+          "description": "The percentage to multiply the total movement speed by. E.g. a value of 0.25 will result in 25% movement speed, or a 75% reduction.",
+          "format": "float",
+          "default": 1.0
+        }
+      }
+    },
+    "JumpSpeedEffectData": {
+      "type": "object",
+      "description": "Modifies the player's jump speed.",
+      "additionalProperties": false,
+      "required": [
+        "multiply"
+      ],
+      "properties": {
+        "multiply": {
+          "type": "number",
+          "description": "The percentage to multiply the total jump speed by. E.g. a value of 0.25 will result in 25% jump speed, or a 75% reduction.",
+          "format": "float",
+          "default": 1.0
         }
       }
     },
@@ -162,12 +212,14 @@
         "add": {
           "type": "number",
           "description": "The percentage of the initial damage to add/reduce. E.g. a value of -0.1 means subtract 10% of the base damage from the total.",
-          "format": "float"
+          "format": "float",
+          "default": 0.0
         },
         "multiply": {
           "type": "number",
           "description": "The percentage to multiply the total damage by. E.g. a value of 0.25 will result in 25% damage, or a 75% reduction.",
-          "format": "float"
+          "format": "float",
+          "default": 1.0
         }
       }
     },
@@ -220,6 +272,21 @@
         }
       }
     },
+    "InventorySpaceEffectData": {
+      "type": "object",
+      "description": "Increases the capacity of the player's inventory.",
+      "additionalProperties": false,
+      "required": [
+        "amount"
+      ],
+      "properties": {
+        "amount": {
+          "type": "integer",
+          "description": "The number of inventory spaces to add.",
+          "format": "int32"
+        }
+      }
+    },
     "HealEffectData": {
       "type": "object",
       "description": "Restores a percentage of the player's health.",
@@ -250,8 +317,9 @@
         },
         "amount": {
           "type": "integer",
-          "description": "The text to display in the UI for this effect.",
-          "format": "int32"
+          "description": "The number of copies to give.",
+          "format": "int32",
+          "default": 1
         }
       }
     },
@@ -259,14 +327,20 @@
       "type": "object",
       "description": "Defines a custom effect that can be interacted with via the mod API.",
       "additionalProperties": false,
+      "required": [
+        "id",
+        "description"
+      ],
       "properties": {
         "id": {
           "type": "string",
-          "description": "A custom value that uniquely identifies this effect, for use with the mod API."
+          "description": "A custom value that uniquely identifies this effect. Also used as the description's translation key.",
+          "minLength": 1
         },
         "description": {
           "type": "string",
-          "description": "The text to display in the UI for this effect."
+          "description": "The text to display in the UI for this effect.",
+          "minLength": 1
         }
       }
     },
@@ -280,15 +354,15 @@
       "properties": {
         "parentPath": {
           "type": "string",
-          "description": "The full path to a GameObject in the solar system that the drop should be attached to.",
+          "description": "The full path to a GameObject in the solar system that the prop should be attached to.",
           "minLength": 1
         },
         "position": {
-          "description": "The position to place the drop at.",
+          "description": "The position to place the prop at.",
           "$ref": "#/definitions/Vector3Data"
         },
         "rotation": {
-          "description": "The rotation of the drop.",
+          "description": "The rotation of the prop.",
           "$ref": "#/definitions/Vector3Data"
         },
         "isRelativeToParent": {
@@ -300,7 +374,7 @@
             "boolean",
             "null"
           ],
-          "description": "Whether to orient the drop to point 'up' away from the center of the planet, or use the provided rotation value. Defaults to true if `rotation` is omitted and false otherwise."
+          "description": "Whether to orient the prop to point 'up' away from the center of the planet, or use the provided rotation value. Defaults to true if `rotation` is omitted and false otherwise."
         },
         "respawns": {
           "type": "boolean",

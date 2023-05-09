@@ -11,6 +11,10 @@ namespace OuterWildsRPG.Utils
     {
         public Queue<Notification> Queue = new();
         public int ConcurrentLimit = 1;
+        public PromptPosition Position = PromptPosition.Center;
+        public float Time = 3f;
+        public AudioType Sound = AudioType.None;
+        public AudioClip Clip = null;
 
         List<Notification> active = new();
 
@@ -27,15 +31,15 @@ namespace OuterWildsRPG.Utils
             return notification;
         }
 
-        public Notification Enqueue(string msg, PromptPosition pos = PromptPosition.Center, float time = 5f, AudioType sound = AudioType.None, AudioClip clip = null, Action onDisplay = null, Action onExpire = null)
+        public Notification Enqueue(string msg, PromptPosition? pos = null, float? time = null, AudioType? sound = null, AudioClip clip = null, Action onDisplay = null, Action onExpire = null)
         {
             return Enqueue(new Notification()
             {
                 Message = msg,
-                Position = pos,
-                Duration = time,
-                Sound = sound,
-                Clip = clip,
+                Position = pos ?? Position,
+                Duration = time ?? Time,
+                Sound = sound ?? Sound,
+                Clip = clip ?? Clip,
                 OnDisplay = onDisplay,
                 OnExpire = onExpire,
             });

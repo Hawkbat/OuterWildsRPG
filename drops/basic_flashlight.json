@@ -1,0 +1,20 @@
+{
+  "$schema": "../schemas/drop.schema.json",
+  "id": "BASIC_FLASHLIGHT",
+  "name": "Hatchling's Flashlight",
+  "description": "A standard hand-held flashlight. Great for nighttime exploration!",
+  "rarity": "uncommon",
+  "equipSlot": "flashlight",
+  "iconPath": "FLASHLIGHT.png",
+  "locations": [
+    {
+      "parentPath": "TimberHearth_Body/Sector_TH",
+      "position": {
+        "x": 21.052,
+        "y": -46.43467,
+        "z": 183.9364
+      },
+      "visuals": []
+    }
+  ]
+}

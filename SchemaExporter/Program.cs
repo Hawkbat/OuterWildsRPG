@@ -2,9 +2,11 @@
 using Newtonsoft.Json.Serialization;
 using NJsonSchema;
 using NJsonSchema.Generation;
+using OuterWildsRPG.Objects.Common;
 using OuterWildsRPG.Objects.Drops;
 using OuterWildsRPG.Objects.Perks;
 using OuterWildsRPG.Objects.Quests;
+using OuterWildsRPG.Objects.Shops;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,6 +26,9 @@ namespace SchemaExporter
             GenerateSchema<PerkData>("perk");
             GenerateSchema<QuestListData>("quests");
             GenerateSchema<QuestData>("quest");
+            GenerateSchema<ShopListData>("shops");
+            GenerateSchema<ShopData>("shop");
+            GenerateSchema<TranslationData>("translation");
         }
 
         static void GenerateSchema<T>(string name)
@@ -43,6 +48,12 @@ namespace SchemaExporter
                 }
             };
             var schema = JsonSchema.FromType<T>(settings);
+            schema.Properties.Add("$schema", new JsonSchemaProperty()
+            {
+                Type = JsonObjectType.String,
+                Description = "The schema to validate with",
+            });
+
             var schemaJson = schema.ToJson();
 
             var filePath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), $"../../../schemas/{name}.schema.json"));

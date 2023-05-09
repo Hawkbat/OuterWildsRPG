@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "TranslationData",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "GeneralDictionary": {
+      "type": "object",
+      "description": "Translation table for mod-defined text elements.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "DialogueDictionary": {
+      "type": "object",
+      "description": "Translation table for dialogue.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "ShipLogDictionary": {
+      "type": "object",
+      "description": "Translation table for Ship Log (entries, facts, etc).",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "UIDictionary": {
+      "type": "object",
+      "description": "Translation table for UI elements.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "AchievementTranslations": {
+      "type": "object",
+      "description": "Translation table for achievements (If Achievements+ is present). The key is the unique ID of the achievement.",
+      "additionalProperties": {
+        "$ref": "#/definitions/AchievementTranslationData"
+      }
+    },
+    "$schema": {
+      "type": "string",
+      "description": "The schema to validate with"
+    }
+  },
+  "definitions": {
+    "AchievementTranslationData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string",
+          "description": "The name of the achievement."
+        },
+        "Description": {
+          "type": "string",
+          "description": "The short description for this achievement."
+        }
+      }
+    }
+  }
+}

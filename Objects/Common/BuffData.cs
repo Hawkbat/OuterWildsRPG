@@ -9,14 +9,21 @@ using System.Threading.Tasks;
 using OWML.Utils;
 using OuterWildsRPG.Utils;
 using OuterWildsRPG.Objects.Common.Effects;
+using System.ComponentModel;
 
 namespace OuterWildsRPG.Objects.Common
 {
-    public class BuffData : EntityData
+    [Description("Various possible effects that will apply when the buff is active.")]
+    public class BuffData : EntityLikeData
     {
+        public MoveSpeedEffectData moveSpeed;
+        public JumpSpeedEffectData jumpSpeed;
         public HazardDamageEffectData hazardDamage;
         public TranslationSpeedEffectData translationSpeed;
         public TravelMusicEffectData travelMusic;
+        public InventorySpaceEffectData inventorySpace;
+        public HealEffectData heal;
+        public GiveDropEffectData giveDrop;
         public CustomEffectData custom;
     }
 }

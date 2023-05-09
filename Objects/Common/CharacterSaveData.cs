@@ -11,7 +11,5 @@ namespace OuterWildsRPG.Objects.Common
         public static CharacterSaveData Instance = new();
 
         public int TotalXP;
-        public HashSet<string> DiscoveredLocations = new();
-        public HashSet<string> ExploredLocations = new();
     }
 }

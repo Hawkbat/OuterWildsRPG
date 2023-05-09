@@ -14,6 +14,10 @@
       "items": {
         "$ref": "#/definitions/QuestData"
       }
+    },
+    "$schema": {
+      "type": "string",
+      "description": "The schema to validate with"
     }
   },
   "definitions": {
@@ -42,6 +46,10 @@
           "description": "How significant this quest is, which determines ship log priority and XP rewards.",
           "$ref": "#/definitions/QuestType"
         },
+        "theme": {
+          "description": "The visual and audible theme used to present this quest to the player.",
+          "$ref": "#/definitions/QuestTheme"
+        },
         "steps": {
           "type": "array",
           "description": "The list of steps that must be completed for this quest to be marked as complete.",
@@ -65,6 +73,22 @@
         "main",
         "side",
         "misc"
+      ]
+    },
+    "QuestTheme": {
+      "type": "string",
+      "description": "",
+      "x-enumNames": [
+        "Default",
+        "Hearthian",
+        "Nomai",
+        "Stranger"
+      ],
+      "enum": [
+        "default",
+        "hearthian",
+        "nomai",
+        "stranger"
       ]
     },
     "QuestStepData": {

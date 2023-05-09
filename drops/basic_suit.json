@@ -1,0 +1,10 @@
+{
+  "$schema": "../schemas/drop.schema.json",
+  "id": "BASIC_SUIT",
+  "name": "Hatchling's Spacesuit",
+  "description": "A custom-fitted spacesuit to keep you save in the hazardous environments of space.",
+  "rarity": "uncommon",
+  "equipSlot": "suit",
+  "iconPath": "SUIT.png",
+  "locations": []
+}

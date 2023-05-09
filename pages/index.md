@@ -1,4 +1,6 @@
-﻿# Outer Wilds RPG
+﻿![Outer Wilds RPG Banner](/banner.png){.banner}
+
+# Outer Wilds RPG
 
 Welcome to the documentation for the Outer Wilds RPG mod!
 

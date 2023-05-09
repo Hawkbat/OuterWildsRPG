@@ -8,7 +8,6 @@ namespace OuterWildsRPG.Objects.Quests
 {
     public class QuestSaveData
     {
-
         public static QuestSaveData Instance = new();
 
         public Dictionary<string, HashSet<string>> StartedSteps = new();
@@ -16,6 +15,5 @@ namespace OuterWildsRPG.Objects.Quests
         public HashSet<string> CompletedQuests = new();
         public HashSet<string> StartedQuests = new();
         public HashSet<string> TrackedQuests = new();
-
     }
 }

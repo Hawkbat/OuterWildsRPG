@@ -1,0 +1,13 @@
+{
+  "$schema": "../schemas/perk.schema.json",
+  "id": "JUMP_SPEED_1",
+  "name": "Jump Speed Up I",
+  "level": 1,
+  "iconPath": "JUMP_SPEED.png",
+  "color": { "r": 0, "g": 1, "b": 0.5 },
+  "buffs": [
+    {
+      "jumpSpeed": { "multiply": 1.15 }
+    }
+  ]
+}

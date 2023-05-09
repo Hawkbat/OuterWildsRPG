@@ -7,13 +7,20 @@ using System.Threading.Tasks;
 
 namespace OuterWildsRPG.Objects.Common.Effects
 {
-    public class CustomEffect : EntityLike<CustomEffect, CustomEffectData>
+    public class CustomEffect : BuffEffect<CustomEffect, CustomEffectData>
     {
+        public string ID;
         public string Description;
 
         public override void Load(CustomEffectData data, string modID)
         {
+            base.Load(data, modID);
+            ID = data.id;
             Description = data.description;
+            TranslationUtils.RegisterGeneral(data.id, data.description);
         }
+
+        public override bool IsInstant() => false;
+        public override string GetDescription() => TranslationUtils.GetGeneral(ID);
     }
 }

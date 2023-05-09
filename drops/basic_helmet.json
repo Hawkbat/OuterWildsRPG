@@ -1,0 +1,10 @@
+{
+  "$schema": "../schemas/drop.schema.json",
+  "id": "BASIC_HELMET",
+  "name": "Hatchling's Helmet",
+  "description": "A custom-fitted space helmet for you. It'll keep the oxygen in. Probably.",
+  "rarity": "uncommon",
+  "equipSlot": "helmet",
+  "iconPath": "HELMET.png",
+  "locations": []
+}

@@ -1,6 +1,6 @@
 {
-  "$schema": "https://raw.githubusercontent.com/Hawkbat/OuterWildsRPG/main/schemas/quest.schema.json",
-  "id": "QST_EYE_LOCATORS",
+  "$schema": "../schemas/quest.schema.json",
+  "id": "EYE_LOCATORS",
   "name": "The Search",
   "type": "main",
   "steps": [
@@ -27,8 +27,7 @@
           "value": "BH_OBSERVATORY_R1"
         }
       ],
-      "completeMode": "all",
-      "locationEntry": "TM_EYE_LOCATOR"
+      "completeMode": "all"
     },
     {
       "id": "OBSERVATORY_ENTRANCE",
@@ -42,10 +41,10 @@
       "completeOn": [
         {
           "type": "fact",
-          "value": "BH_OBSERVATORY_R4"
+          "value": "BH_OBSERVATORY_R4",
+          "markerPath": "BrittleHollow_Body/Sector_BH/Sector_SouthHemisphere/Sector_SouthPole/Interactables_SouthPole/Prefab_HEA_Recorder"
         }
-      ],
-      "locationPath": "BrittleHollow_Body/Sector_BH/Sector_SouthHemisphere/Sector_SouthPole/Interactables_SouthPole/Prefab_HEA_Recorder"
+      ]
     },
     {
       "id": "OBSERVATORY_PATH",

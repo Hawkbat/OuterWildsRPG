@@ -42,20 +42,55 @@ namespace OuterWildsRPG.Utils
 
         public static string GetTransformPath(Transform t)
         {
+            if (t == null) return null;
             if (t.parent) return GetTransformPath(t.parent) + "/" + t.name;
             return t.name;
         }
 
-        public static Transform GetTransformAtPath(string path)
+        public static Transform GetTransformAtPath(string path, string errorMessage)
+            => GetTransformAtPath(null, path, errorMessage);
+
+        public static Transform GetTransformAtPath(Transform root, string path, string errorMessage)
+        {
+            try
+            {
+                return GetTransformAtPathUnsafe(path, root);
+            } catch (Exception ex)
+            {
+                if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    OuterWildsRPG.LogException(ex, errorMessage);
+                }
+            }
+            return null;
+        }
+
+        public static Transform GetTransformAtPathUnsafe(string path)
+            => GetTransformAtPathUnsafe(path, null);
+
+        public static Transform GetTransformAtPathUnsafe(string path, Transform root)
         {
             if (string.IsNullOrEmpty(path)) throw new Exception("Tried to look up path but path was null");
-            var parts = path.Split('/');
-            var root = SceneManager.GetActiveScene().GetRootGameObjects().FirstOrDefault(g => g.name == parts[0]);
-            if (!root) throw new Exception($"Could not find root object of path: {path}");
-            var t = root.transform;
-            foreach (var part in parts.Skip(1))
+            var parts = new Queue<string>(path.Split('/'));
+            if (root == null)
             {
-                if (part.Contains(":"))
+                var rootName = parts.Dequeue();
+                var rootObj = SceneManager.GetActiveScene().GetRootGameObjects().FirstOrDefault(g => g.name == rootName);
+                if (!rootObj) throw new Exception($"Could not find root object of path: {path}");
+                root = rootObj.transform;
+            }
+            var t = root;
+
+            while (parts.Count > 0)
+            {
+                var part = parts.Dequeue();
+                if (part == "..")
+                {
+                    t = t.parent;
+                } else if (part == ".")
+                {
+
+                } else if (part.Contains(":"))
                 {
                     var bits = part.Split(':');
                     var search = bits[0];
@@ -89,6 +124,46 @@ namespace OuterWildsRPG.Utils
             return rt;
         }
 
+        public static Transform PlaceProp(Transform prop, IPropLike data)
+        {
+            var parent = GetTransformAtPathUnsafe(data.ParentPath);
+            prop.parent = parent;
+            if (data.IsRelativeToParent)
+            {
+                prop.localPosition = data.Position;
+                prop.localEulerAngles = data.Rotation;
+            }
+            else
+            {
+                prop.position = parent.root.TransformPoint(data.Position);
+                prop.rotation = parent.root.rotation * Quaternion.Euler(data.Rotation);
+            }
+            if (data.AlignRadial)
+            {
+                prop.up = (prop.position - parent.root.position).normalized;
+            }
+            foreach (var component in prop.GetComponentsInChildren<Component>(true))
+            {
+                if (component == null) continue;
+                if (component is SectoredMonoBehaviour sectoredBehavior)
+                    sectoredBehavior.SetSector(prop.GetComponentInParent<Sector>() ?? prop.transform.root.GetComponentInChildren<Sector>());
+                else if (component is InteractVolume interactVolume)
+                    interactVolume._playerCam = Locator.GetPlayerCamera();
+                else if (component is DestroyOnEnterTrigger destroyOnEnterTrigger)
+                    GameObject.Destroy(destroyOnEnterTrigger);
+                else if (component is Collider collider)
+                    collider.enabled = true;
+                else if (component is Renderer renderer)
+                    renderer.enabled = true;
+                else if (component is Shape shape)
+                    shape.enabled = true;
+            }
+            return prop;
+        }
+
+        public static ColorData ToData(this Color c) => new() { r = c.r, g = c.g, b = c.b, a = c.a };
+        public static Color ToColor(this ColorData c) => c != null ? new Color(c.r, c.g, c.b, c.a) : Color.white;
+        public static Vector3Data ToData(this Vector3 v) => new() { x = v.x, y = v.y, z = v.z };
         public static Vector3 ToVector3(this Vector3Data v) => v != null ? new Vector3(v.x, v.y, v.z) : Vector3.zero;
     }
 }

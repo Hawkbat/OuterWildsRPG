@@ -13,6 +13,7 @@ var pipeline = new MarkdownPipelineBuilder()
     .UseAutoLinks()
     .UseEmojiAndSmiley()
     .UseEmphasisExtras()
+    .UseGenericAttributes()
     .UseGridTables()
     .UseListExtras()
     .UseSmartyPants()
@@ -121,7 +122,7 @@ void Export()
     }
 
     var navHtml = $"<ul>" +
-        $"{string.Join("", rootCategory.Pages.Select(p => $"<li><a href=\"/{p.WebPath}\">{(p.IsIndex ? "<img src=\"/logo.png\" />" : string.Empty)}{p.Title}</a></li>"))}" +
+        $"{string.Join("", rootCategory.Pages.Select(p => $"<li><a href=\"/{p.WebPath}\">{(p.IsIndex ? "<img src=\"/logo.png\" />" : string.Empty)}<span>{p.Title}</span></a></li>"))}" +
         $"{string.Join("", categories.Where(c => c != rootCategory).Select(c => $"<li><a href=\"/{c.WebPath}/\">{c.Title}</a><ul>" +
         $"{string.Join("", c.Pages.Select(p => p.IsIndex ? string.Empty : $"<li><a href=\"/{p.WebPath}\">{p.Title}</a></li>"))}" +
         $"</ul></li>"))}" +

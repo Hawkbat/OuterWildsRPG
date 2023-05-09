@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace OuterWildsRPG.Objects.Drops
 {
+    [Description("A file named 'drops.json' in the root of a mod folder that contains a list of drops to load.")]
     public class DropListData : MultipleEntityData<DropData>
     {
         [Required]

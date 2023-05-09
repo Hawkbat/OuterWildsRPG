@@ -1,0 +1,13 @@
+{
+  "$schema": "../schemas/perk.schema.json",
+  "id": "INVENTORY_SPACE_1",
+  "name": "Inventory Up I",
+  "level": 1,
+  "iconPath": "INVENTORY_SPACE.png",
+  "color": { "r": 1, "g": 0.75, "b": 0 },
+  "buffs": [
+    {
+      "inventorySpace": { "amount": 5 }
+    }
+  ]
+}

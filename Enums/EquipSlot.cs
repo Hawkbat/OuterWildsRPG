@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OuterWildsRPG.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,11 +13,13 @@ namespace OuterWildsRPG.Enums
         Helmet = 1,
         Suit = 2,
         Jetpack = 3,
-        Probe = 4,
-        Signalscope = 5,
-        Flashlight = 6,
-        Translator = 7,
-        Radio = 8,
-        Stick = 9,
+        Scout = 4,
+        Launcher = 5,
+        Signalscope = 6,
+        Flashlight = 7,
+        Translator = 8,
+        Radio = 9,
+        Stick = 10,
+        Item = 11,
     }
 }

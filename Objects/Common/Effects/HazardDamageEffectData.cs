@@ -12,14 +12,19 @@ using System.ComponentModel;
 
 namespace OuterWildsRPG.Objects.Common.Effects
 {
+    [Description("Modifies the damage the player takes from various types of hazards.")]
     public class HazardDamageEffectData : EntityLikeData
     {
         [Required]
         [JsonConverter(typeof(StringEnumConverter), typeof(CamelCaseNamingStrategy))]
         [Description("The type of hazard to modify damage for.")]
         public HazardType type;
+
+        [DefaultValue(0f)]
         [Description("The percentage of the initial damage to add/reduce. E.g. a value of -0.1 means subtract 10% of the base damage from the total.")]
         public float add = 0f;
+
+        [DefaultValue(1f)]
         [Description("The percentage to multiply the total damage by. E.g. a value of 0.25 will result in 25% damage, or a 75% reduction.")]
         public float multiply = 1f;
 

@@ -1,10 +1,11 @@
 {
-  "$schema": "https://raw.githubusercontent.com/Hawkbat/OuterWildsRPG/main/schemas/drop.schema.json",
+  "$schema": "../schemas/drop.schema.json",
   "id": "RADIO_HIDEANDSEEK",
-  "name": "Cassette - Campfire Tune",
+  "name": "Campfire Tune Cassette",
   "description": "A cassette tape for your ship's radio that plays a catchy tune.",
   "rarity": "uncommon",
   "equipSlot": "radio",
+  "iconPath": "RECORDER.png",
   "locations": [
     {
       "parentPath": "TimberHearth_Body/Sector_TH",
@@ -12,15 +13,10 @@
         "x": -34.81908,
         "y": -10.66688,
         "z": 191.5841
-      },
-      "rotation": {
-        "x": 273.4768,
-        "y": 11.40733,
-        "z": 158.3292
       }
     }
   ],
   "buffs": [
-
+    { "travelMusic": { "audioType": "ToolScopeHideAndSeekSignal" } }
   ]
 }

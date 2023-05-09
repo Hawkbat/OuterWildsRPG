@@ -1,0 +1,10 @@
+{
+  "$schema": "../schemas/drop.schema.json",
+  "id": "BASIC_JETPACK",
+  "name": "Hatchling's Jetpack",
+  "description": "A rocket-powered jetpack. Many a Hearthian has burnt the backs of their legs from using these improperly.",
+  "rarity": "uncommon",
+  "equipSlot": "jetpack",
+  "iconPath": "JETPACK.png",
+  "locations": []
+}

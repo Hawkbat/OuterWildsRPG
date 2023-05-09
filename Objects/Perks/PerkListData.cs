@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace OuterWildsRPG.Objects.Perks
 {
+    [Description("A file named 'perks.json' in the root of a mod folder that contains a list of perks to load.")]
     public class PerkListData : MultipleEntityData<PerkData>
     {
         [Required]

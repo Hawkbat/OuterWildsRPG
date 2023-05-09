@@ -1,8 +1,8 @@
 {
-  "$schema": "https://raw.githubusercontent.com/Hawkbat/OuterWildsRPG/main/schemas/quest.schema.json",
-  "id": "QST_HIDE_AND_SEEK",
+  "$schema": "../schemas/quest.schema.json",
+  "id": "HIDE_AND_SEEK",
   "name": "Hide and Seek",
-  "type": "misc",
+  "type": "side",
   "steps": [
     {
       "id": "START",
@@ -11,10 +11,10 @@
       "completeOn": [
         {
           "type": "dialogueCondition",
-          "value": "BeginHideAndSeek"
+          "value": "BeginHideAndSeek",
+          "markerPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Characters_LowerVillage/Kids_PreGame/Villager_HEA_Tephra/Tephra_FocalPoint"
         }
-      ],
-      "locationPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Characters_LowerVillage/Kids_PreGame/Villager_HEA_Tephra/Tephra_FocalPoint"
+      ]
     },
     {
       "id": "HINT",
