@@ -17,6 +17,8 @@ namespace OuterWildsRPG.Components
         VanillaDialogueTree vanillaDialogueTree;
         ShopDialogueTree shopDialogueTree;
 
+        public Shop GetShop() => shop;
+
         public void Init(Shop shop)
         {
             this.shop = shop;

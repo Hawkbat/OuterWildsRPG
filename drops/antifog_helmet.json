@@ -1,0 +1,15 @@
+{
+  "$schema": "../schemas/drop.schema.json",
+  "id": "ANTIFOG_HELMET",
+  "name": "Feldspar's Helmet",
+  "description": "A space helmet with special lenses that enable the user to see clearly through fog.",
+  "rarity": "rare",
+  "equipSlot": "helmet",
+  "iconPath": "HELMET.png",
+  "locations": [],
+  "buffs": [
+    {
+      "fogDensity": { "multiply": 0.25 }
+    }
+  ]
+}

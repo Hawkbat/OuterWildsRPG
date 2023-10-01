@@ -11,27 +11,33 @@ namespace OuterWildsRPG.Objects.Common
     public class Buff : EntityLike<Buff, BuffData>
     {
         public IEntity Entity;
-        public MoveSpeedEffect MoveSpeed;
-        public JumpSpeedEffect JumpSpeed;
+        public CustomEffect Custom;
+        public FogDensityEffect FogDensity;
+        public GiveDropEffect GiveDrop;
         public HazardDamageEffect HazardDamage;
+        public HealEffect Heal;
+        public HoldBreathEffect HoldBreath;
+        public InventorySpaceEffect InventorySpace;
+        public JumpSpeedEffect JumpSpeed;
+        public MaxHealthEffect MaxHealth;
+        public MoveSpeedEffect MoveSpeed;
         public TranslationSpeedEffect TranslationSpeed;
         public TravelMusicEffect TravelMusic;
-        public InventorySpaceEffect InventorySpace;
-        public HealEffect Heal;
-        public GiveDropEffect GiveDrop;
-        public CustomEffect Custom;
 
         public override void Load(BuffData data, string modID)
         {
-            MoveSpeed = MoveSpeedEffect.LoadNew(data.moveSpeed, modID);
-            JumpSpeed = JumpSpeedEffect.LoadNew(data.jumpSpeed, modID);
+            Custom = CustomEffect.LoadNew(data.custom, modID);
+            FogDensity = FogDensityEffect.LoadNew(data.fogDensity, modID);
+            GiveDrop = GiveDropEffect.LoadNew(data.giveDrop, modID);
             HazardDamage = HazardDamageEffect.LoadNew(data.hazardDamage, modID);
+            Heal = HealEffect.LoadNew(data.heal, modID);
+            HoldBreath = HoldBreathEffect.LoadNew(data.holdBreath, modID);
+            InventorySpace = InventorySpaceEffect.LoadNew(data.inventorySpace, modID);
+            JumpSpeed = JumpSpeedEffect.LoadNew(data.jumpSpeed, modID);
+            MaxHealth = MaxHealthEffect.LoadNew(data.maxHealth, modID);
+            MoveSpeed = MoveSpeedEffect.LoadNew(data.moveSpeed, modID);
             TranslationSpeed = TranslationSpeedEffect.LoadNew(data.translationSpeed, modID);
             TravelMusic = TravelMusicEffect.LoadNew(data.travelMusic, modID);
-            InventorySpace = InventorySpaceEffect.LoadNew(data.inventorySpace, modID);
-            Heal = HealEffect.LoadNew(data.heal, modID);
-            GiveDrop = GiveDropEffect.LoadNew(data.giveDrop, modID);
-            Custom = CustomEffect.LoadNew(data.custom, modID);
             foreach (var effect in GetEffects())
                 effect.Buff = this;
         }
@@ -45,15 +51,18 @@ namespace OuterWildsRPG.Objects.Common
 
         public IEnumerable<IBuffEffect> GetEffects()
         {
-            if (MoveSpeed != null) yield return MoveSpeed;
-            if (JumpSpeed != null) yield return JumpSpeed;
+            if (Custom != null) yield return Custom;
+            if (FogDensity != null) yield return FogDensity;
+            if (GiveDrop != null) yield return GiveDrop;
             if (HazardDamage != null) yield return HazardDamage;
+            if (Heal != null) yield return Heal;
+            if (HoldBreath != null) yield return HoldBreath;
+            if (InventorySpace != null) yield return InventorySpace;
+            if (JumpSpeed != null) yield return JumpSpeed;
+            if (MaxHealth != null) yield return MaxHealth;
+            if (MoveSpeed != null) yield return MoveSpeed;
             if (TranslationSpeed != null) yield return TranslationSpeed;
             if (TravelMusic != null) yield return TravelMusic;
-            if (InventorySpace != null) yield return InventorySpace;
-            if (Heal != null) yield return Heal;
-            if (GiveDrop != null) yield return GiveDrop;
-            if (Custom != null) yield return Custom;
         }
     }
 }

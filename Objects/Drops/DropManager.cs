@@ -53,8 +53,14 @@ namespace OuterWildsRPG.Objects.Drops
         public static IEnumerable<Drop> GetAllDrops()
             => drops.Values;
 
+        public static IEnumerable<Drop> GetOwnedDrops()
+            => GetHotbarDrops().Concat(GetInventoryDrops()).Concat(GetEquippedDrops());
+
         public static IEnumerable<Drop> GetInventoryDrops()
             => DropSaveData.Instance.Inventory.Select(i => GetDrop(i));
+
+        public static bool HasInventoryDrop(Drop drop)
+            => DropSaveData.Instance.Inventory.Contains(drop.FullID);
 
         public static Drop GetInventoryDrop(int index)
         {
@@ -63,24 +69,85 @@ namespace OuterWildsRPG.Objects.Drops
             return null;
         }
 
+        public static IEnumerable<Drop> GetEquippedDrops()
+        {
+            return DropSaveData.Instance.Equipment.Values.Select(s => GetDrop(s, OuterWildsRPG.ModID));
+        }
+
         public static Drop GetEquippedDrop(EquipSlot slot)
         {
             if (!DropSaveData.Instance.Equipment.ContainsKey(slot)) return null;
             return GetDrop(DropSaveData.Instance.Equipment[slot]);
         }
 
-        public static IEnumerable<Drop> GetEquippedDrops()
-        {
-            return DropSaveData.Instance.Equipment.Values.Select(s => GetDrop(s, OuterWildsRPG.ModID));
-        }
+        public static bool HasEquippedDrop(Drop drop)
+            => GetEquippedDrops().Contains(drop);
 
         public static int GetTotalInventoryCapacity() => BuffManager.GetInventoryCapacity();
         public static int GetUsedInventoryCapacity() => DropSaveData.Instance.Inventory.Count;
         public static int GetRemainingInventoryCapacity() => GetTotalInventoryCapacity() - GetUsedInventoryCapacity();
 
+        public static IEnumerable<Drop> GetHotbarDrops()
+            => DropSaveData.Instance.Hotbar.Select(i => GetDrop(i));
+
+        public static bool HasHotbarDrop(Drop drop)
+            => DropSaveData.Instance.Hotbar.Contains(drop.FullID);
+
+        public static Drop GetHotbarDrop(int index)
+            => index >= 0 && index < GetUsedHotbarCapacity() ? GetDrop(DropSaveData.Instance.Hotbar[index]) : null;
+
+        public static int GetTotalHotbarCapacity() => 5;
+        public static int GetUsedHotbarCapacity() => DropSaveData.Instance.Hotbar.Count;
+        public static int GetRemainingHotbarCapacity() => GetTotalHotbarCapacity() - GetUsedHotbarCapacity();
+
+        public static bool AddDropToHotbar(Drop drop)
+        {
+            if (GetRemainingHotbarCapacity() <= 0) return false;
+            if (HasHotbarDrop(drop)) return false;
+            DropSaveData.Instance.Hotbar.Add(drop.FullID);
+            ModPlayerController.SetHotbarIndex(DropSaveData.Instance.Hotbar.IndexOf(drop.FullID));
+            SaveDataManager.Save();
+            OnReceiveDrop.Invoke(drop);
+            return true;
+        }
+
+        public static bool RemoveDropFromHotbar(Drop drop)
+        {
+            if (!HasHotbarDrop(drop)) return false;
+            DropSaveData.Instance.Hotbar.Remove(drop.FullID);
+            SaveDataManager.Save();
+            OnRemoveDrop.Invoke(drop);
+            return true;
+        }
+
+        public static bool MoveDropFromInventoryToHotbar(Drop drop)
+        {
+            if (!HasInventoryDrop(drop)) return false;
+            if (GetRemainingHotbarCapacity() <= 0) return false;
+            if (HasHotbarDrop(drop)) return false;
+            if (!DropSaveData.Instance.Inventory.Remove(drop.FullID)) return false;
+            DropSaveData.Instance.Hotbar.Add(drop.FullID);
+            ModPlayerController.SetHotbarIndex(DropSaveData.Instance.Hotbar.IndexOf(drop.FullID));
+            SaveDataManager.Save();
+            return true;
+        }
+
+        public static bool MoveDropFromHotbarToInventory(Drop drop)
+        {
+            if (!HasHotbarDrop(drop)) return false;
+            if (GetRemainingInventoryCapacity() <= 0) return false;
+            if (HasInventoryDrop(drop)) return false;
+            if (!DropSaveData.Instance.Hotbar.Remove(drop.FullID)) return false;
+            DropSaveData.Instance.Inventory.Add(drop.FullID);
+            ModPlayerController.SetHotbarIndex(-1);
+            SaveDataManager.Save();
+            return true;
+        }
+
         public static bool HasDrop(Drop drop)
         {
             if (DropSaveData.Instance.Inventory.Contains(drop.FullID)) return true;
+            if (DropSaveData.Instance.Hotbar.Contains(drop.FullID)) return true;
             if (DropSaveData.Instance.Equipment.ContainsValue(drop.FullID)) return true;
             return false;
         }
@@ -112,14 +179,13 @@ namespace OuterWildsRPG.Objects.Drops
 
         public static bool EquipDrop(Drop drop, EquipSlot slot)
         {
-            if (drop.EquipSlot != slot || slot == EquipSlot.None) return false;
-            if (slot != EquipSlot.Item && !DropSaveData.Instance.Inventory.Contains(drop.FullID)) return false;
+            if (drop.EquipSlot != slot || slot == EquipSlot.None || slot == EquipSlot.Item) return false;
             if (DropSaveData.Instance.Equipment.ContainsKey(slot))
             {
                 if (!UnequipDrop(GetEquippedDrop(slot), slot))
                     return false;
             }
-            if (slot != EquipSlot.Item) DropSaveData.Instance.Inventory.Remove(drop.FullID);
+            DropSaveData.Instance.Inventory.Remove(drop.FullID);
             DropSaveData.Instance.Equipment[slot] = drop.FullID;
             SaveDataManager.Save();
             OnEquipDrop.Invoke(drop, slot);
@@ -131,7 +197,7 @@ namespace OuterWildsRPG.Objects.Drops
             if (!DropSaveData.Instance.Equipment.ContainsKey(slot)) return false;
             if (DropSaveData.Instance.Equipment[slot] != drop.FullID) return false;
             DropSaveData.Instance.Equipment.Remove(slot);
-            if (slot != EquipSlot.Item) DropSaveData.Instance.Inventory.Add(drop.FullID);
+            DropSaveData.Instance.Inventory.Add(drop.FullID);
             SaveDataManager.Save();
             OnUnequipDrop.Invoke(drop, slot);
             return true;
@@ -139,6 +205,8 @@ namespace OuterWildsRPG.Objects.Drops
 
         public static bool ReceiveDrop(Drop drop)
         {
+            if (drop.EquipSlot == EquipSlot.Item && GetRemainingHotbarCapacity() > 0)
+                return AddDropToHotbar(drop);
             if (GetRemainingInventoryCapacity() <= 0) return false;
             DropSaveData.Instance.Inventory.Add(drop.FullID);
             SaveDataManager.Save();
@@ -155,6 +223,8 @@ namespace OuterWildsRPG.Objects.Drops
 
         public static bool RemoveDrop(Drop drop)
         {
+            if (HasHotbarDrop(drop))
+                return RemoveDropFromHotbar(drop);
             if (DropSaveData.Instance.Inventory.Remove(drop.FullID))
             {
                 SaveDataManager.Save();
@@ -208,8 +278,11 @@ namespace OuterWildsRPG.Objects.Drops
                 UnityUtils.PlaceProp(go.transform, location);
                 go.transform.position += go.transform.up * 0.1f;
 
-                var pickup = go.AddComponent<DropPickup>();
+                var pickup = go.AddComponent<DropPickupController>();
                 pickup.Init(location);
+
+                WorldIconManager.MakeTarget(go.transform);
+
                 return true;
             } catch (Exception ex)
             {
@@ -218,11 +291,11 @@ namespace OuterWildsRPG.Objects.Drops
             return false;
         }
 
-        public static DropPickup FindDropPickup(DropLocation location)
-            => DropPickup.All.Find(d => d.GetLocation() == location && d.gameObject.activeSelf);
+        public static DropPickupController FindDropPickup(DropLocation location)
+            => DropPickupController.All.Find(d => d.GetLocation() == location && d.gameObject.activeSelf);
 
-        public static IEnumerable<DropPickup> FindDropPickups(Drop drop)
-            => DropPickup.All.Where(d => d.GetLocation().Drop == drop && d.gameObject.activeSelf);
+        public static IEnumerable<DropPickupController> FindDropPickups(Drop drop)
+            => DropPickupController.All.Where(d => d.GetLocation().Drop == drop && d.gameObject.activeSelf);
 
         public static bool PickUpDropLocation(DropLocation dropLocation)
         {
@@ -243,9 +316,13 @@ namespace OuterWildsRPG.Objects.Drops
         {
             foreach (var item in GameObject.FindObjectsOfType<OWItem>())
             {
+                var itemDropID = UnityUtils.GetTransformPath(item.transform).Replace('/', '$');
+                var itemDrop = GetDrop(itemDropID);
+                if (itemDrop != null) continue;
+
                 DropRarity rarity = item.GetItemType() switch
                 {
-                    ItemType.Scroll => DropRarity.Rare,
+                    ItemType.Scroll => DropRarity.Uncommon,
                     ItemType.WarpCore => (item as WarpCoreItem).GetWarpCoreType() switch
                     {
                         WarpCoreType.Vessel => DropRarity.Legendary,
@@ -255,12 +332,12 @@ namespace OuterWildsRPG.Objects.Drops
                     },
                     ItemType.SharedStone => DropRarity.Rare,
                     ItemType.ConversationStone => DropRarity.Rare,
-                    ItemType.Lantern => DropRarity.Rare,
-                    ItemType.SlideReel => DropRarity.Rare,
+                    ItemType.Lantern => DropRarity.Uncommon,
+                    ItemType.SlideReel => DropRarity.Uncommon,
                     ItemType.DreamLantern => (item as DreamLanternItem).GetLanternType() switch
                     {
-                        DreamLanternType.Nonfunctioning => DropRarity.Epic,
-                        DreamLanternType.Malfunctioning => DropRarity.Epic,
+                        DreamLanternType.Nonfunctioning => DropRarity.Uncommon,
+                        DreamLanternType.Malfunctioning => DropRarity.Uncommon,
                         DreamLanternType.Functioning => DropRarity.Rare,
                         _ => DropRarity.Common,
                     },
@@ -294,9 +371,9 @@ namespace OuterWildsRPG.Objects.Drops
                     _ => string.Empty,
                 };
 
-                var drop = Drop.LoadNew(new DropData()
+                itemDrop = Drop.LoadNew(new DropData()
                 {
-                    id = UnityUtils.GetTransformPath(item.transform).Replace('/', '$'),
+                    id = itemDropID,
                     name = item.GetDisplayName(),
                     equipSlot = EquipSlot.Item,
                     description = string.Empty,
@@ -311,8 +388,9 @@ namespace OuterWildsRPG.Objects.Drops
                         }
                     },
                 }, OuterWildsRPG.ModID);
-                drop.Resolve();
-                RegisterDrop(drop);
+
+                itemDrop.Resolve();
+                RegisterDrop(itemDrop);
             }
 
             foreach (var drop in GetAllDrops())
@@ -331,12 +409,7 @@ namespace OuterWildsRPG.Objects.Drops
 
         public static void CleanUp()
         {
-            var itemDrop = GetEquippedDrop(EquipSlot.Item);
-            if (itemDrop != null)
-            {
-                UnequipDrop(itemDrop, EquipSlot.Item);
-                RemoveDrop(itemDrop);
-            }
+
         }
     }
 }

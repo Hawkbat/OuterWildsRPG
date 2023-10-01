@@ -1,4 +1,5 @@
-﻿using OuterWildsRPG.Enums;
+﻿using OuterWildsRPG.Components;
+using OuterWildsRPG.Enums;
 using OuterWildsRPG.Objects.Common;
 using OuterWildsRPG.Utils;
 using System;
@@ -32,6 +33,7 @@ namespace OuterWildsRPG.Objects.Quests
 
         static HashSet<string> autoTrackedQuests = new();
         static Dictionary<string, List<Transform>> factTargets = new();
+        static Dictionary<string, QuestGiverController> questGivers = new();
 
         public static Quest GetQuest(string id, string modID = null)
         {
@@ -191,6 +193,8 @@ namespace OuterWildsRPG.Objects.Quests
             GenerateAutoQuests();
 
             foreach (var quest in GetAllQuests()) quest.SetUp();
+
+            SetUpAllQuestGivers();
         }
 
         public static void Update()
@@ -202,6 +206,7 @@ namespace OuterWildsRPG.Objects.Quests
         public static void CleanUp()
         {
             factTargets.Clear();
+            questGivers.Clear();
 
             foreach (var quest in GetAllQuests()) quest.CleanUp();
         }
@@ -412,6 +417,20 @@ namespace OuterWildsRPG.Objects.Quests
             if (!factTargets.ContainsKey(factID))
                 factTargets[factID] = new List<Transform>();
             factTargets[factID].Add(target);
+        }
+
+        static void SetUpAllQuestGivers()
+        {
+
+            foreach (var quest in GetAllQuests())
+            {
+                var questGiverTarget = quest.GetQuestGiver();
+                if (questGiverTarget == null) continue;
+                var questGiver = questGiverTarget.gameObject.AddComponent<QuestGiverController>();
+                questGiver.Init(quest);
+                WorldIconManager.MakeTarget(questGiver.transform);
+                questGivers.Add(quest.FullID, questGiver);
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿# Adding RPG Content to Your Mod
+﻿# Adding Content
 
-You can add quests, drops, and perks in either of two ways: top-level JSON files, or per-item JSON files.
+You can add quests, drops, shops, and perks in either of two ways: top-level JSON files, or per-item JSON files.
 ## Top-Level JSON Files
 If you have a small number of items, you can use a json file at the root of your project for each type of item (`quests.json`, `drops.json`, `shops.json`, or `perks.json`):
 
@@ -87,7 +87,7 @@ If you have a small number of items, you can use a json file at the root of your
 }
 ```
 ## Per-Item JSON Files
-If you have many items, or wish to organize them independently, you can create individual .json files for each one, within the appropriate subfolder (`quests`, `drops`, or `perks`). The individual file names do not matter, but you should ensure the `id` property of each item is unique:
+If you have many items, or wish to organize them independently, you can create individual .json files for each one, within the appropriate subfolder (`quests`, `drops`, `shops`, or `perks`). The individual file names do not matter, but you should ensure the `id` property of each item is unique:
 
 
 ![The contents of a mod folder containing various quest .json files](screenshot-individual-jsons.png)

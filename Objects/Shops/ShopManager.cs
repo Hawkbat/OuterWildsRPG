@@ -15,12 +15,14 @@ namespace OuterWildsRPG.Objects.Shops
 {
     public static class ShopManager
     {
-        static readonly Dictionary<string, Shop> shops = new();
-
         public class ShopItemEvent : UnityEvent<Shop, Drop> { }
         public static ShopItemEvent OnBuyDrop = new();
         public static ShopItemEvent OnSellDrop = new();
         public static ShopItemEvent OnBuyBackDrop = new();
+
+        static readonly Dictionary<string, Shop> shops = new();
+
+        static readonly Dictionary<string, ShopkeeperController> shopkeepers = new();
 
         public static Shop GetShop(string id, string modID = null)
         {
@@ -46,8 +48,12 @@ namespace OuterWildsRPG.Objects.Shops
 
         public static int GetCurrencyAmount() => ShopSaveData.Instance.Currency;
 
+        public static ShopkeeperController GetShopkeeper(Shop shop)
+            => shopkeepers.TryGetValue(shop.FullID, out var shopkeeper) ? shopkeeper : null;
+
         public static IEnumerable<Drop> GetBuyableShopItems(Shop shop) => shop.Items.Select(i => i.Drop);
-        public static IEnumerable<Drop> GetSellableShopItems(Shop shop) => DropManager.GetInventoryDrops().Distinct();
+        public static IEnumerable<Drop> GetSellableShopItems(Shop shop) =>
+            DropManager.GetHotbarDrops().Concat(DropManager.GetInventoryDrops()).Distinct();
         public static IEnumerable<Drop> GetBuyBackShopItems(Shop shop)
         {
             if (!ShopSaveData.Instance.Sales.ContainsKey(shop.FullID)) return Enumerable.Empty<Drop>();
@@ -61,7 +67,8 @@ namespace OuterWildsRPG.Objects.Shops
             var stock = ShopSaveData.Instance.Purchases.ContainsKey(shop.FullID) && ShopSaveData.Instance.Purchases[shop.FullID].TryGetValue(item.Drop.FullID, out var count) ? item.InitialStock - count : item.InitialStock;
             return stock;
         }
-        public static int GetSellAmount(Shop shop, Drop drop) => DropManager.GetInventoryDrops().Count(d => d == drop);
+        public static int GetSellAmount(Shop shop, Drop drop)
+            => DropManager.GetHotbarDrops().Concat(DropManager.GetInventoryDrops()).Count(d => d == drop);
         public static int GetBuyBackAmount(Shop shop, Drop drop)
         {
             if (ShopSaveData.Instance.Sales.ContainsKey(shop.FullID) && ShopSaveData.Instance.Sales[shop.FullID].TryGetValue(drop.FullID, out var count))
@@ -143,12 +150,14 @@ namespace OuterWildsRPG.Objects.Shops
                 }
                 var shopkeep = character.gameObject.AddComponent<ShopkeeperController>();
                 shopkeep.Init(shop);
+                WorldIconManager.MakeTarget(shopkeep.transform);
+                shopkeepers.Add(shop.FullID, shopkeep);
             }
         }
 
         public static void CleanUp()
         {
-
+            shopkeepers.Clear();
         }
     }
 }

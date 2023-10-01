@@ -197,7 +197,9 @@ namespace OuterWildsRPG.Components.Graph
 
         protected override void FinishRevealAnimation()
         {
-            graphProvider.OnCardRevealStateUpdated(id);
+            var isRevealed = graphProvider.GetCardIsRevealed(id);
+            var isRumored = graphProvider.GetCardIsRumor(id);
+            graphProvider.OnCardRevealStateUpdated(id, isRevealed, isRumored);
         }
     }
 }

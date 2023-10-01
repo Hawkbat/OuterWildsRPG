@@ -23,30 +23,46 @@ namespace OuterWildsRPG
         public static AudioClip StrangerJingleAudioClip;
         public static AudioClip LevelUpJingleAudioClip;
         public static Texture2D ParticleTex;
+        public static Texture2D WorldIconQuestTex;
+        public static Texture2D WorldIconTalkTex;
+        public static Texture2D WorldIconTextTex;
+        public static Texture2D WorldIconShopTex;
+        public static Sprite WorldIconQuestSprite;
+        public static Sprite WorldIconTalkSprite;
+        public static Sprite WorldIconTextSprite;
+        public static Sprite WorldIconShopSprite;
 
-        public static Color HUDBackColor = new Color(0.4f, 0.4f, 0.4f, 1f);
+        public static Color HUDBackColor = new(0.4f, 0.4f, 0.4f, 1f);
         public static Color HUDForeColor = Color.white;
-        public static Color HUDActiveColor = new Color(0.9686f, 0.498f, 0.2078f);
+        public static Color HUDActiveColor = new(0.9686f, 0.498f, 0.2078f);
         public static Color RarityCommonColor = Color.white;
         public static Color RarityUncommonColor = Color.HSVToRGB(120f / 360f, 1f, 1f);
         public static Color RarityRareColor = Color.HSVToRGB(210f / 360f, 1f, 1f);
         public static Color RarityEpicColor = Color.HSVToRGB(285f / 360f, 1f, 1f);
         public static Color RarityLegendaryColor = Color.HSVToRGB(30f / 360f, 1f, 1f);
 
-        static Dictionary<string, Texture2D> iconTextures = new();
-        static Dictionary<string, Sprite> iconSprites = new();
+        static readonly Dictionary<string, Texture2D> iconTextures = new();
+        static readonly Dictionary<string, Sprite> iconSprites = new();
 
         public static void Init()
         {
             CheckboxOnTex = OuterWildsRPG.Instance.ModHelper.Assets.GetTexture("assets/CheckboxOn.png");
             CheckboxOffTex = OuterWildsRPG.Instance.ModHelper.Assets.GetTexture("assets/CheckboxOff.png");
-            CheckboxOnSprite = Sprite.Create(CheckboxOnTex, new Rect(0f, 0f, CheckboxOnTex.width, CheckboxOnTex.height), Vector2.one * 0.5f, 256f);
-            CheckboxOffSprite = Sprite.Create(CheckboxOffTex, new Rect(0f, 0f, CheckboxOffTex.width, CheckboxOffTex.height), Vector2.one * 0.5f, 256f);
+            CheckboxOnSprite = GetSprite(CheckboxOnTex);
+            CheckboxOffSprite = GetSprite(CheckboxOffTex);
             HearthianJingleAudioClip = OuterWildsRPG.Instance.ModHelper.Assets.GetAudio("assets/HearthianJingle.wav");
             NomaiJingleAudioClip = OuterWildsRPG.Instance.ModHelper.Assets.GetAudio("assets/NomaiJingle.wav");
             StrangerJingleAudioClip = OuterWildsRPG.Instance.ModHelper.Assets.GetAudio("assets/StrangerJingle.wav");
             LevelUpJingleAudioClip = OuterWildsRPG.Instance.ModHelper.Assets.GetAudio("assets/LevelUpJingle.wav");
             ParticleTex = OuterWildsRPG.Instance.ModHelper.Assets.GetTexture("assets/Particle.png");
+            WorldIconQuestTex = OuterWildsRPG.Instance.ModHelper.Assets.GetTexture("assets/WorldIconQuest.png");
+            WorldIconTalkTex = OuterWildsRPG.Instance.ModHelper.Assets.GetTexture("assets/WorldIconTalk.png");
+            WorldIconTextTex = OuterWildsRPG.Instance.ModHelper.Assets.GetTexture("assets/WorldIconText.png");
+            WorldIconShopTex = OuterWildsRPG.Instance.ModHelper.Assets.GetTexture("assets/WorldIconShop.png");
+            WorldIconQuestSprite = GetSprite(WorldIconQuestTex);
+            WorldIconTalkSprite = GetSprite(WorldIconTalkTex);
+            WorldIconTextSprite = GetSprite(WorldIconTextTex);
+            WorldIconShopSprite = GetSprite(WorldIconShopTex);
         }
 
         public static Color GetRarityColor(DropRarity rarity)
@@ -91,7 +107,7 @@ namespace OuterWildsRPG
             var icon = GetIconTexture(filename, modID);
             if (icon != null)
             {
-                var sprite = Sprite.Create(icon, new Rect(0f, 0f, icon.width, icon.height), Vector2.one * 0.5f, 32f);
+                var sprite = GetSprite(icon, 32f);
                 sprite.name = fullID;
                 iconSprites.Add(fullID, sprite);
                 return sprite;
@@ -123,6 +139,13 @@ namespace OuterWildsRPG
                 return contents;
             }
             return null;
+        }
+
+        static Sprite GetSprite(Texture2D tex, float pixelsPerUnit = 256f)
+        {
+            var sprite = Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), Vector2.one * 0.5f, pixelsPerUnit);
+            sprite.name = tex.name;
+            return sprite;
         }
     }
 }

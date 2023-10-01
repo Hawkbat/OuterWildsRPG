@@ -1,7 +1,9 @@
-﻿using OuterWildsRPG.Enums;
+﻿using OuterWildsRPG.Components;
+using OuterWildsRPG.Enums;
 using OuterWildsRPG.Objects.Common.Effects;
 using OuterWildsRPG.Objects.Drops;
 using OuterWildsRPG.Objects.Perks;
+using OuterWildsRPG.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,7 +60,7 @@ namespace OuterWildsRPG.Objects.Common
             foreach (var effect in activeEffects)
                 multiplier *= effect.Multiply;
 
-            return (damage + addition) * multiplier;
+            return (damage + damage * addition) * multiplier;
         }
 
         public static float GetTranslationSpeedMultiplier()
@@ -72,6 +74,34 @@ namespace OuterWildsRPG.Objects.Common
             return multiplier;
         }
 
+        public static float GetSuffocationTimeModifier()
+        {
+            var modifier = 0f;
+            var activeEffects = GetAllActiveBuffs()
+                .Select(b => b.HoldBreath)
+                .Where(e => e != null);
+            foreach (var effect in activeEffects)
+                modifier += effect.Seconds;
+            return modifier;
+        }
+
+        public static float GetMaxHealthMultiplier()
+        {
+            var activeEffects = GetAllActiveBuffs()
+                .Select(b => b.MaxHealth)
+                .Where(e => e != null);
+
+            var addition = 0f;
+            foreach (var effect in activeEffects)
+                addition += effect.Add;
+
+            var multiplier = 1f;
+            foreach (var effect in activeEffects)
+                multiplier *= effect.Multiply;
+
+            return (1f + addition) * multiplier;
+        }
+
         public static int GetInventoryCapacity()
         {
             var capacity = 10;
@@ -81,6 +111,17 @@ namespace OuterWildsRPG.Objects.Common
             foreach (var effect in activeEffects)
                 capacity += effect.Amount;
             return capacity;
+        }
+
+        public static float GetFogDensityMultiplier()
+        {
+            var multiplier = 1f;
+            var activeEffects = GetAllActiveBuffs()
+                .Select(b => b.FogDensity)
+                .Where(e => e != null);
+            foreach (var effect in activeEffects)
+                multiplier *= effect.Multiply;
+            return multiplier;
         }
 
         static void UpdateMovementSpeed()
@@ -134,12 +175,24 @@ namespace OuterWildsRPG.Objects.Common
             }
         }
 
+        public static void SetUp()
+        {
+            foreach (var planetaryFogController in GameObject.FindObjectsOfType<PlanetaryFogController>())
+            {
+                planetaryFogController.gameObject.AddComponent<FogBuffController>();
+            }
+        }
+
         public static void Update()
         {
             UpdateMovementSpeed();
             UpdateJumpSpeed();
-            UpdateJumpSpeed();
             UpdateTravelMusic();
+        }
+
+        public static void CleanUp()
+        {
+
         }
     }
 }

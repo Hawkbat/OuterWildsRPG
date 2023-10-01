@@ -106,6 +106,16 @@ namespace OuterWildsRPG.Objects.Perks
             return false;
         }
 
+        public static bool UnseePerk(Perk perk)
+        {
+            if (PerkSaveData.Instance.HasSeen.Remove(perk.FullID))
+            {
+                SaveDataManager.Save();
+                return true;
+            }
+            return false;
+        }
+
         public static bool HasReadPerk(Perk perk)
             => PerkSaveData.Instance.HasRead.Contains(perk.FullID);
 

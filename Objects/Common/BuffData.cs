@@ -16,14 +16,17 @@ namespace OuterWildsRPG.Objects.Common
     [Description("Various possible effects that will apply when the buff is active.")]
     public class BuffData : EntityLikeData
     {
-        public MoveSpeedEffectData moveSpeed;
-        public JumpSpeedEffectData jumpSpeed;
+        public CustomEffectData custom;
+        public FogDensityEffectData fogDensity;
+        public GiveDropEffectData giveDrop;
         public HazardDamageEffectData hazardDamage;
+        public HealEffectData heal;
+        public HoldBreathEffectData holdBreath;
+        public InventorySpaceEffectData inventorySpace;
+        public JumpSpeedEffectData jumpSpeed;
+        public MaxHealthEffectData maxHealth;
+        public MoveSpeedEffectData moveSpeed;
         public TranslationSpeedEffectData translationSpeed;
         public TravelMusicEffectData travelMusic;
-        public InventorySpaceEffectData inventorySpace;
-        public HealEffectData heal;
-        public GiveDropEffectData giveDrop;
-        public CustomEffectData custom;
     }
 }

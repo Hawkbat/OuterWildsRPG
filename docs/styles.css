@@ -146,6 +146,17 @@ main {
         tab-size: 2;
     }
 
+    main code {
+        display: inline-block;
+        background: #111;
+        font-size: 12px;
+        border: 2px solid #111;
+    }
+
+    main blockquote {
+        font-style: italic;
+    }
+
     main .banner {
         display: block;
         width: 100%;

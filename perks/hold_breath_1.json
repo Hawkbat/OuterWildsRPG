@@ -1,0 +1,13 @@
+{
+  "$schema": "../schemas/perk.schema.json",
+  "id": "HOLD_BREATH_1",
+  "name": "Lung Capacity I",
+  "level": 1,
+  "iconPath": "HOLD_BREATH.png",
+  "color": { "r": 0, "g": 1, "b": 1 },
+  "buffs": [
+    {
+      "holdBreath": { "seconds": 5 }
+    }
+  ]
+}

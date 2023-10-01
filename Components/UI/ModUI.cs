@@ -1,5 +1,7 @@
 ﻿using OuterWildsRPG.Enums;
+using OuterWildsRPG.Objects.Common;
 using OuterWildsRPG.Objects.Quests;
+using OuterWildsRPG.Objects.Shops;
 using OuterWildsRPG.Utils;
 using System;
 using System.Collections.Generic;
@@ -23,9 +25,7 @@ namespace OuterWildsRPG.Components.UI
         ExperienceBar expBar;
         QuestList questList;
         ToolSlotStrip toolStrip;
-        readonly Dictionary<string, QuestGiverIcon> questGiverIcons = new();
-        readonly Dictionary<string, DialogueIcon> dialogueIcons = new();
-        readonly Dictionary<string, TranslateIcon> translateIcons = new();
+        Dictionary<WorldIconTarget, WorldIcon> worldIcons = new();
 
         public override void Setup()
         {
@@ -64,42 +64,15 @@ namespace OuterWildsRPG.Components.UI
 
             toolStrip = MakeChild(toolStrip, "ToolStrip");
 
-            foreach (var quest in QuestManager.GetAllQuests())
+            foreach (var target in WorldIconManager.GetAllTargets())
             {
-                if (quest.IsStarted || !quest.GetQuestGiver()) continue;
+                var existing = worldIcons.ContainsKey(target) ? worldIcons[target] : null;
+                if (existing) worldIcons.Remove(target);
 
-                var existing = questGiverIcons.ContainsKey(quest.FullID) ? questGiverIcons[quest.FullID] : null;
-                if (existing) questGiverIcons.Remove(quest.FullID);
+                var worldIcon = MakeChild(existing, target.name);
+                worldIcon.Init(target);
 
-                var questGiverIcon = MakeChild(existing, quest.FullID);
-                questGiverIcon.Init(quest);
-
-                questGiverIcons.Add(quest.FullID, questGiverIcon);
-            }
-
-
-            foreach (var dialogue in FindObjectsOfType<CharacterDialogueTree>())
-            {
-                var path = UnityUtils.GetTransformPath(dialogue.transform);
-                var existing = dialogueIcons.ContainsKey(path) ? dialogueIcons[path] : null;
-                if (existing) dialogueIcons.Remove(path);
-
-                var dialogueIcon = MakeChild(existing, dialogue.transform.parent.name);
-                dialogueIcon.Init(dialogue, questGiverIcons.Values);
-
-                dialogueIcons.Add(path, dialogueIcon);
-            }
-
-            foreach (var nomaiText in FindObjectsOfType<NomaiText>())
-            {
-                var path = UnityUtils.GetTransformPath(nomaiText.transform);
-                var existing = translateIcons.ContainsKey(path) ? translateIcons[path] : null;
-                if (existing) translateIcons.Remove(path);
-
-                var translateIcon = MakeChild(existing, nomaiText.transform.parent.name);
-                translateIcon.Init(nomaiText);
-
-                translateIcons.Add(path, translateIcon);
+                worldIcons.Add(target, worldIcon);
             }
         }
 

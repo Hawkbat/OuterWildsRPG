@@ -63,6 +63,9 @@
 	<None Update="icons\**\*.*">
 		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	</None>
+	<None Update="assets\worldicons.svg">
+	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	</None>
     <None Update="perks.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -39,7 +39,7 @@ namespace OuterWildsRPG.Components.Graph
         }
 
         public Card GetCard(string id) => cards[id];
-        public Link GetLink(string sourceID, string targetID) => links[$"{sourceID}@{targetID}"];
+        public Link GetLink(string sourceID, string targetID) => links[GraphLink.GetID(sourceID, targetID)];
 
         public void SetInitialCard(Card card)
         {
@@ -172,9 +172,9 @@ namespace OuterWildsRPG.Components.Graph
 
         public string GetInitialFocusedCard() => initialFocusedCard;
 
-        public IEnumerable<string> GetInitialCards() => cards.Values.Select(c => c.ID);
+        public IEnumerable<string> GetCards() => cards.Values.Select(c => c.ID);
 
-        public IEnumerable<KeyValuePair<string, string>> GetInitialLinks()
+        public IEnumerable<KeyValuePair<string, string>> GetLinks()
             => links.Values.Select(l => new KeyValuePair<string, string>(l.SourceID, l.TargetID));
 
         public IEnumerable<string> GetLinkDescription(string sourceID, string targetID)
@@ -186,16 +186,18 @@ namespace OuterWildsRPG.Components.Graph
         public bool GetLinkWasRevealed(string sourceID, string targetID)
             => GetLink(sourceID, targetID).PreviousState == Link.State.Visible;
 
-        public void OnCardRevealStateUpdated(string id)
+        public void OnCardRevealStateUpdated(string id, bool revealed, bool rumored)
         {
             var card = GetCard(id);
             card.PreviousState = card.CurrentState;
+            card.CurrentState = revealed ? rumored ? Card.State.Rumored : Card.State.Revealed : Card.State.Hidden;
         }
 
-        public void OnLinkRevealStateUpdated(string sourceID, string targetID)
+        public void OnLinkRevealStateUpdated(string sourceID, string targetID, bool revealed)
         {
             var link = GetLink(sourceID, targetID);
             link.PreviousState = link.CurrentState;
+            link.CurrentState = revealed ? Link.State.Visible : Link.State.Hidden;
         }
 
         public class Card
@@ -271,7 +273,7 @@ namespace OuterWildsRPG.Components.Graph
                 PreviousState = previousState;
             }
 
-            public string GetID() => $"{SourceID}@{TargetID}";
+            public string GetID() => GraphLink.GetID(SourceID, TargetID);
 
             public enum State
             {

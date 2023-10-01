@@ -81,6 +81,9 @@ namespace OuterWildsRPG.Objects.Quests
         public void CleanUp()
         {
             foreach (var c in GetConditions()) c.CleanUp();
+
+            startProgress = 0;
+            completionProgress = 0;
         }
 
         public void Update(bool markersVisible)

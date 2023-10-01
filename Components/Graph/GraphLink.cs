@@ -34,12 +34,14 @@ namespace OuterWildsRPG.Components.Graph
             return graphLink;
         }
 
-        public override string GetID() => $"{sourceCard.GetID()}@{targetCard.GetID()}";
-        public string GetReversedID() => $"{targetCard.GetID()}@{sourceCard.GetID()}";
+        public override string GetID() => GetID(sourceCard.GetID(), targetCard.GetID());
+        public string GetReversedID() => GetID(targetCard.GetID(), sourceCard.GetID());
         public string GetSourceID() => sourceCard.GetID();
         public string GetTargetID() => targetCard.GetID();
         public GraphCard GetSourceCard() => sourceCard;
         public GraphCard GetTargetCard() => targetCard;
+
+        public static string GetID(string sourceID, string targetID) => $"{sourceID}@{targetID}";
 
 
         public void Init(GraphMode graphMode, GraphCard sourceCard, GraphCard targetCard, IGraphProvider graphProvider)
@@ -119,7 +121,8 @@ namespace OuterWildsRPG.Components.Graph
 
         protected override void FinishRevealAnimation()
         {
-            graphProvider.OnLinkRevealStateUpdated(GetSourceID(), GetTargetID());
+            var isRevealed = graphProvider.GetLinkIsRevealed(GetSourceID(), GetTargetID());
+            graphProvider.OnLinkRevealStateUpdated(GetSourceID(), GetTargetID(), isRevealed);
         }
 
         protected override bool Animate()

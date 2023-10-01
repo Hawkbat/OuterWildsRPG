@@ -11,9 +11,9 @@ using UnityEngine;
 
 namespace OuterWildsRPG.Components
 {
-    public class DropPickup : MonoBehaviour
+    public class DropPickupController : MonoBehaviour
     {
-        public static List<DropPickup> All = new();
+        public static List<DropPickupController> All = new();
 
         static Gradient fadeOutGradient;
         static Gradient fadeInOutGradient;
@@ -36,9 +36,12 @@ namespace OuterWildsRPG.Components
         bool animatePickUp;
         float pickUpTime;
         Vector3 pickUpPosition;
-        bool isHeld;
 
         public DropLocation GetLocation() => location;
+
+        public bool IsVanillaItem() => owItem != null;
+
+        public OWItem GetVanillaItem() => owItem;
 
         void Awake()
         {
@@ -88,17 +91,20 @@ namespace OuterWildsRPG.Components
                 };
             }
 
+            var scale = 2f;
+
             sparks = new GameObject("Sparks").AddComponent<ParticleSystem>();
             sparks.transform.parent = transform;
             sparks.transform.localPosition = Vector3.zero;
             sparks.transform.localEulerAngles = new Vector3(-90f, 0f, 0f);
-            sparks.transform.localScale = Vector3.one;
+            sparks.transform.localScale = Vector3.one * scale;
             var sparksMain = sparks.main;
             sparksMain.startSpeed = new(0.25f, 0.5f);
             sparksMain.startSize = 0.02f;
             sparksMain.startColor = color;
             sparksMain.startLifetime = 1f;
             sparksMain.scalingMode = ParticleSystemScalingMode.Hierarchy;
+            sparksMain.cullingMode = ParticleSystemCullingMode.PauseAndCatchup;
             var sparksShape = sparks.shape;
             sparksShape.shapeType = ParticleSystemShapeType.Cone;
             sparksShape.angle = 10f;
@@ -115,13 +121,14 @@ namespace OuterWildsRPG.Components
             shafts.transform.parent = transform;
             shafts.transform.localPosition = Vector3.zero;
             shafts.transform.localEulerAngles = new Vector3(-90f, 0f, 0f);
-            shafts.transform.localScale = Vector3.one;
+            shafts.transform.localScale = Vector3.one * scale;
             var shaftsMain = shafts.main;
             shaftsMain.startSpeed = 0.01f;
             shaftsMain.startSize = new(0.01f, 0.05f);
             shaftsMain.startColor = color;
             shaftsMain.startLifetime = 1f;
             shaftsMain.scalingMode = ParticleSystemScalingMode.Hierarchy;
+            shaftsMain.cullingMode = ParticleSystemCullingMode.PauseAndCatchup;
             var shaftsShape = shafts.shape;
             shaftsShape.shapeType = ParticleSystemShapeType.Cone;
             shaftsShape.angle = 5f;
@@ -138,13 +145,14 @@ namespace OuterWildsRPG.Components
             shine.transform.parent = transform;
             shine.transform.localPosition = Vector3.zero;
             shine.transform.localEulerAngles = new Vector3(-90f, 0f, 0f);
-            shine.transform.localScale = Vector3.one;
+            shine.transform.localScale = Vector3.one * scale;
             var shineMain = shine.main;
             shineMain.startSpeed = new(0f, 0.05f);
             shineMain.startSize = 0.25f;
             shineMain.startColor = color;
             shineMain.startLifetime = 1f;
             shineMain.scalingMode = ParticleSystemScalingMode.Hierarchy;
+            shineMain.cullingMode = ParticleSystemCullingMode.PauseAndCatchup;
             var shineShape = shine.shape;
             shineShape.shapeType = ParticleSystemShapeType.Sphere;
             shineShape.radius = 0.0001f;
@@ -159,13 +167,14 @@ namespace OuterWildsRPG.Components
             sparkles.transform.parent = transform;
             sparkles.transform.localPosition = Vector3.zero;
             sparkles.transform.localEulerAngles = new Vector3(-90f, 0f, 0f);
-            sparkles.transform.localScale = Vector3.one;
+            sparkles.transform.localScale = Vector3.one * scale;
             var sparklesMain = sparkles.main;
             sparklesMain.startSpeed = new(0f, 0.01f);
             sparklesMain.startSize = new(0.02f, 0.05f);
             sparklesMain.startColor = color;
             sparklesMain.startLifetime = 1f;
             sparklesMain.scalingMode = ParticleSystemScalingMode.Hierarchy;
+            sparklesMain.cullingMode = ParticleSystemCullingMode.PauseAndCatchup;
             var sparklesShape = sparkles.shape;
             sparklesShape.shapeType = ParticleSystemShapeType.Sphere;
             sparklesShape.radius = 0.125f;
@@ -183,16 +192,22 @@ namespace OuterWildsRPG.Components
 
             owItem = GetComponentInParent<OWItem>();
 
-            var collider = gameObject.AddComponent<SphereCollider>();
-            collider.radius = owItem != null ? 0f : 1f;
-            collider.isTrigger = true;
-            var owCollider = gameObject.AddComponent<OWCollider>();
+            if (owItem == null)
+            {
+                var collider = gameObject.AddComponent<SphereCollider>();
+                collider.radius = 1f;
+                collider.isTrigger = true;
+                var owCollider = gameObject.AddComponent<OWCollider>();
 
-            interactReceiver = gameObject.AddComponent<InteractReceiver>();
-            interactReceiver.SetInteractionEnabled(owItem == null);
-            interactReceiver.SetInteractRange(2f);
-            interactReceiver.ChangePrompt(Translations.PromptDropPickup(location.Drop));
-            interactReceiver.OnPressInteract += OnPressInteract;
+                interactReceiver = gameObject.AddComponent<InteractReceiver>();
+                interactReceiver.SetInteractionEnabled(owItem == null);
+                interactReceiver.SetInteractRange(2f);
+                interactReceiver.ChangePrompt(Translations.PromptDropPickup(location.Drop));
+                interactReceiver.OnPressInteract += OnPressInteract;
+            } else
+            {
+                ModPlayerController.RegisterPickup(this);
+            }
 
             AttachToSector(gameObject.GetComponentInParent<Sector>());
 
@@ -280,27 +295,29 @@ namespace OuterWildsRPG.Components
             Locator.GetPlayerAudioController().PlayOneShotInternal(location.Drop.PickUpAudioType);
         }
 
-        public void OnPickedUp(OWItem item)
+        public bool AttemptItemPickup()
         {
-            DropManager.EquipDrop(location.Drop, EquipSlot.Item);
-            interactReceiver.DisableInteraction();
-            isHeld = true;
-            enabled = true;
-            DetachFromSector();
-            ToggleVisuals(false);
+            if (DropManager.AddDropToHotbar(location.Drop))
+            {
+                DetachFromSector();
+                ToggleVisuals(false);
+                return true;
+            }
+            return false;
         }
 
-        public void OnDropped(OWItem item)
+        public bool AttemptItemDrop()
         {
-            DropManager.UnequipDrop(location.Drop, EquipSlot.Item);
-            interactReceiver.EnableInteraction();
-            interactReceiver.ResetInteraction();
-            isHeld = false;
-            AttachToSector(gameObject.GetComponentInParent<Sector>());
-            ToggleVisuals(true);
+            if (DropManager.RemoveDropFromHotbar(location.Drop))
+            {
+                AttachToSector(gameObject.GetComponentInParent<Sector>());
+                ToggleVisuals(true);
+                return true;
+            }
+            return false;
         }
 
-        void ToggleVisuals(bool enable)
+        public void ToggleVisuals(bool enable)
         {
             var sparksEmission = sparks.emission;
             sparksEmission.enabled = enable;
@@ -315,14 +332,6 @@ namespace OuterWildsRPG.Components
 
         void Update()
         {
-            if (isHeld)
-            {
-                var heldItem = Locator.GetToolModeSwapper().GetItemCarryTool().GetHeldItem();
-                if (heldItem != owItem)
-                {
-                    OnDropped(owItem);
-                }
-            }
             if (animatePickUp)
             {
                 var t = Mathf.InverseLerp(pickUpTime, pickUpTime + 0.2f, Time.time);
@@ -339,7 +348,7 @@ namespace OuterWildsRPG.Components
                     gameObject.SetActive(false);
                 }
             }
-            if (!animatePickUp && !isHeld)
+            if (!animatePickUp)
                 enabled = false;
         }
     }

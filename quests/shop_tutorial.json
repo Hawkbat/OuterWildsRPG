@@ -1,0 +1,24 @@
+{
+  "$schema": "../schemas/quest.schema.json",
+  "id": "SHOP_TUTORIAL",
+  "name": "Golden Marshmallows",
+  "type": "side",
+  "steps": [
+    {
+      "id": "START",
+      "text": "Speak to Scoria",
+      "startOn": [
+        {
+          "type": "conversation",
+          "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_VillageCemetery/SCORIA"
+        }
+      ],
+      "completeOn": [
+        {
+          "type": "conversation",
+          "value": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_VillageCemetery/SCORIA"
+        }
+      ]
+    }
+  ]
+}

@@ -14,7 +14,8 @@
         "y": -15.95331,
         "z": 187.5071
       },
-      "visuals": []
+      "visuals": [],
+      "respawns": true
     }
   ],
   "buffs": [

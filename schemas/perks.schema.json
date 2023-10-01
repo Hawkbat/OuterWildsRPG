@@ -93,17 +93,45 @@
       "description": "Various possible effects that will apply when the buff is active.",
       "additionalProperties": false,
       "properties": {
-        "moveSpeed": {
-          "description": "Modifies the player's movement speed.",
-          "$ref": "#/definitions/MoveSpeedEffectData"
+        "custom": {
+          "description": "Defines a custom effect that can be interacted with via the mod API.",
+          "$ref": "#/definitions/CustomEffectData"
+        },
+        "fogDensity": {
+          "description": "Modifies the density of planetary fog to increase or decrease visibility.",
+          "$ref": "#/definitions/FogDensityEffectData"
+        },
+        "giveDrop": {
+          "description": "Adds a drop directly to the player's inventory.",
+          "$ref": "#/definitions/GiveDropEffectData"
+        },
+        "hazardDamage": {
+          "description": "Modifies the damage the player takes from various types of hazards.",
+          "$ref": "#/definitions/HazardDamageEffectData"
+        },
+        "heal": {
+          "description": "Restores a percentage of the player's health.",
+          "$ref": "#/definitions/HealEffectData"
+        },
+        "holdBreath": {
+          "description": "Modifies the duration that a player can survive with no oxygen before suffocating or drowning.",
+          "$ref": "#/definitions/HoldBreathEffectData"
+        },
+        "inventorySpace": {
+          "description": "Increases the capacity of the player's inventory.",
+          "$ref": "#/definitions/InventorySpaceEffectData"
         },
         "jumpSpeed": {
           "description": "Modifies the player's jump speed.",
           "$ref": "#/definitions/JumpSpeedEffectData"
         },
-        "hazardDamage": {
-          "description": "Modifies the damage the player takes from various types of hazards.",
-          "$ref": "#/definitions/HazardDamageEffectData"
+        "maxHealth": {
+          "description": "Modifies the maximum health of the player.",
+          "$ref": "#/definitions/MaxHealthEffectData"
+        },
+        "moveSpeed": {
+          "description": "Modifies the player's movement speed.",
+          "$ref": "#/definitions/MoveSpeedEffectData"
         },
         "translationSpeed": {
           "description": "Modifies the speed at which the player can translate Nomai text.",
@@ -112,28 +140,33 @@
         "travelMusic": {
           "description": "Changes the travel music played when flying the ship between planets.",
           "$ref": "#/definitions/TravelMusicEffectData"
-        },
-        "inventorySpace": {
-          "description": "Increases the capacity of the player's inventory.",
-          "$ref": "#/definitions/InventorySpaceEffectData"
-        },
-        "heal": {
-          "description": "Restores a percentage of the player's health.",
-          "$ref": "#/definitions/HealEffectData"
-        },
-        "giveDrop": {
-          "description": "Adds a drop directly to the player's inventory.",
-          "$ref": "#/definitions/GiveDropEffectData"
-        },
-        "custom": {
-          "description": "Defines a custom effect that can be interacted with via the mod API.",
-          "$ref": "#/definitions/CustomEffectData"
         }
       }
     },
-    "MoveSpeedEffectData": {
+    "CustomEffectData": {
       "type": "object",
-      "description": "Modifies the player's movement speed.",
+      "description": "Defines a custom effect that can be interacted with via the mod API.",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "description"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "A custom value that uniquely identifies this effect. Also used as the description's translation key.",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "The text to display in the UI for this effect.",
+          "minLength": 1
+        }
+      }
+    },
+    "FogDensityEffectData": {
+      "type": "object",
+      "description": "Modifies the density of planetary fog to increase or decrease visibility.",
       "additionalProperties": false,
       "required": [
         "multiply"
@@ -141,25 +174,30 @@
       "properties": {
         "multiply": {
           "type": "number",
-          "description": "The percentage to multiply the total movement speed by. E.g. a value of 0.25 will result in 25% movement speed, or a 75% reduction.",
+          "description": "The percentage to multiply the total fog density by. E.g. a value of 0.25 will result in 25% fog density, or a 75% reduction.",
           "format": "float",
           "default": 1.0
         }
       }
     },
-    "JumpSpeedEffectData": {
+    "GiveDropEffectData": {
       "type": "object",
-      "description": "Modifies the player's jump speed.",
+      "description": "Adds a drop directly to the player's inventory.",
       "additionalProperties": false,
       "required": [
-        "multiply"
+        "drop"
       ],
       "properties": {
-        "multiply": {
-          "type": "number",
-          "description": "The percentage to multiply the total jump speed by. E.g. a value of 0.25 will result in 25% jump speed, or a 75% reduction.",
-          "format": "float",
-          "default": 1.0
+        "drop": {
+          "type": "string",
+          "description": "The unique ID of the drop to give.",
+          "minLength": 1
+        },
+        "amount": {
+          "type": "integer",
+          "description": "The number of copies to give.",
+          "format": "int32",
+          "default": 1
         }
       }
     },
@@ -211,6 +249,102 @@
         "electricity"
       ]
     },
+    "HealEffectData": {
+      "type": "object",
+      "description": "Restores a percentage of the player's health.",
+      "additionalProperties": false,
+      "required": [
+        "amount"
+      ],
+      "properties": {
+        "amount": {
+          "type": "number",
+          "description": "The percentage of total health to restore. E.g. 0.2 will restore 20% of maximum health.",
+          "format": "float"
+        }
+      }
+    },
+    "HoldBreathEffectData": {
+      "type": "object",
+      "description": "Modifies the duration that a player can survive with no oxygen before suffocating or drowning.",
+      "additionalProperties": false,
+      "required": [
+        "seconds"
+      ],
+      "properties": {
+        "seconds": {
+          "type": "number",
+          "description": "The number of seconds to add or remove from the total suffocation duration. E.g. a value of 0.5 will result in suffocating taking half a second longer.",
+          "format": "float"
+        }
+      }
+    },
+    "InventorySpaceEffectData": {
+      "type": "object",
+      "description": "Increases the capacity of the player's inventory.",
+      "additionalProperties": false,
+      "required": [
+        "amount"
+      ],
+      "properties": {
+        "amount": {
+          "type": "integer",
+          "description": "The number of inventory spaces to add.",
+          "format": "int32"
+        }
+      }
+    },
+    "JumpSpeedEffectData": {
+      "type": "object",
+      "description": "Modifies the player's jump speed.",
+      "additionalProperties": false,
+      "required": [
+        "multiply"
+      ],
+      "properties": {
+        "multiply": {
+          "type": "number",
+          "description": "The percentage to multiply the total jump speed by. E.g. a value of 0.25 will result in 25% jump speed, or a 75% reduction.",
+          "format": "float",
+          "default": 1.0
+        }
+      }
+    },
+    "MaxHealthEffectData": {
+      "type": "object",
+      "description": "Modifies the maximum health of the player.",
+      "additionalProperties": false,
+      "properties": {
+        "add": {
+          "type": "number",
+          "description": "The percentage of the base health to add/reduce. E.g. a value of -0.1 means subtract 10% of the base health from the total.",
+          "format": "float",
+          "default": 0.0
+        },
+        "multiply": {
+          "type": "number",
+          "description": "The percentage to multiply the total max health by. E.g. a value of 0.25 will result in 25% of base max health, or a 75% reduction.",
+          "format": "float",
+          "default": 1.0
+        }
+      }
+    },
+    "MoveSpeedEffectData": {
+      "type": "object",
+      "description": "Modifies the player's movement speed.",
+      "additionalProperties": false,
+      "required": [
+        "multiply"
+      ],
+      "properties": {
+        "multiply": {
+          "type": "number",
+          "description": "The percentage to multiply the total movement speed by. E.g. a value of 0.25 will result in 25% movement speed, or a 75% reduction.",
+          "format": "float",
+          "default": 1.0
+        }
+      }
+    },
     "TranslationSpeedEffectData": {
       "type": "object",
       "description": "Modifies the speed at which the player can translate Nomai text.",
@@ -234,78 +368,6 @@
         "audioType": {
           "type": "string",
           "description": "An Outer Wilds AudioType value that will be used as the travel music will this buff is active. See https://nh.outerwildsmods.com/reference/audio_enum.html",
-          "minLength": 1
-        }
-      }
-    },
-    "InventorySpaceEffectData": {
-      "type": "object",
-      "description": "Increases the capacity of the player's inventory.",
-      "additionalProperties": false,
-      "required": [
-        "amount"
-      ],
-      "properties": {
-        "amount": {
-          "type": "integer",
-          "description": "The number of inventory spaces to add.",
-          "format": "int32"
-        }
-      }
-    },
-    "HealEffectData": {
-      "type": "object",
-      "description": "Restores a percentage of the player's health.",
-      "additionalProperties": false,
-      "required": [
-        "amount"
-      ],
-      "properties": {
-        "amount": {
-          "type": "number",
-          "description": "The percentage of total health to restore. E.g. 0.2 will restore 20% of maximum health.",
-          "format": "float"
-        }
-      }
-    },
-    "GiveDropEffectData": {
-      "type": "object",
-      "description": "Adds a drop directly to the player's inventory.",
-      "additionalProperties": false,
-      "required": [
-        "drop"
-      ],
-      "properties": {
-        "drop": {
-          "type": "string",
-          "description": "The unique ID of the drop to give.",
-          "minLength": 1
-        },
-        "amount": {
-          "type": "integer",
-          "description": "The number of copies to give.",
-          "format": "int32",
-          "default": 1
-        }
-      }
-    },
-    "CustomEffectData": {
-      "type": "object",
-      "description": "Defines a custom effect that can be interacted with via the mod API.",
-      "additionalProperties": false,
-      "required": [
-        "id",
-        "description"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "A custom value that uniquely identifies this effect. Also used as the description's translation key.",
-          "minLength": 1
-        },
-        "description": {
-          "type": "string",
-          "description": "The text to display in the UI for this effect.",
           "minLength": 1
         }
       }

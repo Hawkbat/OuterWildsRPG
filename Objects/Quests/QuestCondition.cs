@@ -202,6 +202,7 @@ namespace OuterWildsRPG.Objects.Quests
                 Locator.GetMapController().GetMarkerManager().UnregisterMarker(mapMarker);
             mapMarkers.Clear();
 
+            disabled = false;
             wereMarkersNeeded = false;
 
             if (Type == QuestConditionType.Special)

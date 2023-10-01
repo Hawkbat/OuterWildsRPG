@@ -2,9 +2,14 @@
   "$schema": "../schemas/drop.schema.json",
   "id": "BASIC_HELMET",
   "name": "Hatchling's Helmet",
-  "description": "A custom-fitted space helmet for you. It'll keep the oxygen in. Probably.",
+  "description": "A space helmet custom-fitted just for you. Essential for not suffocating in space.",
   "rarity": "uncommon",
   "equipSlot": "helmet",
   "iconPath": "HELMET.png",
-  "locations": []
+  "locations": [],
+  "buffs": [
+    {
+      "fogDensity": { "multiply": 0.25 }
+    }
+  ]
 }

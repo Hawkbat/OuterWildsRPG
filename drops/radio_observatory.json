@@ -2,7 +2,7 @@
   "$schema": "../schemas/drop.schema.json",
   "id": "RADIO_OBSERVATORY",
   "name": "Observatory Cassette",
-  "description": "A cassette tape for your ship's radio that plays an enriching ambiance.",
+  "description": "A cassette tape for your ship's radio that reminds you of the Hearthian observatory.",
   "rarity": "uncommon",
   "equipSlot": "radio",
   "iconPath": "RECORDER.png",

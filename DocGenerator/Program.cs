@@ -119,6 +119,8 @@ void Export()
                 Console.WriteLine(ex.ToString());
             }
         }
+
+        category.Pages.Sort((a, b) => a.IsIndex != b.IsIndex ? -a.IsIndex.CompareTo(b.IsIndex) : a.Title.CompareTo(b.Title));
     }
 
     var navHtml = $"<ul>" +

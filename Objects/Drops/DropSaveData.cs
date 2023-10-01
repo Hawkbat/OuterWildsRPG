@@ -12,6 +12,7 @@ namespace OuterWildsRPG.Objects.Drops
         public static DropSaveData Instance = new();
 
         public Dictionary<EquipSlot, string> Equipment = new();
+        public List<string> Hotbar = new();
         public List<string> Inventory = new();
         public Dictionary<string, float> Consumables = new();
         public HashSet<string> HasPickedUp = new();

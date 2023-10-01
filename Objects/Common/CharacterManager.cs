@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OuterWildsRPG.Components;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,10 +13,10 @@ namespace OuterWildsRPG.Objects.Common
         const int LEVEL_CAP = 255;
 
         public class AwardXPEvent : UnityEvent<int, string> { }
-        public static AwardXPEvent OnAwardXP = new AwardXPEvent();
+        public static AwardXPEvent OnAwardXP = new();
 
         public class LevelUpEvent : UnityEvent<int> { }
-        public static LevelUpEvent OnLevelUp = new LevelUpEvent();
+        public static LevelUpEvent OnLevelUp = new();
 
         public static int GetTotalNeededXP(int level)
         {
@@ -58,7 +59,17 @@ namespace OuterWildsRPG.Objects.Common
             }
         }
 
+        public static void SetUp()
+        {
+            Locator.GetPlayerBody().gameObject.AddComponent<ModPlayerController>();
+        }
+
         public static void Update()
+        {
+
+        }
+
+        public static void CleanUp()
         {
 
         }

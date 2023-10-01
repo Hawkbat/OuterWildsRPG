@@ -29,17 +29,25 @@ See about running in the Eye scene, for an ending quest
 
 Hide dialogue icons when in dialogue, viewing slide reels, etc.
 
-Add a dialogue-style icon for Nomai recorders, cairns, and text
-
-Fix shop dialogue translations
-
-Auto-generate shop dialogue nodes for buying and selling
-
-Add inventory size limits and reject pickups if they would exceed size limits
 Add indicator somewhere of remaining golden marshmallows (use the fancy icons!)
 
+Okay, let's pull the trigger on this OWItem tracking system
+Add a 'hotbar' inventory of items for the player to pick up
+This new item inventory should be separate from equipment and ship inventory
+Add a property to Drops to indicate the physical item they correspond to
+Allow auto-generated OWItem drops to inherit from explicitly defined drops
+On system load, loop through drops in any list and see if they match physical OWItems
+If a match is found and the item is set to not respawn, disable the physical OWItem
+When a Drop with a paired OWItem is highlighted in the hotbar, enable and equip it using vanilla item system
+When an OWItem is set down, re-enable its associated DropPickup
+Add hotbar cards to inventory screen, to move items back and forth (may need new prompts/actions)
+Use toolOptionLeft/toolOptionRight controls and prompts to scroll through hotbar
+Only while ItemTool or no tool is equipped
 
-The dialogue tree code is fairly vestigial
-_mapDialogueNodes is only used for resolving option targets when selecting them
-_listOptionNodes is initialized but never used
-With some minimal patches we could probably make a dynamic dialogue provider fairly easily
+Icons overlapping
+Tephra nameplate stays
+Special dialogue icon for signs (and recorders)
+Indicator of how many golden marshmallows you have
+Buff to make ghost matter visible
+Add random snapshots from the rewind in the pause menu
+Quest UI is hidden while flying the ship

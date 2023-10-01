@@ -1,0 +1,27 @@
+{
+  "$schema": "../schemas/drop.schema.json",
+  "id": "RADIO_RESERVOIR",
+  "name": "Reservoir Cassette",
+  "description": "A cassette tape for your ship's radio that reminds you of the Stranger's reservoir.",
+  "rarity": "rare",
+  "equipSlot": "radio",
+  "iconPath": "RECORDER.png",
+  "locations": [
+    {
+      "parentPath": "RingWorld_Body/Sector_RingInterior",
+      "position": {
+        "x": 117.6118,
+        "y": 0.3634071,
+        "z": -184.0373
+      },
+      "rotation": {
+        "x": 1.125736,
+        "y": 59.84858,
+        "z": 90.00004
+      }
+    }
+  ],
+  "buffs": [
+    { "travelMusic": { "audioType": "RaftTravel_Reservoir" } }
+  ]
+}

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Advanced Dialogue - Outer Wilds RPG</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" href="/logo.png" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js?skin=sunburst"></script>
+    <script crossorigin="" src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin="" src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin="" src="https://unpkg.com/nomai-json-schema@1/index.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/nomai-json-schema@1/index.css">
+    <link rel="stylesheet" href="/styles.css" />
+    <script>fetch('/hotreload').then((r) => r.ok && window.location.reload(), () => { })</script>
+</head>
+<body>
+    <header>
+        <nav><ul><li><a href="/index.html"><img src="/logo.png" /><span>Outer Wilds RPG</span></a></li><li><a href="/concepts.html"><span>Concepts</span></a></li><li><a href="/guides/">Guides</a><ul><li><a href="/guides/using.html">Adding Content</a></li><li><a href="/guides/dialogue.html">Advanced Dialogue</a></li><li><a href="/guides/shops.html">Creating Shops</a></li></ul></li><li><a href="/schemas/">Schemas</a><ul><li><a href="/schemas/drop.html">Drop Schema</a></li><li><a href="/schemas/drops.html">Drops Schema</a></li><li><a href="/schemas/perk.html">Perk Schema</a></li><li><a href="/schemas/perks.html">Perks Schema</a></li><li><a href="/schemas/quest.html">Quest Schema</a></li><li><a href="/schemas/quests.html">Quests Schema</a></li><li><a href="/schemas/shop.html">Shop Schema</a></li><li><a href="/schemas/shops.html">Shops Schema</a></li></ul></li></ul>
+            <div class="spacer"></div>
+            <a href="https://discord.gg/9vE5aHxcF9" target="_blank">
+                <img src="https://unpkg.com/simple-icons@v4/icons/discord.svg" />
+            </a>
+            <a href="https://github.com/Hawkbat/OuterWildsRPG" target="_blank">
+                <img src="https://unpkg.com/simple-icons@v4/icons/github.svg" />
+            </a>
+        </nav>
+    </header>
+    <main><h1 id="advanced-dialogue"><a href="#advanced-dialogue">Advanced Dialogue</a></h1>
+<p>This mod extends Outer Wilds' dialogue system with several special conditions and node names,
+which let you interact with the mod's systems through normal dialogue XML files.</p>
+<h2 id="mod-provided-conditions"><a href="#mod-provided-conditions">Mod-Provided Conditions</a></h2>
+<p>Anywhere you can use dialogue condtions in character dialogue XML, you can use special values injected by this mod.
+For example, to show a dialogue node only if the player has started a quest:</p>
+<?prettify?>
+<pre><code class="language-xml">&lt;DialogueNode&gt;
+	&lt;Name&gt;MyQuestIntro&lt;/name&gt;
+	&lt;EntryCondition&gt;Hawkbar.OuterWildsRPG@MY_AWESOME_QUEST&lt;/EntryCondition&gt;
+	&lt;Dialogue&gt;&lt;!-- etc. --&gt;&lt;/Dialogue&gt;
+&lt;/DialogueNode&gt;
+</code></pre>
+<p>Or, to do the same for a dialogue option:</p>
+<?prettify?>
+<pre><code class="language-xml">&lt;DialogueNode&gt;
+	&lt;Name&gt;DEFAULT&lt;/name&gt;
+	&lt;EntryCondition&gt;ENTRY&lt;/EntryCondition&gt;
+	&lt;Dialogue&gt;&lt;!-- etc. --&gt;&lt;/Dialogue&gt;
+	&lt;DialogueOptionsList&gt;
+		&lt;DialogueOption&gt;
+			&lt;RequiredCondition&gt;.OuterWildsRPG@MY_AWESOME_QUEST&lt;/RequiredCondition&gt;
+			&lt;Text&gt;How's the quest going?&lt;/Text&gt;
+		&lt;/DialogueOption&gt;
+	&lt;/DialogueOptionsList&gt;
+&lt;/DialogueNode&gt;
+</code></pre>
+<h3 id="quest-conditions"><a href="#quest-conditions">Quest Conditions</a></h3>
+<ul>
+<li>Quest Started: <code>{MyUserName.MyModUniqueName}@{QUEST_ID}</code>, e.g. <code>Hawkbar.OuterWildsRPG@MY_AWESOME_QUEST</code></li>
+<li>Quest Completed: <code>{MyUserName.MyModUniqueName}@{QUEST_ID}:COMPLETED</code>, e.g. <code>Hawkbar.OuterWildsRPG@MY_AWESOME_QUEST:COMPLETED</code></li>
+<li>Quest Step Started: <code>{MyUserName.MyModUniqueName}@{QUEST_ID}:{QUEST_STEP_ID}</code>, e.g. <code>Hawkbar.OuterWildsRPG@MY_AWESOME_QUEST:TALK_TO_SLATE</code></li>
+<li>Quest Step Completed: <code>{MyUserName.MyModUniqueName}@{QUEST_ID}:{QUEST_STEP_ID}:COMPLETED</code>, e.g. <code>Hawkbar.OuterWildsRPG@MY_AWESOME_QUEST:TALK_TO_SLATE:COMPLETED</code></li>
+</ul>
+<h3 id="drop-conditions"><a href="#drop-conditions">Drop Conditions</a></h3>
+<ul>
+<li>Player has Drop (in hotbar, inventory, or equipped): <code>{MyUserName.MyModUniqueName}@{DROP_ID}</code>, e.g. <code>Hawkbar.OuterWildsRPG@BASIC_FLASHLIGHT</code></li>
+<li>Player has Drop Equipped: <code>{MyUserName.MyModUniqueName}@{DROP_ID}:EQUIPPED</code>, e.g. <code>Hawkbar.OuterWildsRPG@BASIC_FLASHLIGHT:EQUIPPED</code></li>
+<li>Player has Drop in Inventory: <code>{MyUserName.MyModUniqueName}@{DROP_ID}:INVENTORY</code>, e.g. <code>Hawkbar.OuterWildsRPG@BASIC_FLASHLIGHT:INVENTORY</code></li>
+<li>Player has Drop in Toolbelt/Hotbar: <code>{MyUserName.MyModUniqueName}@{DROP_ID}:HOTBAR</code>, e.g. <code>Hawkbar.OuterWildsRPG@BASIC_FLASHLIGHT:HOTBAR</code></li>
+</ul>
+<h3 id="perk-conditions"><a href="#perk-conditions">Perk Conditions</a></h3>
+<ul>
+<li>Player has Unlocked Perk: <code>{MyUserName.MyModUniqueName}@{PERK_ID}</code>, e.g. <code>Hawkbar.OuterWildsRPG@JUMP_SPEED_1</code></li>
+</ul>
+<h2 id="shop-dialogue"><a href="#shop-dialogue">Shop Dialogue</a></h2>
+<p>Shopkeepers have special dialogue target names used to trigger shop interfaces. <a href="/guides/shops.html#shop-dialogue">Learn more here.</a></p>
+<h3>Related Pages</h3><ul><li><a href="/guides/using.html">Adding Content</a></li><li><a href="/guides/shops.html">Creating Shops</a></li></ul></main>
+    <footer>© 2023 Hawkbar</footer>
+</body>
+</html>

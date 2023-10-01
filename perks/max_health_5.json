@@ -1,0 +1,14 @@
+{
+  "$schema": "../schemas/perk.schema.json",
+  "id": "MAX_HEALTH_5",
+  "name": "Health Up V",
+  "level": 1,
+  "prereq": "MAX_HEALTH_4",
+  "iconPath": "MAX_HEALTH.png",
+  "color": { "r": 1, "g": 0.5, "b": 0.5 },
+  "buffs": [
+    {
+      "maxHealth": { "add": 0.2 }
+    }
+  ]
+}

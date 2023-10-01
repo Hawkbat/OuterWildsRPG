@@ -15,11 +15,14 @@ namespace OuterWildsRPG
 {
     public static class Translations
     {
+        public static string EffectDescriptionFogDensity(float amount) => Translate(nameof(EffectDescriptionFogDensity), PercentageModifier(1f / amount));
         public static string EffectDescriptionGiveDrop(Drop drop, int amount) => Translate(nameof(EffectDescriptionGiveDrop), drop, amount);
         public static string EffectDescriptionHazardDamage(float add, float multiply, HazardVolume.HazardType hazardType) => Translate(nameof(EffectDescriptionHazardDamage), PercentageModifier(add), PercentageModifier(multiply - 1f), Enum(hazardType));
         public static string EffectDescriptionHeal(float amount) => Translate(nameof(EffectDescriptionHeal), Percentage(amount));
+        public static string EffectDescriptionHoldBreath(float amount) => Translate(nameof(EffectDescriptionHoldBreath), Modifier(amount));
         public static string EffectDescriptionInventorySpace(int amount) => Translate(nameof(EffectDescriptionInventorySpace), Modifier(amount));
         public static string EffectDescriptionJumpSpeed(float amount) => Translate(nameof(EffectDescriptionJumpSpeed), PercentageModifier(amount - 1f));
+        public static string EffectDescriptionMaxHealth(float add, float multiply) => Translate(nameof(EffectDescriptionMaxHealth), PercentageModifier(add), PercentageModifier(multiply - 1f));
         public static string EffectDescriptionMoveSpeed(float amount) => Translate(nameof(EffectDescriptionMoveSpeed), PercentageModifier(amount - 1f));
         public static string EffectDescriptionTranslationSpeed(float amount) => Translate(nameof(EffectDescriptionTranslationSpeed), PercentageModifier(amount - 1f));
         public static string EffectDescriptionTravelMusic() => Translate(nameof(EffectDescriptionTravelMusic));
@@ -41,6 +44,8 @@ namespace OuterWildsRPG
         public static string PromptEquipDrop(Drop drop) => Translate(nameof(PromptEquipDrop), drop);
         public static string PromptUnequipDrop(Drop drop) => Translate(nameof(PromptUnequipDrop), drop);
         public static string PromptConsumeDrop(Drop drop) => Translate(nameof(PromptConsumeDrop), drop);
+        public static string PromptMoveFromInventoryToHotbar(Drop drop) => Translate(nameof(PromptMoveFromInventoryToHotbar), drop);
+        public static string PromptMoveFromHotbarToInventory(Drop drop) => Translate(nameof(PromptMoveFromHotbarToInventory), drop);
         public static string PromptViewDrop(Drop drop) => Translate(nameof(PromptViewDrop), drop);
         public static string PromptUnlockPerk(Perk perk, int cost, int points) => Translate(nameof(PromptUnlockPerk), perk, cost, points);
         public static string PromptRefundPerk(Perk perk, int cost) => Translate(nameof(PromptRefundPerk), perk, cost);
@@ -72,6 +77,9 @@ namespace OuterWildsRPG
         static string CurrencyShort(int amount)
             => Translate("CurrencyShort", amount);
 
+        static string Modifier(float amount)
+            => $"{(amount < 0 ? "" : "+")}{amount}";
+
         static string Modifier(int amount)
             => $"{(amount < 0 ? "" : "+")}{amount}";
 
@@ -82,11 +90,11 @@ namespace OuterWildsRPG
             => $"{(amount < 0f ? "" : "+")}{Mathf.Round(amount * 100f)}%";
 
         static string Translate(string key, params object[] args)
-            => string.Format(TranslationUtils.GetGeneral(key), args.Select(a => a switch
+            => string.Format(TranslationUtils.GetGeneral(key) ?? key, args.Select(a => a switch
             {
                 IDisplayable displayable => displayable.ToDisplayString(),
                 Enum enumValue => TranslationUtils.GetGeneral($"{enumValue.GetType().Name}.{EnumUtils.GetName(enumValue.GetType(), enumValue)}"),
                 _ => a,
-            }).ToArray());
+            }).ToArray()).Trim();
     }
 }

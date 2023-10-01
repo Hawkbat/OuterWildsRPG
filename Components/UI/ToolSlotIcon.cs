@@ -14,15 +14,17 @@ namespace OuterWildsRPG.Components.UI
     public class ToolSlotIcon : BuiltElement
     {
         EquipSlot equipSlot;
+        int itemIndex;
         ToolMode tool;
 
         Image border;
         Image icon;
         Image buttonIcon;
 
-        public void Init(EquipSlot equipSlot)
+        public void Init(EquipSlot equipSlot, int itemIndex)
         {
             this.equipSlot = equipSlot;
+            this.itemIndex = itemIndex;
             tool = equipSlot switch
             {
                 EquipSlot.Translator => ToolMode.Translator,
@@ -64,7 +66,6 @@ namespace OuterWildsRPG.Components.UI
                 EquipSlot.Signalscope => InputConsts.InputCommandType.SIGNALSCOPE,
                 EquipSlot.Translator => InputConsts.InputCommandType.INTERACT,
                 EquipSlot.Launcher => InputConsts.InputCommandType.PROBELAUNCH,
-                EquipSlot.Item => InputConsts.InputCommandType.INTERACT,
                 _ => InputConsts.InputCommandType.UNDEFINED,
             };
             if (cmdType != InputConsts.InputCommandType.UNDEFINED)
@@ -90,14 +91,19 @@ namespace OuterWildsRPG.Components.UI
                 active = Locator.GetFlashlight().IsFlashlightOn();
             else if (equipSlot == EquipSlot.Stick)
                 active = PlayerStateUtils.IsRoasting;
+            else if (equipSlot == EquipSlot.Item)
+                active = ModPlayerController.GetHotbarIndex() == itemIndex;
 
             var drop = DropManager.GetEquippedDrop(equipSlot);
+            if (equipSlot == EquipSlot.Item)
+                drop = DropManager.GetHotbarDrop(itemIndex);
 
             var color = drop != null ? Assets.GetRarityColor(drop.Rarity) : Assets.HUDBackColor;
 
             icon.sprite = drop != null ? drop.Icon : null;
             icon.color = icon.sprite ? Color.white : Color.Lerp(Color.black, Assets.HUDBackColor, 0.25f);
             border.color = active ? color : Color.Lerp(Color.black, color, 0.5f);
+            buttonIcon.enabled = buttonIcon.sprite != null && drop != null;
             
             return true;
         }

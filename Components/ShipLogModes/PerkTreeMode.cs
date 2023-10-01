@@ -16,7 +16,7 @@ namespace OuterWildsRPG.Components.ShipLogModes
 
         public Perk GetPerk(string id) => PerkManager.GetPerk(id, OuterWildsRPG.ModID);
 
-        public string GetLinkID(string sourceID, string targetID) => $"{sourceID}@{targetID}";
+        public string GetLinkID(string sourceID, string targetID) => GraphLink.GetID(sourceID, targetID);
 
         public void CalculatePositions()
         {
@@ -61,10 +61,10 @@ namespace OuterWildsRPG.Components.ShipLogModes
             => GetPerk(id) != null ? Translations.PromptViewPerk(GetPerk(id)) : string.Empty;
         public string GetSelectLinkPrompt(string sourceID, string targetID) => string.Empty;
 
-        public IEnumerable<string> GetInitialCards() =>
+        public IEnumerable<string> GetCards() =>
             PerkManager.GetAllPerks().Select(p => p.FullID);
 
-        public IEnumerable<KeyValuePair<string, string>> GetInitialLinks() =>
+        public IEnumerable<KeyValuePair<string, string>> GetLinks() =>
             PerkManager.GetAllPerks()
             .Where(p => p.Prereq != null)
             .Select(p => new KeyValuePair<string, string>(p.FullID, p.Prereq.FullID));
@@ -92,7 +92,7 @@ namespace OuterWildsRPG.Components.ShipLogModes
 
         public bool AttemptDeselectLink(string sourceID, string targetID) => false;
 
-        public string GetCardName(string id) => GetPerk(id).Name;
+        public string GetCardName(string id) => GetPerk(id).ToDisplayString(false);
 
         public Vector2 GetCardPosition(string id)
         {
@@ -146,7 +146,7 @@ namespace OuterWildsRPG.Components.ShipLogModes
 
         public bool GetCardWasRumor(string id) => false;
 
-        public bool GetCardIsRevealed(string id) => true;
+        public bool GetCardIsRevealed(string id) => GetPerk(id).Prereq == null || PerkManager.HasUnlockedPerk(GetPerk(id).Prereq);
 
         public bool GetCardWasRevealed(string id) => PerkManager.HasSeenPerk(GetPerk(id));
 
@@ -154,8 +154,13 @@ namespace OuterWildsRPG.Components.ShipLogModes
 
         public bool GetLinkWasRevealed(string sourceID, string targetID) => PerkManager.HasSeenPerk(GetPerk(sourceID)) && PerkManager.HasSeenPerk(GetPerk(targetID));
 
-        public void OnCardRevealStateUpdated(string id) => PerkManager.SeePerk(GetPerk(id));
+        public void OnCardRevealStateUpdated(string id, bool revealed, bool rumored) {
+            if (revealed)
+                PerkManager.SeePerk(GetPerk(id));
+            else
+                PerkManager.UnseePerk(GetPerk(id));
+        }
 
-        public void OnLinkRevealStateUpdated(string sourceID, string targetID) { }
+        public void OnLinkRevealStateUpdated(string sourceID, string targetID, bool revealed) { }
     }
 }

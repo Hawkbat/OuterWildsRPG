@@ -141,7 +141,6 @@ namespace OuterWildsRPG
             QuestManager.OnCompleteQuest.AddListener(OnCompleteQuest);
             CharacterManager.OnAwardXP.AddListener(OnAwardXP);
             CharacterManager.OnLevelUp.AddListener(OnLevelUp);
-            PerkManager.OnUnlockPerk.AddListener(OnUnlockPerk);
             DropManager.OnReceiveDrop.AddListener(OnPickUpDrop);
             DropManager.OnRemoveDrop.AddListener(OnRemoveDrop);
             DropManager.OnEquipDrop.AddListener(OnEquipDrop);
@@ -168,10 +167,12 @@ namespace OuterWildsRPG
         private void SetUp()
         {
             SaveDataManager.SetUp();
+            BuffManager.SetUp();
+            CharacterManager.SetUp();
             DropManager.SetUp();
             ShopManager.SetUp();
             QuestManager.SetUp();
-
+            WorldIconManager.SetUp();
             PlayerStateUtils.SetUp();
 
             if (!ModUI)
@@ -206,9 +207,12 @@ namespace OuterWildsRPG
         {
             Ready = false;
 
-            ShopManager.CleanUp();
+            BuffManager.CleanUp();
+            CharacterManager.CleanUp();
             DropManager.CleanUp();
+            ShopManager.CleanUp();
             QuestManager.CleanUp();
+            WorldIconManager.CleanUp();
             PlayerStateUtils.CleanUp();
         }
 
@@ -281,11 +285,6 @@ namespace OuterWildsRPG
             MajorQueue.Enqueue(Translations.NotificationLevelUp(level), clip: Assets.LevelUpJingleAudioClip);
             if (PerkManager.GetUnspentPerkPoints() > 0)
                 ExpQueue.Enqueue(Translations.NotificationUnspentPerkPoints(PerkManager.GetUnspentPerkPoints()), time: 10f);
-        }
-
-        public void OnUnlockPerk(Perk perk)
-        {
-
         }
 
         public void OnPickUpDrop(Drop drop)

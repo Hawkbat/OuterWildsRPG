@@ -10,8 +10,8 @@ namespace OuterWildsRPG.Components.Graph
         public string GetUnmarkCardPrompt(string id);
         public string GetSelectCardPrompt(string id);
         public string GetSelectLinkPrompt(string sourceID, string targetID);
-        public IEnumerable<string> GetInitialCards();
-        public IEnumerable<KeyValuePair<string, string>> GetInitialLinks();
+        public IEnumerable<string> GetCards();
+        public IEnumerable<KeyValuePair<string, string>> GetLinks();
         public string GetInitialFocusedCard();
         public bool CanMarkCard(string id);
         public bool AttemptMarkCard(string id);
@@ -39,7 +39,7 @@ namespace OuterWildsRPG.Components.Graph
         public bool GetCardWasRevealed(string id);
         public bool GetLinkIsRevealed(string sourceID, string targetID);
         public bool GetLinkWasRevealed(string sourceID, string targetID);
-        public void OnCardRevealStateUpdated(string id);
-        public void OnLinkRevealStateUpdated(string sourceID, string targetID);
+        public void OnCardRevealStateUpdated(string id, bool revealed, bool rumored);
+        public void OnLinkRevealStateUpdated(string sourceID, string targetID, bool revealed);
     }
 }

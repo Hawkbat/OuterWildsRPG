@@ -41,12 +41,12 @@ If all conditions must be met, the number of conditions remaining will be displa
 
 ## Drops
 
-Drops are items that can be picked up and stored in the player's inventory, and also function as
+Drops are items that can be picked up and stored in the player's ship inventory, and also function as
 equipment or consumable items. They are called "drops" by this mod to distinguish them
 from the objects that you can pick up in the vanilla game, such as the Nomai scrolls or projection stones.
 
 
-Consumable drops have an instantaneous effect on the player when used from the inventory menu, and can
+Consumable drops have an instantaneous effect on the player when used from the ship inventory menu, and can
 also provide passive buffs for a certain duration of time afterwards.
 
 
@@ -56,12 +56,35 @@ additional drops that occupy the same equipment slot but provide different benef
 that provides additional protection against certain types of hazards, or a Nomai translator that can
 translate text faster than the base one. Equipment drops apply certain buffs while they are equipped.
 
+
+Vanilla items that can be picked up and dropped, like Nomai scrolls, lanterns from the DLC, etc. are also
+converted into the drops system, although they work slightly differently. By default, picked up items are
+placed in a "toolbelt" or hotbar, and can be easily accessed by the player by cycling through hotbar slots.
+These psuedo-drops can then be transferred to the ship inventory, sold to shopkeepers, or otherwise
+interacted with like other drops.
+
+## Shops
+
+Shops are NPCs (either existing NPCs or clones) where the player can exchange currency for new drops,
+or sell drops they have in their inventory or hotbar in exchange for currency. Each shop is tied to
+exactly one shopkeeper NPC, and can only be interacted with through their dialogue.
+
+
+Each shop has a set list of items that it sells. Shop items can either restock at the start of each loop,
+or carry the remaining stock over from loop to loop.
+
+
+Drops sold to a shopkeeper can be repurchased through a "buyback" menu, although the prices are higher than
+the amount the drops initially sold for, to discourage using shopkeepers as extra inventory space.
+The buyback system allows the player to gain currency without permanently losing access to items that
+may be necessary for game or quest progression.
+
 ## Perks
 
-Perks are unlocked by the player as they level up, and permanently provide certain buffs to the player.
+Perks are unlocked by the player using perk points gained from level ups. An unlocked perk permanently
+provide certain buffs to the player, unless the perk is refunded, which returns all spent perk points.
 Perks can require a previous perk to be unlocked before they become available, forming a standard RPG
 perk tree.
-
 
 ## Buffs
 

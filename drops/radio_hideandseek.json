@@ -2,7 +2,7 @@
   "$schema": "../schemas/drop.schema.json",
   "id": "RADIO_HIDEANDSEEK",
   "name": "Campfire Tune Cassette",
-  "description": "A cassette tape for your ship's radio that plays a catchy tune.",
+  "description": "A cassette tape for your ship's radio that reminds you of playing hide and seek.",
   "rarity": "uncommon",
   "equipSlot": "radio",
   "iconPath": "RECORDER.png",

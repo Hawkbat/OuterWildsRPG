@@ -1,0 +1,27 @@
+{
+  "$schema": "../schemas/drop.schema.json",
+  "id": "RADIO_RIVER",
+  "name": "River Cassette",
+  "description": "A cassette tape for your ship's radio that reminds you of rafting in the Stranger.",
+  "rarity": "uncommon",
+  "equipSlot": "radio",
+  "iconPath": "RECORDER.png",
+  "locations": [
+    {
+      "parentPath": "RingWorld_Body/Sector_RingInterior",
+      "position": {
+        "x": -289.08,
+        "y": 36.8624,
+        "z": -76.24989
+      },
+      "rotation": {
+        "x": 50.63347,
+        "y": 51.88524,
+        "z": 351.1329
+      }
+    }
+  ],
+  "buffs": [
+    { "travelMusic": { "audioType": "RaftTravel_River" } }
+  ]
+}

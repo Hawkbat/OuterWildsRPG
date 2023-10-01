@@ -2,7 +2,7 @@
   "$schema": "../schemas/drop.schema.json",
   "id": "RADIO_TIMBERHEARTH",
   "name": "Timber Hearth Cassette",
-  "description": "A cassette tape for your ship's radio that plays a nostalgic melody.",
+  "description": "A cassette tape for your ship's radio that reminds you of the village on Timber Hearth.",
   "rarity": "uncommon",
   "equipSlot": "radio",
   "iconPath": "RECORDER.png",

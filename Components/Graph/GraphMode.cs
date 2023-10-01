@@ -18,12 +18,12 @@ namespace OuterWildsRPG.Components.Graph
         ScreenPromptList centerPromptList;
         ScreenPromptList upperRightPromptList;
 
-        List<GraphCard> cardList;
-        Dictionary<string, GraphCard> cardDict;
-        List<GraphLink> linkList;
-        Dictionary<string, GraphLink> linkDict;
-        List<GraphLink> highlightedLinkList;
-        List<GraphElement> cardOrLinkRevealQueue;
+        List<GraphCard> cardList = new();
+        Dictionary<string, GraphCard> cardDict = new();
+        List<GraphLink> linkList = new();
+        Dictionary<string, GraphLink> linkDict = new();
+        List<GraphLink> highlightedLinkList = new();
+        List<GraphElement> cardOrLinkRevealQueue = new();
 
         OWAudioSource navigateAudioSource;
         ScreenPrompt zoomPrompt;
@@ -146,8 +146,8 @@ namespace OuterWildsRPG.Components.Graph
             selectPrompt = new ScreenPrompt(InputLibrary.interact, "", 0, ScreenPrompt.DisplayState.Normal, false);
             markPrompt = new ScreenPrompt(InputLibrary.markEntryOnHUD, "", 0, ScreenPrompt.DisplayState.Normal, false);
 
-            GenerateCards();
-            GenerateLinks();
+            RefreshCards();
+            RefreshLinks();
             canvasAnimator.SetImmediate(0f, Vector3.one * 0.5f);
         }
 
@@ -209,7 +209,7 @@ namespace OuterWildsRPG.Components.Graph
 
             if (customRevealQueue.Count() > 0)
             {
-                PlayRevealAnimation(customRevealQueue.ToList());
+                StartRevealAnimation(customRevealQueue.ToList());
             }
             else if (!string.IsNullOrEmpty(customFocusID))
             {
@@ -228,30 +228,6 @@ namespace OuterWildsRPG.Components.Graph
             Locator.GetPromptManager().AddScreenPrompt(skipPrompt, upperRightPromptList, TextAnchor.MiddleRight, -1, false);
             Locator.GetPromptManager().AddScreenPrompt(selectPrompt, centerPromptList, TextAnchor.MiddleCenter, -1, false);
             Locator.GetPromptManager().AddScreenPrompt(markPrompt, centerPromptList, TextAnchor.MiddleCenter, -1, false);
-        }
-
-        private void PlayRevealAnimation(List<GraphElement> revealQueue)
-        {
-            cardOrLinkRevealQueue = revealQueue;
-            updateRevealAnim = true;
-            updateFrameAll = false;
-            targetCard = null;
-            animWaitSeconds = 0.5f;
-            panDuration = 0.7f;
-            queueIndex = 0;
-            startScale = scaleRoot.localScale;
-            PrepareRevealAnimations();
-        }
-
-        public void CenterOnCard(string id)
-        {
-            if (!cardDict.ContainsKey(id)) return;
-            var card = cardDict[id];
-            panRoot.anchoredPosition = -card.GetAnchoredPosition();
-            scaleRoot.localScale = Vector3.one;
-            UpdateFocusedSelectable();
-            if (focusedElement != null)
-                descriptionField.SetVisible(true);
         }
 
         public override void ExitMode()
@@ -276,16 +252,7 @@ namespace OuterWildsRPG.Components.Graph
             var x = scaleRoot.localScale.x;
             if (updateFrameAll)
             {
-                var t = Mathf.InverseLerp(startPanTime, startPanTime + panDuration, Time.unscaledTime);
-                t = Mathf.SmoothStep(0f, 1f, t);
-                var boundsSize = maxBounds - minBounds;
-                var boundsCenter = -(minBounds + boundsSize * 0.5f);
-                panRoot.anchoredPosition = Vector2.Lerp(startPanPos, boundsCenter, t);
-                scaleRoot.localScale = Vector2.Lerp(startScale, Vector2.one * minScale, t);
-                if (t >= 1f)
-                {
-                    updateFrameAll = false;
-                }
+                UpdateFrameAll();
             }
             else if (updateSnapToCard)
             {
@@ -384,14 +351,6 @@ namespace OuterWildsRPG.Components.Graph
             var boundsSize = maxBounds - minBounds;
             minScale = Mathf.Min(1f, boundsSize.y / boundsSize.x > ratio ? canvasSize.y / boundsSize.y : canvasSize.x / boundsSize.x);
             maxScale = 5f;
-        }
-
-        private void FrameRevealedCards()
-        {
-            var boundsSize = maxBounds - minBounds;
-            var boundsCenter = minBounds + boundsSize * 0.5f;
-            panRoot.anchoredPosition = -boundsCenter;
-            scaleRoot.localScale = Vector3.one * minScale;
         }
 
         private void UpdatePrompts()
@@ -511,11 +470,50 @@ namespace OuterWildsRPG.Components.Graph
             }
         }
 
-        private void PrepareRevealAnimations()
+        public void CenterOnCard(string id)
         {
-            foreach (var el in cardOrLinkRevealQueue)
-                if (el.IsVisible() && !el.IsRevealAnimationReady())
-                    el.PrepareRevealAnimation();
+            if (!cardDict.ContainsKey(id)) return;
+            var card = cardDict[id];
+            panRoot.anchoredPosition = -card.GetAnchoredPosition();
+            scaleRoot.localScale = Vector3.one;
+            UpdateFocusedSelectable();
+            if (focusedElement != null)
+                descriptionField.SetVisible(true);
+        }
+
+        private void FrameRevealedCards()
+        {
+            var boundsSize = maxBounds - minBounds;
+            var boundsCenter = minBounds + boundsSize * 0.5f;
+            panRoot.anchoredPosition = -boundsCenter;
+            scaleRoot.localScale = Vector3.one * minScale;
+        }
+
+        private void StartFrameAll()
+        {
+            updateFrameAll = true;
+            startPanTime = Time.unscaledTime;
+            startPanPos = panRoot.anchoredPosition;
+            startScale = scaleRoot.localScale;
+        }
+
+        private void UpdateFrameAll()
+        {
+            var t = Mathf.InverseLerp(startPanTime, startPanTime + panDuration, Time.unscaledTime);
+            t = Mathf.SmoothStep(0f, 1f, t);
+            var boundsSize = maxBounds - minBounds;
+            var boundsCenter = -(minBounds + boundsSize * 0.5f);
+            panRoot.anchoredPosition = Vector2.Lerp(startPanPos, boundsCenter, t);
+            scaleRoot.localScale = Vector2.Lerp(startScale, Vector2.one * minScale, t);
+            if (t >= 1f)
+            {
+                FinishFrameAll();
+            }
+        }
+
+        private void FinishFrameAll()
+        {
+            updateFrameAll = false;
         }
 
         private void StartSnapToCard(GraphCard card)
@@ -527,6 +525,12 @@ namespace OuterWildsRPG.Components.Graph
             targetCard = card;
         }
 
+        private void FinishSnapToCard()
+        {
+            updateSnapToCard = false;
+            targetCard = null;
+        }
+
         private void UpdateSnapToCard()
         {
             var t = Mathf.InverseLerp(startPanTime, startPanTime + panDuration, Time.unscaledTime);
@@ -535,9 +539,37 @@ namespace OuterWildsRPG.Components.Graph
             panRoot.anchoredPosition = Vector2.Lerp(startPanPos, pos, t);
             if (t >= 1f)
             {
-                updateSnapToCard = false;
-                targetCard = null;
+                FinishSnapToCard();
             }
+        }
+
+        private void StartRevealAnimation(List<GraphElement> revealQueue)
+        {
+            cardOrLinkRevealQueue = revealQueue;
+            updateRevealAnim = true;
+            updateFrameAll = false;
+            targetCard = null;
+            animWaitSeconds = 0.5f;
+            panDuration = 0.7f;
+            queueIndex = 0;
+            startScale = scaleRoot.localScale;
+
+            foreach (var el in cardOrLinkRevealQueue)
+                if (el.IsVisible())
+                    el.PrepareRevealAnimation();
+        }
+
+        private void FinishRevealAnimation()
+        {
+            foreach (var el in cardOrLinkRevealQueue)
+            {
+                if (el.IsRevealAnimationReady())
+                    el.PlayRevealAnimation(panDuration);
+            }
+            cardOrLinkRevealQueue.Clear();
+            updateRevealAnim = false;
+            targetCard = null;
+            StartFrameAll();
         }
 
         private void UpdateRevealAnimation()
@@ -605,62 +637,86 @@ namespace OuterWildsRPG.Components.Graph
             }
         }
 
-        private void FinishRevealAnimation()
+        private void RefreshCards()
         {
-            foreach (var el in cardOrLinkRevealQueue)
+            var missingIDs = new HashSet<string>(cardList.Select(c => c.GetID()));
+            foreach (var cardID in graphProvider.GetCards())
             {
-                if (el.IsRevealAnimationReady())
-                    el.PlayRevealAnimation(panDuration);
+                if (cardDict.TryGetValue(cardID, out var card))
+                {
+                    card.Refresh();
+                    missingIDs.Remove(cardID);
+                } 
+                else
+                {
+                    var go = Instantiate(entryCardTemplate, entryCardTemplate.transform.parent);
+                    go.name = cardID;
+                    card = go.GetComponent<GraphCard>();
+                    card.gameObject.SetActive(true);
+                    card.Init(cardID, this, graphProvider, fontAndLanguageController);
+                    cardList.Add(card);
+                    cardDict.Add(card.GetID(), card);
+                }
             }
-            cardOrLinkRevealQueue.Clear();
-            updateRevealAnim = false;
-            targetCard = null;
-            updateFrameAll = true;
-            startPanTime = Time.unscaledTime;
-            startPanPos = panRoot.anchoredPosition;
-            startScale = scaleRoot.localScale;
+            foreach (var cardID in missingIDs)
+            {
+                if (cardDict.TryGetValue(cardID, out var card))
+                {
+                    cardDict.Remove(cardID);
+                    cardList.Remove(card);
+                    Destroy(card.gameObject);
+                }
+            }
         }
 
-        private void GenerateCards()
+        private void RefreshLinks()
         {
-            cardList = new List<GraphCard>();
-            cardDict = new Dictionary<string, GraphCard>();
-            foreach (var cardID in graphProvider.GetInitialCards())
+            var missingIDs = new HashSet<string>(linkList.Select(l => l.GetID()));
+            foreach (var linkPair in graphProvider.GetLinks())
             {
-                var go = Instantiate(entryCardTemplate, entryCardTemplate.transform.parent);
-                go.name = cardID;
-                var card = go.GetComponent<GraphCard>();
-                card.gameObject.SetActive(true);
-                card.Init(cardID, this, graphProvider, fontAndLanguageController);
-                cardList.Add(card);
-                cardDict.Add(card.GetID(), card);
+                var linkID = GraphLink.GetID(linkPair.Key, linkPair.Value);
+                if (linkDict.TryGetValue(linkID, out var link))
+                {
+                    link.Refresh();
+                    missingIDs.Remove(linkID);
+                }
+                else
+                {
+                    var sourceID = linkPair.Key;
+                    var targetID = linkPair.Value;
+                    var sourceCard = cardDict[sourceID];
+                    var targetCard = cardDict[targetID];
+                    var go = Instantiate(entryLinkTemplate, entryLinkTemplate.transform.parent);
+                    go.name = $"LINK_{sourceID}-->{targetID}";
+                    link = go.GetComponent<GraphLink>();
+                    link.gameObject.SetActive(true);
+                    link.Init(this, sourceCard, targetCard, graphProvider);
+                    linkList.Add(link);
+                    linkDict.Add(link.GetID(), link);
+                }
             }
-        }
-
-        private void GenerateLinks()
-        {
-            linkList = new List<GraphLink>();
-            linkDict = new Dictionary<string, GraphLink>();
-            foreach (var linkPair in graphProvider.GetInitialLinks())
+            foreach (var linkID in missingIDs)
             {
-                var sourceID = linkPair.Key;
-                var targetID = linkPair.Value;
-                var sourceCard = cardDict[sourceID];
-                var targetCard = cardDict[targetID];
-                var go = Instantiate(entryLinkTemplate, entryLinkTemplate.transform.parent);
-                go.name = $"LINK_{sourceID}-->{targetID}";
-                var link = go.GetComponent<GraphLink>();
-                link.gameObject.SetActive(true);
-                link.Init(this, sourceCard, targetCard, graphProvider);
-                linkList.Add(link);
-                linkDict.Add(link.GetID(), link);
+                if (linkDict.TryGetValue(linkID, out var link))
+                {
+                    linkDict.Remove(linkID);
+                    linkList.Remove(link);
+                    Destroy(link.gameObject);
+                }
             }
         }
 
         private void RefreshAll()
         {
-            foreach (var el in GetGraphElements())
-                el.Refresh();
+            RefreshCards();
+            RefreshLinks();
+
+            var customRevealQueue = GetGraphElements().Where(el => el.ShouldPlayRevealAnimation());
+
+            if (customRevealQueue.Count() > 0)
+            {
+                StartRevealAnimation(customRevealQueue.ToList());
+            }
         }
 
         private void SetDescriptionFieldTexts(IEnumerable<string> texts)

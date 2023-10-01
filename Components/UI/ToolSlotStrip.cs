@@ -1,4 +1,5 @@
 ﻿using OuterWildsRPG.Enums;
+using OuterWildsRPG.Objects.Drops;
 using OuterWildsRPG.Utils;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace OuterWildsRPG.Components.UI
     {
         CanvasGroup canvasGroup;
         readonly Dictionary<EquipSlot, ToolSlotIcon> toolSlotIcons = new();
+        readonly Dictionary<int, ToolSlotIcon> hotbarIcons = new();
 
         public override void Setup()
         {
@@ -37,11 +39,13 @@ namespace OuterWildsRPG.Components.UI
                 EquipSlot.Translator,
                 EquipSlot.Stick,
                 EquipSlot.Launcher,
-                EquipSlot.Item,
             };
+
+            var totalCount = equipSlots.Count + DropManager.GetTotalHotbarCapacity() + 1;
+
             var size = 30f;
             var gap = 5f;
-            var offset = -0.5f * (size * equipSlots.Count + gap * (equipSlots.Count - 1) - size);
+            var offset = -0.5f * (size * totalCount + gap * (totalCount - 1) - size);
             var x = offset;
             foreach (var equipSlot in equipSlots)
             {
@@ -49,7 +53,7 @@ namespace OuterWildsRPG.Components.UI
                 if (existing) toolSlotIcons.Remove(equipSlot);
 
                 var toolSlotIcon = MakeChild(existing, equipSlot.ToString());
-                toolSlotIcon.Init(equipSlot);
+                toolSlotIcon.Init(equipSlot, 0);
 
                 toolSlotIcon.rectTransform.anchorMin = new(0.5f, 0f);
                 toolSlotIcon.rectTransform.anchorMax = new(0.5f, 0f);
@@ -60,11 +64,32 @@ namespace OuterWildsRPG.Components.UI
                 toolSlotIcons.Add(equipSlot, toolSlotIcon);
                 x += size + gap;
             }
+
+            x += size + gap;
+
+            for (var itemIndex = 0; itemIndex < DropManager.GetTotalHotbarCapacity(); itemIndex++)
+            {
+                var existing = hotbarIcons.ContainsKey(itemIndex) ? hotbarIcons[itemIndex] : null;
+                if (existing) hotbarIcons.Remove(itemIndex);
+
+                var hotbarIcon = MakeChild(existing, $"Hotbar{itemIndex}");
+                hotbarIcon.Init(EquipSlot.Item, itemIndex);
+
+                hotbarIcon.rectTransform.anchorMin = new(0.5f, 0f);
+                hotbarIcon.rectTransform.anchorMax = new(0.5f, 0f);
+                hotbarIcon.rectTransform.pivot = new Vector2(0.5f, 0f);
+                hotbarIcon.rectTransform.sizeDelta = new(size, size);
+                hotbarIcon.rectTransform.anchoredPosition = new Vector2(x, 25f);
+
+                hotbarIcons.Add(itemIndex, hotbarIcon);
+                x += size + gap;
+            }
         }
 
         public override bool Animate()
         {
-            canvasGroup.alpha = Mathf.MoveTowards(canvasGroup.alpha, PlayerStateUtils.IsPlayable ? 1f : 0f, Time.unscaledDeltaTime);
+            var active = PlayerStateUtils.IsPlayable && !PlayerState.InDreamWorld();
+            canvasGroup.alpha = Mathf.MoveTowards(canvasGroup.alpha, active ? 1f : 0f, Time.unscaledDeltaTime * 5f);
             return true;
         }
     }

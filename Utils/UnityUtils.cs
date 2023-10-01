@@ -43,7 +43,22 @@ namespace OuterWildsRPG.Utils
         public static string GetTransformPath(Transform t)
         {
             if (t == null) return null;
-            if (t.parent) return GetTransformPath(t.parent) + "/" + t.name;
+            if (t.parent)
+            {
+                var sameNameCount = 0;
+                var sameNameIndex = 0;
+                foreach (var child in GetChildren(t.parent))
+                {
+                    if (child == t) sameNameIndex = sameNameCount;
+                    if (child.name == t.name) sameNameCount++;
+                }
+                if (sameNameCount > 1)
+                {
+                    return $"{GetTransformPath(t.parent)}/{t.name}:{sameNameIndex}";
+
+                }
+                return $"{GetTransformPath(t.parent)}/{t.name}";
+            }
             return t.name;
         }
 
@@ -106,6 +121,17 @@ namespace OuterWildsRPG.Utils
                 if (t == null) throw new Exception($"Could not find \"{part}\" in path: {path}");
             }
             return t;
+        }
+
+        public static bool IsTransformDescendent(Transform child, Transform parent)
+        {
+            var t = child;
+            while (t.parent != null)
+            {
+                t = t.parent;
+                if (t == parent) return true;
+            }
+            return false;
         }
 
         public static string RichTextColor(string s, Color32 color)
