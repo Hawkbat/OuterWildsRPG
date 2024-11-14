@@ -10,11 +10,9 @@ using HazardType = HazardVolume.HazardType;
 
 namespace OuterWildsRPG.Objects.Common.Effects
 {
-    public class HazardDamageEffect : BuffEffect<HazardDamageEffect, HazardDamageEffectData>
+    public class HazardDamageEffect : StatBuffEffect<HazardDamageEffect, HazardDamageEffectData>
     {
         public HazardType Type;
-        public float Add;
-        public float Multiply;
 
         public override void Load(HazardDamageEffectData data, string modID)
         {

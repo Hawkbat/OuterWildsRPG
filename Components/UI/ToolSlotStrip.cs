@@ -59,7 +59,7 @@ namespace OuterWildsRPG.Components.UI
                 toolSlotIcon.rectTransform.anchorMax = new(0.5f, 0f);
                 toolSlotIcon.rectTransform.pivot = new Vector2(0.5f, 0f);
                 toolSlotIcon.rectTransform.sizeDelta = new(size, size);
-                toolSlotIcon.rectTransform.anchoredPosition = new Vector2(x, 25f);
+                toolSlotIcon.rectTransform.anchoredPosition = new Vector2(x, 30f);
 
                 toolSlotIcons.Add(equipSlot, toolSlotIcon);
                 x += size + gap;
@@ -79,7 +79,7 @@ namespace OuterWildsRPG.Components.UI
                 hotbarIcon.rectTransform.anchorMax = new(0.5f, 0f);
                 hotbarIcon.rectTransform.pivot = new Vector2(0.5f, 0f);
                 hotbarIcon.rectTransform.sizeDelta = new(size, size);
-                hotbarIcon.rectTransform.anchoredPosition = new Vector2(x, 25f);
+                hotbarIcon.rectTransform.anchoredPosition = new Vector2(x, 30f);
 
                 hotbarIcons.Add(itemIndex, hotbarIcon);
                 x += size + gap;

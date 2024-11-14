@@ -1,4 +1,5 @@
 ﻿using OuterWildsRPG.Objects.Common;
+using OuterWildsRPG.Objects.Common.Effects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace OuterWildsRPG.Components
         void Update()
         {
             if (!fogController.enabled) return;
-            fogController._fogDensity = originalFogDensity * BuffManager.GetFogDensityMultiplier();
+            fogController._fogDensity = originalFogDensity * BuffManager.GetStatMultiplier<FogDensityEffect>();
         }
     }
 }

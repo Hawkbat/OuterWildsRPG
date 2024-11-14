@@ -8,10 +8,8 @@ using UnityEngine;
 
 namespace OuterWildsRPG.Objects.Common.Effects
 {
-    public class MoveSpeedEffect : BuffEffect<MoveSpeedEffect, MoveSpeedEffectData>
+    public class MoveSpeedEffect : StatBuffEffect<MoveSpeedEffect, MoveSpeedEffectData>
     {
-        public float Multiply = 1f;
-
         public override void Load(MoveSpeedEffectData data, string modID)
         {
             base.Load(data, modID);

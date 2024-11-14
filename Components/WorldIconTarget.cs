@@ -37,7 +37,12 @@ namespace OuterWildsRPG.Components
                 return Assets.WorldIconTextSprite;
             } else if (dialogueTree != null)
             {
-                return Assets.WorldIconTalkSprite;
+                switch (dialogueTree._characterName)
+                {
+                    case "SIGN": return Assets.WorldIconSignSprite;
+                    case "RECORDING": return Assets.WorldIconRecordingSprite;
+                    default: return Assets.WorldIconTalkSprite;
+                }
             }
             return null;
         }

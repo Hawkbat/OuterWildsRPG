@@ -1,6 +1,7 @@
 ﻿using OuterWildsRPG.Components;
 using OuterWildsRPG.Enums;
 using OuterWildsRPG.Objects.Common;
+using OuterWildsRPG.Objects.Common.Effects;
 using OuterWildsRPG.Utils;
 using OWML.Common;
 using OWML.ModHelper.Events;
@@ -83,7 +84,7 @@ namespace OuterWildsRPG.Objects.Drops
         public static bool HasEquippedDrop(Drop drop)
             => GetEquippedDrops().Contains(drop);
 
-        public static int GetTotalInventoryCapacity() => BuffManager.GetInventoryCapacity();
+        public static int GetTotalInventoryCapacity() => 10 + Mathf.FloorToInt(BuffManager.GetStatMultiplier<InventorySpaceEffect>());
         public static int GetUsedInventoryCapacity() => DropSaveData.Instance.Inventory.Count;
         public static int GetRemainingInventoryCapacity() => GetTotalInventoryCapacity() - GetUsedInventoryCapacity();
 

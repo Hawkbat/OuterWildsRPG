@@ -8,10 +8,8 @@ using UnityEngine;
 
 namespace OuterWildsRPG.Objects.Common.Effects
 {
-    public class TranslationSpeedEffect : BuffEffect<TranslationSpeedEffect, TranslationSpeedEffectData>
+    public class TranslationSpeedEffect : StatBuffEffect<TranslationSpeedEffect, TranslationSpeedEffectData>
     {
-        public float Multiply;
-
         public override void Load(TranslationSpeedEffectData data, string modID)
         {
             base.Load(data, modID);

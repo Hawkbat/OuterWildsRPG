@@ -1,5 +1,4 @@
 ﻿using OuterWildsRPG.Utils;
-using OWML.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,17 +8,17 @@ using UnityEngine;
 
 namespace OuterWildsRPG.Objects.Common.Effects
 {
-    public class MaxHealthEffect : StatBuffEffect<MaxHealthEffect, MaxHealthEffectData>
+    public class JetpackThrustEffect : StatBuffEffect<JetpackThrustEffect, JetpackThrustEffectData>
     {
-        public override void Load(MaxHealthEffectData data, string modID)
+        public override void Load(JetpackThrustEffectData data, string modID)
         {
             base.Load(data, modID);
-            Add = data.add;
             Multiply = data.multiply;
         }
 
         public override bool IsInstant() => false;
 
-        public override string GetDescription() => Translations.EffectDescriptionMaxHealth(Add, Multiply);
+        public override string GetDescription() => Translations.EffectDescriptionJetpackThrust(Add, Multiply);
+
     }
 }

@@ -8,9 +8,12 @@ using UnityEngine;
 
 namespace OuterWildsRPG.Objects.Common.Effects
 {
-    public class InventorySpaceEffect : BuffEffect<InventorySpaceEffect, InventorySpaceEffectData>
+    public class InventorySpaceEffect : BuffEffect<InventorySpaceEffect, InventorySpaceEffectData>, IStatBuffEffect
     {
         public int Amount;
+
+        public float Add => Amount;
+        public float Multiply => 1f;
 
         public override void Load(InventorySpaceEffectData data, string modID)
         {

@@ -23,9 +23,16 @@ namespace OuterWildsRPG.Objects.Common
         public HealEffectData heal;
         public HoldBreathEffectData holdBreath;
         public InventorySpaceEffectData inventorySpace;
+        public JetpackBoostDurationEffectData jetpackBoostDuration;
+        public JetpackBoostRechargeEffectData jetpackBoostRecharge;
+        public JetpackBoostThrustEffectData jetpackBoostThrust;
+        public JetpackThrustEffectData jetpackThrust;
         public JumpSpeedEffectData jumpSpeed;
         public MaxHealthEffectData maxHealth;
+        public MaxOxygenEffectData maxOxygen;
+        public MaxFuelEffectData maxFuel;
         public MoveSpeedEffectData moveSpeed;
+        public StrangeFlameEffectData strangeFlame;
         public TranslationSpeedEffectData translationSpeed;
         public TravelMusicEffectData travelMusic;
     }

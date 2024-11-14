@@ -8,9 +8,12 @@ using UnityEngine;
 
 namespace OuterWildsRPG.Objects.Common.Effects
 {
-    public class HealEffect : BuffEffect<HealEffect, HealEffectData>
+    public class HealEffect : BuffEffect<HealEffect, HealEffectData>, IStatBuffEffect
     {
         public float Amount;
+
+        public float Add => Amount;
+        public float Multiply => 1f;
 
         public override void Load(HealEffectData data, string modID)
         {

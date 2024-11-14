@@ -73,21 +73,14 @@ namespace OuterWildsRPG.Components.UI
 
         public override bool Animate()
         {
-            if (target == null)
+            if (target == null || target.GetTarget() == null || !target.isActiveAndEnabled)
             {
                 OuterWildsRPG.LogError($"Lost target for icon {name}!");
                 gameObject.SetActive(false);
                 return false;
             }
 
-            var targetTransform = target.GetTarget();
-            if (targetTransform == null)
-            {
-                image.enabled = false;
-                return true;
-            }
-
-            var targetPos = targetTransform.TransformPoint(target.GetOffset());
+            var targetPos = target.GetTarget().TransformPoint(target.GetOffset());
 
             var distance = Vector3.Distance(Locator.GetPlayerTransform().position, targetPos);
             var t = Mathf.Clamp01(Mathf.InverseLerp(target.GetMinDistance(), target.GetMaxDistance(), distance));

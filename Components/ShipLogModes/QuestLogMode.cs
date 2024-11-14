@@ -85,6 +85,13 @@ namespace OuterWildsRPG.Components.ShipLogModes
         {
             int index = ShiplogModesAPI.ItemListGetSelectedIndex(itemList);
             int delta = ShiplogModesAPI.ItemListUpdateList(itemList);
+            if (quests.Count == 0)
+            {
+                selected = null;
+                trackQuestPrompt.SetVisibility(false);
+                untrackQuestPrompt.SetVisibility(false);
+                return;
+            }
             index = (index + delta + quests.Count) % quests.Count;
 
             selected = quests[index];

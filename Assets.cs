@@ -27,10 +27,14 @@ namespace OuterWildsRPG
         public static Texture2D WorldIconTalkTex;
         public static Texture2D WorldIconTextTex;
         public static Texture2D WorldIconShopTex;
+        public static Texture2D WorldIconSignTex;
+        public static Texture2D WorldIconRecordingTex;
         public static Sprite WorldIconQuestSprite;
         public static Sprite WorldIconTalkSprite;
         public static Sprite WorldIconTextSprite;
         public static Sprite WorldIconShopSprite;
+        public static Sprite WorldIconSignSprite;
+        public static Sprite WorldIconRecordingSprite;
 
         public static Color HUDBackColor = new(0.4f, 0.4f, 0.4f, 1f);
         public static Color HUDForeColor = Color.white;
@@ -59,10 +63,14 @@ namespace OuterWildsRPG
             WorldIconTalkTex = OuterWildsRPG.Instance.ModHelper.Assets.GetTexture("assets/WorldIconTalk.png");
             WorldIconTextTex = OuterWildsRPG.Instance.ModHelper.Assets.GetTexture("assets/WorldIconText.png");
             WorldIconShopTex = OuterWildsRPG.Instance.ModHelper.Assets.GetTexture("assets/WorldIconShop.png");
+            WorldIconSignTex = OuterWildsRPG.Instance.ModHelper.Assets.GetTexture("assets/WorldIconSign.png");
+            WorldIconRecordingTex = OuterWildsRPG.Instance.ModHelper.Assets.GetTexture("assets/WorldIconRecording.png");
             WorldIconQuestSprite = GetSprite(WorldIconQuestTex);
             WorldIconTalkSprite = GetSprite(WorldIconTalkTex);
             WorldIconTextSprite = GetSprite(WorldIconTextTex);
             WorldIconShopSprite = GetSprite(WorldIconShopTex);
+            WorldIconSignSprite = GetSprite(WorldIconSignTex);
+            WorldIconRecordingSprite = GetSprite(WorldIconRecordingTex);
         }
 
         public static Color GetRarityColor(DropRarity rarity)

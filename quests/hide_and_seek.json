@@ -12,7 +12,7 @@
         {
           "type": "dialogueCondition",
           "value": "BeginHideAndSeek",
-          "markerPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Characters_LowerVillage/Kids_PreGame/Villager_HEA_Tephra/Tephra_FocalPoint"
+          "markerPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_LowerVillage/Characters_LowerVillage/Kids_PreGame/Villager_HEA_Tephra/ConversationZone"
         }
       ]
     },

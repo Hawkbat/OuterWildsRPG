@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using OuterWildsRPG.Objects.Common;
+using OuterWildsRPG.Objects.Common.Effects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,64 +28,10 @@ namespace OuterWildsRPG.Patches
             }
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(HazardDetector), nameof(HazardDetector.GetNetDamagePerSecond))]
-        public static void HazardDetector_GetNetDamagePerSecond(HazardDetector __instance, ref float __result)
-        {
-            if (__instance._isPlayerDetector)
-            {
-                var baseMaxHealth = 100f;
-                var modifiedMaxHealth = 100f * BuffManager.GetMaxHealthMultiplier();
-                var ratio = baseMaxHealth / modifiedMaxHealth;
-                __result *= ratio;
-            }
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.ApplyInstantDamage))]
-        public static void PlayerResource_ApplyInstantDamage(PlayerResources __instance, ref float damage, InstantDamageType type, ref bool __result)
-        {
-            var baseMaxHealth = 100f;
-            var modifiedMaxHealth = 100f * BuffManager.GetMaxHealthMultiplier();
-            var ratio = baseMaxHealth / modifiedMaxHealth;
-            damage *= ratio;
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.UpdateOxygen))]
-        public static bool PlayerResources_UpdateOxygen(PlayerResources __instance)
-        {
-            if (PlayerState.InDreamWorld()) return true;
-            if (__instance._isSuffocating && !__instance.IsOxygenPresent() && __instance._currentOxygen <= 0f)
-            {
-                var modifier = BuffManager.GetSuffocationTimeModifier();
-                var modifiedSuffocationTime = __instance._startSuffocationTime + 4f + modifier;
-                if (Time.time < modifiedSuffocationTime)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsSuffocating))]
-        public static bool PlayerResources_IsSuffocating(PlayerResources __instance, ref bool __result)
-        {
-            if (PlayerState.InDreamWorld()) return true;
-            if (__instance._isSuffocating && !__instance.IsOxygenPresent() && __instance._currentOxygen <= 0f)
-            {
-                var modifier = BuffManager.GetSuffocationTimeModifier();
-                var modifiedStartSuffocationTime = __instance._startSuffocationTime + modifier;
-                if (Time.time < modifiedStartSuffocationTime)
-                {
-                    __result = false;
-                    return false;
-                }
-            }
-            return true;
-        }
-
         [HarmonyPrefix, HarmonyPatch(typeof(NomaiTranslatorProp), nameof(NomaiTranslatorProp.SwitchTextNode))]
         public static void NomaiTranslatorProp_SwitchTextMode(NomaiTranslatorProp __instance)
         {
-            var multiplier = BuffManager.GetTranslationSpeedMultiplier();
+            var multiplier = BuffManager.GetStatMultiplier<TranslationSpeedEffect>();
             // Vanilla is a flat 0.2f
             __instance._totalTranslateTime = 1f * multiplier;
         }

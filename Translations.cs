@@ -21,9 +21,16 @@ namespace OuterWildsRPG
         public static string EffectDescriptionHeal(float amount) => Translate(nameof(EffectDescriptionHeal), Percentage(amount));
         public static string EffectDescriptionHoldBreath(float amount) => Translate(nameof(EffectDescriptionHoldBreath), Modifier(amount));
         public static string EffectDescriptionInventorySpace(int amount) => Translate(nameof(EffectDescriptionInventorySpace), Modifier(amount));
+        public static string EffectDescriptionJetpackBoostDuration(float add, float multiply) => Translate(nameof(EffectDescriptionJetpackBoostDuration), Modifier(add), PercentageModifier(multiply - 1f));
+        public static string EffectDescriptionJetpackBoostRecharge(float add, float multiply) => Translate(nameof(EffectDescriptionJetpackBoostRecharge), Modifier(add), PercentageModifier(multiply - 1f));
+        public static string EffectDescriptionJetpackBoostThrust(float add, float multiply) => Translate(nameof(EffectDescriptionJetpackBoostThrust), Modifier(add), PercentageModifier(multiply - 1f));
+        public static string EffectDescriptionJetpackThrust(float add, float multiply) => Translate(nameof(EffectDescriptionJetpackThrust), Modifier(add), PercentageModifier(multiply - 1f));
         public static string EffectDescriptionJumpSpeed(float amount) => Translate(nameof(EffectDescriptionJumpSpeed), PercentageModifier(amount - 1f));
         public static string EffectDescriptionMaxHealth(float add, float multiply) => Translate(nameof(EffectDescriptionMaxHealth), PercentageModifier(add), PercentageModifier(multiply - 1f));
+        public static string EffectDescriptionMaxOxygen(float add, float multiply) => Translate(nameof(EffectDescriptionMaxOxygen), PercentageModifier(add), PercentageModifier(multiply - 1f));
+        public static string EffectDescriptionMaxFuel(float add, float multiply) => Translate(nameof(EffectDescriptionMaxFuel), PercentageModifier(add), PercentageModifier(multiply - 1f));
         public static string EffectDescriptionMoveSpeed(float amount) => Translate(nameof(EffectDescriptionMoveSpeed), PercentageModifier(amount - 1f));
+        public static string EffectDescriptionStrangeFlame() => Translate(nameof(EffectDescriptionStrangeFlame));
         public static string EffectDescriptionTranslationSpeed(float amount) => Translate(nameof(EffectDescriptionTranslationSpeed), PercentageModifier(amount - 1f));
         public static string EffectDescriptionTravelMusic() => Translate(nameof(EffectDescriptionTravelMusic));
         public static string NotificationQuestStart(Quest quest) => Translate(nameof(NotificationQuestStart), quest);

@@ -12,7 +12,7 @@
         {
           "type": "dialogueCondition",
           "value": "CoachSaysHi_1",
-          "markerPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Gossan/Gossan_FocalPoint"
+          "markerPath": "TimberHearth_Body/Sector_TH/Sector_Village/Sector_UpperVillage/Characters_UpperVillage/Villager_HEA_Gossan/ConversationZone"
         },
         {
           "type": "dialogueCondition",

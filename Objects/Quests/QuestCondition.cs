@@ -301,17 +301,7 @@ namespace OuterWildsRPG.Objects.Quests
                         yield return signal.transform;
                     break;
                 case QuestConditionType.Conversation:
-                    var talker = UnityUtils.GetTransformAtPath(Value, null);
-                    if (talker != null)
-                    {
-                        var convo = talker.GetComponentInChildren<CharacterDialogueTree>(true);
-                        if (convo == null)
-                            convo = talker.GetComponentInParent<CharacterDialogueTree>();
-                        if (convo != null)
-                            yield return convo._attentionPoint;
-                        else
-                            yield return talker;
-                    }
+                    yield return UnityUtils.GetTransformAtPath(Value, null);
                     break;
                 case QuestConditionType.HaveDrop:
                     foreach (var pickup in DropManager.FindDropPickups(valueDrop))

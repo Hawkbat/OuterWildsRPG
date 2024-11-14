@@ -9,9 +9,9 @@ using UnityEngine;
 
 namespace OuterWildsRPG.Objects.Common.Effects
 {
-    public class MaxHealthEffect : StatBuffEffect<MaxHealthEffect, MaxHealthEffectData>
+    public class MaxOxygenEffect : StatBuffEffect<MaxOxygenEffect, MaxOxygenEffectData>
     {
-        public override void Load(MaxHealthEffectData data, string modID)
+        public override void Load(MaxOxygenEffectData data, string modID)
         {
             base.Load(data, modID);
             Add = data.add;
@@ -20,6 +20,6 @@ namespace OuterWildsRPG.Objects.Common.Effects
 
         public override bool IsInstant() => false;
 
-        public override string GetDescription() => Translations.EffectDescriptionMaxHealth(Add, Multiply);
+        public override string GetDescription() => Translations.EffectDescriptionMaxOxygen(Add, Multiply);
     }
 }

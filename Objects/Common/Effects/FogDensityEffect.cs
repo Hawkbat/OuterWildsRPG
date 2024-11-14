@@ -8,10 +8,8 @@ using UnityEngine;
 
 namespace OuterWildsRPG.Objects.Common.Effects
 {
-    public class FogDensityEffect : BuffEffect<FogDensityEffect, FogDensityEffectData>
+    public class FogDensityEffect : StatBuffEffect<FogDensityEffect, FogDensityEffectData>
     {
-        public float Multiply = 1f;
-
         public override void Load(FogDensityEffectData data, string modID)
         {
             base.Load(data, modID);

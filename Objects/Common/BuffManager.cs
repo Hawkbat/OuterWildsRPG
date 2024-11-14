@@ -46,51 +46,23 @@ namespace OuterWildsRPG.Objects.Common
         }
 
         public static float ModifyHazardDamage(HazardVolume.HazardType type, float damage)
-        {
-            var activeEffects = GetAllActiveBuffs()
-                .Select(b => b.HazardDamage)
+            => damage * GetStatMultiplier<HazardDamageEffect>(e => e.Type == HazardVolume.HazardType.NONE || e.Type == type);
+
+        public static float GetStatMultiplier<T>() where T : IStatBuffEffect
+            => GetStatMultiplier(GetAllActiveBuffs()
+                .SelectMany(b => b.GetEffects())
+                .OfType<T>()
+                .Where(e => e != null));
+
+        public static float GetStatMultiplier<T>(Func<T, bool> filter) where T : IStatBuffEffect
+            => GetStatMultiplier(GetAllActiveBuffs()
+                .SelectMany(b => b.GetEffects())
+                .OfType<T>()
                 .Where(e => e != null)
-                .Where(e => e.Type == HazardVolume.HazardType.NONE || e.Type == type);
+                .Where(filter));
 
-            var addition = 0f;
-            foreach (var effect in activeEffects)
-                addition += effect.Add;
-
-            var multiplier = 1f;
-            foreach (var effect in activeEffects)
-                multiplier *= effect.Multiply;
-
-            return (damage + damage * addition) * multiplier;
-        }
-
-        public static float GetTranslationSpeedMultiplier()
+        public static float GetStatMultiplier<T>(IEnumerable<T> activeEffects) where T : IStatBuffEffect
         {
-            var multiplier = 1f;
-            var activeEffects = GetAllActiveBuffs()
-                .Select(b => b.TranslationSpeed)
-                .Where(e => e != null);
-            foreach (var effect in activeEffects)
-                multiplier *= effect.Multiply;
-            return multiplier;
-        }
-
-        public static float GetSuffocationTimeModifier()
-        {
-            var modifier = 0f;
-            var activeEffects = GetAllActiveBuffs()
-                .Select(b => b.HoldBreath)
-                .Where(e => e != null);
-            foreach (var effect in activeEffects)
-                modifier += effect.Seconds;
-            return modifier;
-        }
-
-        public static float GetMaxHealthMultiplier()
-        {
-            var activeEffects = GetAllActiveBuffs()
-                .Select(b => b.MaxHealth)
-                .Where(e => e != null);
-
             var addition = 0f;
             foreach (var effect in activeEffects)
                 addition += effect.Add;
@@ -102,37 +74,38 @@ namespace OuterWildsRPG.Objects.Common
             return (1f + addition) * multiplier;
         }
 
-        public static int GetInventoryCapacity()
+        public static TValue GetEffectValue<TEffect, TValue>(Func<TEffect, TValue> map, TValue defaultValue = default) where TEffect : IBuffEffect
         {
-            var capacity = 10;
             var activeEffects = GetAllActiveBuffs()
-                .Select(b => b.InventorySpace)
+                .SelectMany(b => b.GetEffects())
+                .OfType<TEffect>()
                 .Where(e => e != null);
+
+            var result = defaultValue;
+
             foreach (var effect in activeEffects)
-                capacity += effect.Amount;
-            return capacity;
+            {
+                var value = map(effect);
+                if (!EqualityComparer<TValue>.Default.Equals(value, defaultValue))
+                {
+                    result = value;
+                }
+            }
+
+            return result;
         }
 
-        public static float GetFogDensityMultiplier()
+        static void UpdateResources()
         {
-            var multiplier = 1f;
-            var activeEffects = GetAllActiveBuffs()
-                .Select(b => b.FogDensity)
-                .Where(e => e != null);
-            foreach (var effect in activeEffects)
-                multiplier *= effect.Multiply;
-            return multiplier;
+            PlayerResources._maxHealth = 100f * GetStatMultiplier<MaxHealthEffect>();
+            PlayerResources._maxOxygen = 450f * GetStatMultiplier<MaxOxygenEffect>();
+            PlayerResources._maxFuel = 100f * GetStatMultiplier<MaxFuelEffect>();
+            PlayerResources._suffocationDuration = GetStatMultiplier<HoldBreathEffect>();
         }
 
         static void UpdateMovementSpeed()
         {
-            var multiplier = 1f;
-
-            var activeEffects = GetAllActiveBuffs()
-                .Select(b => b.MoveSpeed)
-                .Where(e => e != null);
-            foreach (var effect in activeEffects)
-                multiplier *= effect.Multiply;
+            var multiplier = GetStatMultiplier<MoveSpeedEffect>();
 
             var player = Locator.GetPlayerController();
             player._runSpeed = 6f * multiplier;
@@ -145,29 +118,30 @@ namespace OuterWildsRPG.Objects.Common
 
         static void UpdateJumpSpeed()
         {
-            var multiplier = 1f;
-
-            var activeEffects = GetAllActiveBuffs()
-                .Select(b => b.JumpSpeed)
-                .Where(e => e != null);
-            foreach (var effect in activeEffects)
-                multiplier *= effect.Multiply;
+            var multiplier = GetStatMultiplier<JumpSpeedEffect>();
 
             var player = Locator.GetPlayerController();
             player._minJumpSpeed = 3f * multiplier;
             player._maxJumpSpeed = 6f * multiplier;
         }
 
+        static void UpdateJetpack()
+        {
+            var jetpack = Locator.GetPlayerController()._jetpackModel as JetpackThrusterModel;
+            jetpack._maxTranslationalThrust = 10f * GetStatMultiplier<JetpackThrustEffect>();
+            jetpack._boostThrust = 10f * GetStatMultiplier<JetpackBoostThrustEffect>();
+            jetpack._boostSeconds = 1f * GetStatMultiplier<JetpackBoostDurationEffect>();
+            jetpack._chargeSecondsGround = 1f * GetStatMultiplier<JetpackBoostRechargeEffect>();
+            jetpack._chargeSecondsAir = 8f * GetStatMultiplier<JetpackBoostRechargeEffect>();
+
+            var useGreenFlame = GetEffectValue<StrangeFlameEffect, bool>(e => true, false);
+            Locator.GetPlayerController()._playerResources._jetpackFlameColorSwapper.SetFlameColor(useGreenFlame);
+        }
+
         static void UpdateTravelMusic()
         {
             var currentTravelMusic = Locator.GetGlobalMusicController()._travelSource.audioLibraryClip;
-            var travelMusic = AudioType.Travel_Theme;
-
-            var activeEffects = GetAllActiveBuffs()
-                .Select(b => b.TravelMusic)
-                .Where(e => e != null);
-            foreach (var effect in activeEffects)
-                travelMusic = effect.AudioType;
+            var travelMusic = GetEffectValue<TravelMusicEffect, AudioType>(e => e.AudioType, AudioType.Travel_Theme);
 
             if (travelMusic != currentTravelMusic)
             {
@@ -185,8 +159,10 @@ namespace OuterWildsRPG.Objects.Common
 
         public static void Update()
         {
+            UpdateResources();
             UpdateMovementSpeed();
             UpdateJumpSpeed();
+            UpdateJetpack();
             UpdateTravelMusic();
         }
 

@@ -6,9 +6,12 @@ using System.Threading.Tasks;
 
 namespace OuterWildsRPG.Objects.Common.Effects
 {
-    public class HoldBreathEffect : BuffEffect<HoldBreathEffect, HoldBreathEffectData>
+    public class HoldBreathEffect : BuffEffect<HoldBreathEffect, HoldBreathEffectData>, IStatBuffEffect
     {
         public float Seconds;
+
+        float IStatBuffEffect.Add => Seconds;
+        float IStatBuffEffect.Multiply => 1f;
 
         public override void Load(HoldBreathEffectData data, string modID)
         {

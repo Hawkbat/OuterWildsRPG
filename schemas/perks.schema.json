@@ -121,6 +121,22 @@
           "description": "Increases the capacity of the player's inventory.",
           "$ref": "#/definitions/InventorySpaceEffectData"
         },
+        "jetpackBoostDuration": {
+          "description": "Modifies the amount of time a player can boost with the jetpack before recharging.",
+          "$ref": "#/definitions/JetpackBoostDurationEffectData"
+        },
+        "jetpackBoostRecharge": {
+          "description": "Modifies the amount of time it takes for a player's jetpack to recharge after boosting.",
+          "$ref": "#/definitions/JetpackBoostRechargeEffectData"
+        },
+        "jetpackBoostThrust": {
+          "description": "Modifies the thrust of the player's jetpack while boosting.",
+          "$ref": "#/definitions/JetpackBoostThrustEffectData"
+        },
+        "jetpackThrust": {
+          "description": "Modifies the thrust of the player's jetpack.",
+          "$ref": "#/definitions/JetpackThrustEffectData"
+        },
         "jumpSpeed": {
           "description": "Modifies the player's jump speed.",
           "$ref": "#/definitions/JumpSpeedEffectData"
@@ -129,9 +145,21 @@
           "description": "Modifies the maximum health of the player.",
           "$ref": "#/definitions/MaxHealthEffectData"
         },
+        "maxOxygen": {
+          "description": "Modifies the maximum oxygen of the player.",
+          "$ref": "#/definitions/MaxOxygenEffectData"
+        },
+        "maxFuel": {
+          "description": "Modifies the maximum fuel of the player.",
+          "$ref": "#/definitions/MaxFuelEffectData"
+        },
         "moveSpeed": {
           "description": "Modifies the player's movement speed.",
           "$ref": "#/definitions/MoveSpeedEffectData"
+        },
+        "strangeFlame": {
+          "description": "Applies the strange flame effect to the player's jetpack.",
+          "$ref": "#/definitions/StrangeFlameEffectData"
         },
         "translationSpeed": {
           "description": "Modifies the speed at which the player can translate Nomai text.",
@@ -294,6 +322,70 @@
         }
       }
     },
+    "JetpackBoostDurationEffectData": {
+      "type": "object",
+      "description": "Modifies the amount of time a player can boost with the jetpack before recharging.",
+      "additionalProperties": false,
+      "required": [
+        "multiply"
+      ],
+      "properties": {
+        "multiply": {
+          "type": "number",
+          "description": "The percentage to multiply the total jetpack boost duration by. E.g. a value of 0.25 will result in 25% jetpack boost duration, or a 75% reduction.",
+          "format": "float",
+          "default": 1.0
+        }
+      }
+    },
+    "JetpackBoostRechargeEffectData": {
+      "type": "object",
+      "description": "Modifies the amount of time it takes for a player's jetpack to recharge after boosting.",
+      "additionalProperties": false,
+      "required": [
+        "multiply"
+      ],
+      "properties": {
+        "multiply": {
+          "type": "number",
+          "description": "The percentage to multiply the total jetpack recharge duration by. E.g. a value of 0.25 will result in 25% jetpack recharge duration, or a 75% reduction.",
+          "format": "float",
+          "default": 1.0
+        }
+      }
+    },
+    "JetpackBoostThrustEffectData": {
+      "type": "object",
+      "description": "Modifies the thrust of the player's jetpack while boosting.",
+      "additionalProperties": false,
+      "required": [
+        "multiply"
+      ],
+      "properties": {
+        "multiply": {
+          "type": "number",
+          "description": "The percentage to multiply the total jetpack boost thrust by. E.g. a value of 0.25 will result in 25% jetpack boost thrust, or a 75% reduction.",
+          "format": "float",
+          "default": 1.0
+        }
+      }
+    },
+    "JetpackThrustEffectData": {
+      "type": "object",
+      "description": "Modifies the thrust of the player's jetpack.",
+      "additionalProperties": false,
+      "required": [
+        "multiply"
+      ],
+      "properties": {
+        "multiply": {
+          "type": "number",
+          "description": "The percentage to multiply the total jetpack thrust by. E.g. a value of 0.25 will result in 25% jetpack thrust, or a 75% reduction.",
+          "format": "float",
+          "default": 1.0
+        }
+      }
+    },
     "JumpSpeedEffectData": {
       "type": "object",
       "description": "Modifies the player's jump speed.",
@@ -329,6 +421,44 @@
         }
       }
     },
+    "MaxOxygenEffectData": {
+      "type": "object",
+      "description": "Modifies the maximum oxygen of the player.",
+      "additionalProperties": false,
+      "properties": {
+        "add": {
+          "type": "number",
+          "description": "The percentage of the base oxygen to add/reduce. E.g. a value of -0.1 means subtract 10% of the base oxygen from the total.",
+          "format": "float",
+          "default": 0.0
+        },
+        "multiply": {
+          "type": "number",
+          "description": "The percentage to multiply the total max oxygen by. E.g. a value of 0.25 will result in 25% of base max oxygen, or a 75% reduction.",
+          "format": "float",
+          "default": 1.0
+        }
+      }
+    },
+    "MaxFuelEffectData": {
+      "type": "object",
+      "description": "Modifies the maximum fuel of the player.",
+      "additionalProperties": false,
+      "properties": {
+        "add": {
+          "type": "number",
+          "description": "The percentage of the base fuel to add/reduce. E.g. a value of -0.1 means subtract 10% of the base fuel from the total.",
+          "format": "float",
+          "default": 0.0
+        },
+        "multiply": {
+          "type": "number",
+          "description": "The percentage to multiply the total max fuel by. E.g. a value of 0.25 will result in 25% of base max fuel, or a 75% reduction.",
+          "format": "float",
+          "default": 1.0
+        }
+      }
+    },
     "MoveSpeedEffectData": {
       "type": "object",
       "description": "Modifies the player's movement speed.",
@@ -344,6 +474,11 @@
           "default": 1.0
         }
       }
+    },
+    "StrangeFlameEffectData": {
+      "type": "object",
+      "description": "Applies the strange flame effect to the player's jetpack.",
+      "additionalProperties": false
     },
     "TranslationSpeedEffectData": {
       "type": "object",
